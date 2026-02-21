@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import {
@@ -8,15 +8,41 @@ import {
   weeklyActivityTrend,
   nutritionByMeal,
   hostelComparison,
-  users,
 } from "@/lib/mockData";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 
 export default function DashboardPage() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const maxActivity = Math.max(...weeklyActivityTrend.map((d) => d.count));
+  const avgActivity = weeklyActivityTrend.reduce((s, d) => s + d.count, 0) / weeklyActivityTrend.length;
+
+  const weeklyData = weeklyActivityTrend.map(d => ({
+    ...d,
+    percentage: Math.round((d.count / maxActivity) * 100)
+  }));
+  const avgPercentage = Math.round((avgActivity / maxActivity) * 100);
+
   const totalMealCals = nutritionByMeal.reduce(
     (s, m) => s + m.avgCalories,
     0
   );
+
+  const burnoutFlagsMap: Record<string, number> = {
+    "Govind": 1,
+    "Sarojini": 3,
+    "Rajendra": 0,
+    "Kasturba": 5,
+    "Cautley": 2,
+    "Jawahar": 4,
+  };
 
   return (
     <>
@@ -44,14 +70,20 @@ export default function DashboardPage() {
           accentColor="var(--blue)"
           className="animate-fade-in-up stagger-2"
         />
-        <StatCard
-          icon="🔥"
-          label="Avg Calories"
-          value={dashboardStats.avgCalories.toLocaleString()}
-          trend={{ value: "3.1%", direction: "down" }}
-          accentColor="var(--orange)"
-          className="animate-fade-in-up stagger-3"
-        />
+        <div
+          onClick={() => setDrawerOpen(!drawerOpen)}
+          style={{ cursor: "pointer" }}
+          title="Click to review burnout alerts"
+        >
+          <StatCard
+            icon="🚨"
+            label="Active Burnout Alerts"
+            value="24"
+            trend={{ value: "2 new", direction: "up" }}
+            accentColor="var(--red)"
+            className="animate-fade-in-up stagger-3"
+          />
+        </div>
         <StatCard
           icon="💚"
           label="Wellness Score"
@@ -69,20 +101,25 @@ export default function DashboardPage() {
           badge="This Week"
           className="animate-fade-in-up stagger-3"
         >
-          <div className="bar-chart">
-            {weeklyActivityTrend.map((d) => (
-              <div key={d.day} className="bar-chart-item">
-                <div
-                  className="bar"
-                  style={{
-                    height: `${(d.count / maxActivity) * 100}%`,
-                    background: `linear-gradient(to top, var(--accent-dark), var(--accent-light))`,
-                  }}
-                  title={`${d.count} activities`}
+          <div style={{ width: "100%", height: 220, marginTop: 16 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
+                <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                  formatter={(val: any) => [`${val}%`, "Activity Level"]}
                 />
-                <span className="bar-label">{d.day}</span>
-              </div>
-            ))}
+                <ReferenceLine
+                  y={avgPercentage}
+                  stroke="var(--text-muted)"
+                  strokeDasharray="3 3"
+                  label={{ position: "right", value: "Avg", fill: "var(--text-muted)", fontSize: 11 }}
+                />
+                <Bar dataKey="percentage" fill="var(--accent-dark)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </ChartCard>
 
@@ -151,7 +188,12 @@ export default function DashboardPage() {
       {/* Hostel Comparison */}
       <ChartCard
         title="Hostel Comparison"
-        badge="Live"
+        badge={
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span className="live-dot"></span>
+            LIVE
+          </div>
+        }
         className="animate-fade-in-up stagger-5"
       >
         <div style={{ overflowX: "auto" }}>
@@ -163,100 +205,65 @@ export default function DashboardPage() {
                 <th>Avg Steps</th>
                 <th>Avg Calories</th>
                 <th>Wellness Score</th>
+                <th>Burnout Flags</th>
               </tr>
             </thead>
             <tbody>
-              {hostelComparison.map((h) => (
-                <tr key={h.hostel}>
-                  <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>
-                    {h.hostel} Bhawan
-                  </td>
-                  <td>{h.activeUsers}</td>
-                  <td>{h.avgSteps.toLocaleString()}</td>
-                  <td>{h.avgCalories.toLocaleString()} kcal</td>
-                  <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <div className="progress-bar" style={{ width: "80px" }}>
-                        <div
-                          className="progress-bar-fill"
-                          style={{
-                            width: `${h.wellnessScore}%`,
-                            background:
-                              h.wellnessScore >= 80
-                                ? "var(--green)"
-                                : h.wellnessScore >= 70
-                                  ? "var(--accent)"
-                                  : "var(--orange)",
-                          }}
-                        />
+              {hostelComparison.map((h) => {
+                const flags = burnoutFlagsMap[h.hostel] || 0;
+                return (
+                  <tr key={h.hostel}>
+                    <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                      {h.hostel} Bhawan
+                    </td>
+                    <td>{h.activeUsers}</td>
+                    <td>{h.avgSteps.toLocaleString()}</td>
+                    <td>{h.avgCalories.toLocaleString()} kcal</td>
+                    <td>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <div className="progress-bar" style={{ width: "80px" }}>
+                          <div
+                            className="progress-bar-fill"
+                            style={{
+                              width: `${h.wellnessScore}%`,
+                              background:
+                                h.wellnessScore >= 80
+                                  ? "var(--green)"
+                                  : h.wellnessScore >= 70
+                                    ? "var(--accent)"
+                                    : "var(--orange)",
+                            }}
+                          />
+                        </div>
+                        <span>{h.wellnessScore}</span>
                       </div>
-                      <span>{h.wellnessScore}</span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+                      {flags === 0 ? (
+                        <span style={{ color: "var(--green)", fontWeight: 600 }}>None</span>
+                      ) : flags <= 2 ? (
+                        <span className="badge badge-cyan" style={{ background: "var(--accent-glow)", color: "var(--accent)" }}>
+                          {flags} flags
+                        </span>
+                      ) : flags <= 4 ? (
+                        <span className="badge badge-orange">{flags} flags</span>
+                      ) : (
+                        <span className="badge badge-red">{flags} flags</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </ChartCard>
-
-      {/* Recent Users */}
-      <div style={{ marginTop: "24px" }}>
-        <ChartCard
-          title="Recent Active Users"
-          badge={`${users.length} users`}
-          className="animate-fade-in-up stagger-6"
-        >
-          <div style={{ overflowX: "auto" }}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Hostel</th>
-                  <th>Branch</th>
-                  <th>Fitness Level</th>
-                  <th>Last Active</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.slice(0, 6).map((u) => (
-                  <tr key={u.id}>
-                    <td
-                      style={{
-                        fontWeight: 600,
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      {u.name}
-                    </td>
-                    <td>{u.hostel}</td>
-                    <td>{u.branch}</td>
-                    <td>
-                      <span
-                        className={`badge ${u.fitnessLevel === "Advanced"
-                          ? "badge-green"
-                          : u.fitnessLevel === "Intermediate"
-                            ? "badge-blue"
-                            : "badge-orange"
-                          }`}
-                      >
-                        {u.fitnessLevel}
-                      </span>
-                    </td>
-                    <td>{u.lastActive}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </ChartCard>
-      </div>
     </>
   );
 }

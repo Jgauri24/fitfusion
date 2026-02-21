@@ -3,6 +3,14 @@
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { wellnessData, moodDistribution } from "@/lib/mockData";
+import {
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+} from "recharts";
 
 export default function WellnessPage() {
     const avgMood =
@@ -21,6 +29,24 @@ export default function WellnessPage() {
 
     const maxMood = 5;
     const maxJournal = Math.max(...wellnessData.map((w) => w.journalEntries));
+
+    const moodDeltas: Record<string, number> = {
+        "😊 Happy": 4,
+        "😌 Calm": 2,
+        "😐 Neutral": -1,
+        "😰 Anxious": -3,
+        "😞 Low": -2,
+    };
+
+    const attendanceData = [
+        { week: 'W1', attendance: 210 },
+        { week: 'W2', attendance: 235 },
+        { week: 'W3', attendance: 198 },
+        { week: 'W4', attendance: 176 },
+        { week: 'W5', attendance: 220 },
+        { week: 'W6', attendance: 248 },
+        { week: 'W7', attendance: 270 },
+    ];
 
     return (
         <>
@@ -81,44 +107,58 @@ export default function WellnessPage() {
                             padding: "8px 0",
                         }}
                     >
-                        {moodDistribution.map((m) => (
-                            <div key={m.mood}>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        marginBottom: "8px",
-                                    }}
-                                >
-                                    <span
-                                        style={{
-                                            fontSize: "14px",
-                                            color: "var(--text-secondary)",
-                                        }}
-                                    >
-                                        {m.mood}
-                                    </span>
-                                    <span
-                                        style={{
-                                            fontSize: "14px",
-                                            fontWeight: 600,
-                                            color: m.color,
-                                        }}
-                                    >
-                                        {m.percentage}%
-                                    </span>
-                                </div>
-                                <div className="progress-bar" style={{ height: "10px" }}>
+                        {moodDistribution.map((m) => {
+                            const delta = moodDeltas[m.mood];
+                            return (
+                                <div key={m.mood}>
                                     <div
-                                        className="progress-bar-fill"
                                         style={{
-                                            width: `${m.percentage}%`,
-                                            background: m.color,
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            marginBottom: "8px",
                                         }}
-                                    />
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: "14px",
+                                                color: "var(--text-secondary)",
+                                            }}
+                                        >
+                                            {m.mood}
+                                        </span>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                            <span
+                                                style={{
+                                                    fontSize: "14px",
+                                                    fontWeight: 600,
+                                                    color: m.color,
+                                                }}
+                                            >
+                                                {m.percentage}%
+                                            </span>
+                                            {delta !== undefined && (
+                                                <span style={{
+                                                    fontSize: "11px",
+                                                    color: delta > 0 ? "var(--green)" : "var(--red)",
+                                                    fontWeight: 600
+                                                }}>
+                                                    {delta > 0 ? "↑" : "↓"} {Math.abs(delta)}%
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="progress-bar" style={{ height: "10px" }}>
+                                        <div
+                                            className="progress-bar-fill"
+                                            style={{
+                                                width: `${m.percentage}%`,
+                                                background: m.color,
+                                            }}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </ChartCard>
 
@@ -201,10 +241,10 @@ export default function WellnessPage() {
                                         <td>
                                             <span
                                                 className={`badge ${w.avgMood >= 4.2
-                                                        ? "badge-green"
-                                                        : w.avgMood >= 3.8
-                                                            ? "badge-cyan"
-                                                            : "badge-orange"
+                                                    ? "badge-green"
+                                                    : w.avgMood >= 3.8
+                                                        ? "badge-cyan"
+                                                        : "badge-orange"
                                                     }`}
                                             >
                                                 {w.avgMood}
@@ -213,10 +253,10 @@ export default function WellnessPage() {
                                         <td>
                                             <span
                                                 className={`badge ${w.stressLevel <= 4
-                                                        ? "badge-green"
-                                                        : w.stressLevel <= 5.5
-                                                            ? "badge-yellow"
-                                                            : "badge-red"
+                                                    ? "badge-green"
+                                                    : w.stressLevel <= 5.5
+                                                        ? "badge-yellow"
+                                                        : "badge-red"
                                                     }`}
                                             >
                                                 {w.stressLevel}
@@ -230,6 +270,34 @@ export default function WellnessPage() {
                         </table>
                     </div>
                 </ChartCard>
+            </div>
+
+            <div style={{ marginTop: "24px", marginBottom: "32px" }} className="animate-fade-in-up stagger-6">
+                <ChartCard title="Wellness Circle Attendance Trend">
+                    <div style={{ width: "100%", height: 160, marginTop: 16 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={attendanceData} margin={{ top: 10, right: 30, left: -20, bottom: 0 }}>
+                                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                                <Tooltip
+                                    contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                                />
+                                <Line type="monotone" dataKey="attendance" stroke="#A78BFA" strokeWidth={2} dot={{ r: 3, fill: "#A78BFA" }} activeDot={{ r: 5 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </ChartCard>
+            </div>
+
+            <div style={{
+                borderTop: "1px solid #1a1a1a",
+                paddingTop: "16px",
+                marginTop: "24px",
+                fontSize: "12px",
+                color: "#333",
+                textAlign: "center"
+            }}>
+                All wellness data represents campus-wide aggregates (min. group: 10). No individual mood, journal, or stress data is accessible to administrators. Journal content is never stored or viewable by this panel.
             </div>
         </>
     );

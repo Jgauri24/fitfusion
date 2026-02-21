@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FileText } from "lucide-react";
+import React from "react";
 
 const navItems = [
     { label: "Dashboard", href: "/", icon: "📊" },
@@ -11,6 +13,7 @@ const navItems = [
     { label: "Wellness", href: "/wellness", icon: "🧘" },
     { label: "Environment", href: "/environment", icon: "🌿" },
     { label: "Analytics", href: "/analytics", icon: "📈" },
+    { label: "Reports", href: "/reports", icon: <FileText size={18} /> },
 ];
 
 export default function Sidebar() {
@@ -65,13 +68,15 @@ export default function Sidebar() {
             </nav>
 
             <div className="sidebar-footer">
-                <div className="admin-profile">
-                    <div className="admin-avatar">GA</div>
-                    <div className="admin-info">
-                        <span className="admin-name">Gauri Admin</span>
-                        <span className="admin-role">Super Admin</span>
+                <Link href="/profile" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                    <div className="admin-profile">
+                        <div className="admin-avatar">GA</div>
+                        <div className="admin-info">
+                            <span className="admin-name">Gauri Admin</span>
+                            <span className="admin-role">Super Admin</span>
+                        </div>
                     </div>
-                </div>
+                </Link>
             </div>
         </aside>
     );
