@@ -3,6 +3,15 @@
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { monthlyTrends, departmentStats, hostelComparison } from "@/lib/mockData";
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    ReferenceLine,
+} from "recharts";
 
 export default function AnalyticsPage() {
     const latestMonth = monthlyTrends[monthlyTrends.length - 1];
@@ -18,6 +27,26 @@ export default function AnalyticsPage() {
 
     const maxUsers = Math.max(...monthlyTrends.map((m) => m.users));
     const maxDeptUsers = Math.max(...departmentStats.map((d) => d.users));
+
+    const correlationData = [
+        { week: "W1", mood: 75, stress: 30 },
+        { week: "W2", mood: 78, stress: 28 },
+        { week: "W3", mood: 65, stress: 55 },
+        { week: "W4", mood: 50, stress: 70 },
+        { week: "W5", mood: 45, stress: 80 },
+        { week: "W6", mood: 60, stress: 60 },
+        { week: "W7", mood: 80, stress: 45 },
+        { week: "W8", mood: 85, stress: 25 },
+    ];
+
+    const deltas: Record<string, number> = {
+        "CSE": 3,
+        "IT": 1,
+        "ME": -2,
+        "ECE": 4,
+        "Civil": -1,
+        "EE": 2,
+    };
 
     return (
         <>
@@ -105,54 +134,116 @@ export default function AnalyticsPage() {
                         {departmentStats
                             .sort((a, b) => b.engagement - a.engagement)
                             .slice(0, 6)
-                            .map((d) => (
-                                <div key={d.dept}>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            marginBottom: "6px",
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                fontSize: "13px",
-                                                color: "var(--text-secondary)",
-                                            }}
-                                        >
-                                            {d.dept}
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontSize: "13px",
-                                                fontWeight: 600,
-                                                color:
-                                                    d.engagement >= 80
-                                                        ? "var(--green)"
-                                                        : d.engagement >= 70
-                                                            ? "var(--accent)"
-                                                            : "var(--orange)",
-                                            }}
-                                        >
-                                            {d.engagement}%
-                                        </span>
-                                    </div>
-                                    <div className="progress-bar" style={{ height: "6px" }}>
+                            .map((d) => {
+                                const delta = deltas[d.dept];
+                                return (
+                                    <div key={d.dept}>
                                         <div
-                                            className="progress-bar-fill"
                                             style={{
-                                                width: `${d.engagement}%`,
-                                                background:
-                                                    d.engagement >= 80
-                                                        ? "var(--green)"
-                                                        : d.engagement >= 70
-                                                            ? "var(--accent)"
-                                                            : "var(--orange)",
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                marginBottom: "6px",
+                                                alignItems: "center"
                                             }}
-                                        />
+                                        >
+                                            <span
+                                                style={{
+                                                    fontSize: "13px",
+                                                    color: "var(--text-secondary)",
+                                                }}
+                                            >
+                                                {d.dept}
+                                            </span>
+                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                <span
+                                                    style={{
+                                                        fontSize: "13px",
+                                                        fontWeight: 600,
+                                                        color:
+                                                            d.engagement >= 80
+                                                                ? "var(--green)"
+                                                                : d.engagement >= 70
+                                                                    ? "var(--accent)"
+                                                                    : "var(--orange)",
+                                                    }}
+                                                >
+                                                    {d.engagement}%
+                                                </span>
+                                                {delta !== undefined && (
+                                                    <span style={{
+                                                        fontSize: "11px",
+                                                        color: delta > 0 ? "var(--green)" : "var(--red)",
+                                                        fontWeight: 600
+                                                    }}>
+                                                        {delta > 0 ? "↑" : "↓"} {Math.abs(delta)}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="progress-bar" style={{ height: "6px" }}>
+                                            <div
+                                                className="progress-bar-fill"
+                                                style={{
+                                                    width: `${d.engagement}%`,
+                                                    background:
+                                                        d.engagement >= 80
+                                                            ? "var(--green)"
+                                                            : d.engagement >= 70
+                                                                ? "var(--accent)"
+                                                                : "var(--orange)",
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
+                    </div>
+                </ChartCard>
+            </div>
+
+            {/* Stress and Mood Correlation */}
+            <div style={{ marginTop: "24px", marginBottom: "24px" }} className="animate-fade-in-up stagger-5">
+                <ChartCard
+                    title="Stress and Mood Correlation"
+                    badge={
+                        <div style={{
+                            background: "#0a0a0a",
+                            color: "var(--accent)",
+                            padding: "4px 10px",
+                            borderRadius: "12px",
+                            fontSize: "12px",
+                            border: "1px solid var(--border)"
+                        }}>
+                            r = −0.82 strong inverse
+                        </div>
+                    }
+                >
+                    <div style={{ width: "100%", height: 300, marginTop: 16 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={correlationData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorStress" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#FF4444" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#FF4444" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
+                                <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                                <Tooltip
+                                    contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                                />
+                                <ReferenceLine x="W3" stroke="#333" strokeDasharray="3 3" label={{ position: "top", value: "Midsem Begin", fill: "#555", fontSize: 10 }} />
+                                <ReferenceLine x="W5" stroke="#333" strokeDasharray="3 3" label={{ position: "top", value: "Midsem End", fill: "#555", fontSize: 10 }} />
+                                <ReferenceLine x="W7" stroke="#333" strokeDasharray="3 3" label={{ position: "top", value: "Techfest", fill: "#555", fontSize: 10 }} />
+
+                                <Area type="monotone" dataKey="mood" stroke="#38BDF8" fillOpacity={1} fill="url(#colorMood)" strokeWidth={2} />
+                                <Area type="monotone" dataKey="stress" stroke="#FF4444" fillOpacity={1} fill="url(#colorStress)" strokeWidth={2} />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
                 </ChartCard>
             </div>
@@ -161,7 +252,7 @@ export default function AnalyticsPage() {
             <ChartCard
                 title="Department Breakdown"
                 badge="Detailed"
-                className="animate-fade-in-up stagger-5"
+                className="animate-fade-in-up stagger-6"
             >
                 <div style={{ overflowX: "auto" }}>
                     <table>
@@ -189,10 +280,10 @@ export default function AnalyticsPage() {
                                     <td>
                                         <span
                                             className={`badge ${d.avgFitness >= 80
-                                                    ? "badge-green"
-                                                    : d.avgFitness >= 75
-                                                        ? "badge-cyan"
-                                                        : "badge-orange"
+                                                ? "badge-green"
+                                                : d.avgFitness >= 75
+                                                    ? "badge-cyan"
+                                                    : "badge-orange"
                                                 }`}
                                         >
                                             {d.avgFitness}/100

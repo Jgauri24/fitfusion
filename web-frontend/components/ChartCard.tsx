@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 interface ChartCardProps {
     title: string;
-    badge?: string;
+    badge?: ReactNode;
     children: ReactNode;
     className?: string;
 }

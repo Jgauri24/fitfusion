@@ -868,3 +868,18 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 }
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(204, 255, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0); }
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #CCFF00;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}

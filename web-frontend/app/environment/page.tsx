@@ -1,7 +1,9 @@
 "use client";
 
 import StatCard from "@/components/StatCard";
+import ChartCard from "@/components/ChartCard";
 import { environmentData } from "@/lib/mockData";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function EnvironmentPage() {
     const avgAqi = Math.round(
@@ -40,6 +42,34 @@ export default function EnvironmentPage() {
             case "High": return "badge-red";
             default: return "badge-cyan";
         }
+    };
+
+    const impactData = [
+        { zone: "Library Area", stress: 3.2, activity: 45 },
+        { zone: "Sports Complex", stress: 2.8, activity: 92 },
+        { zone: "Main Ground", stress: 3.1, activity: 78 },
+        { zone: "Academic Block", stress: 6.8, activity: 28 },
+        { zone: "Hostel North", stress: 4.2, activity: 55 },
+        { zone: "Mess Area", stress: 3.8, activity: 40 },
+    ];
+
+    const timeSlots = ["6AM", "8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM", "10PM"];
+    const heatmapData = [
+        { zone: "Main Ground", data: [15, 20, 35, 40, 30, 65, 80, 45, 10] },
+        { zone: "Library", data: [5, 15, 85, 60, 50, 45, 65, 90, 85] },
+        { zone: "Sports Complex", data: [20, 45, 15, 10, 20, 85, 95, 40, 15] },
+        { zone: "Academic Block", data: [5, 45, 95, 90, 85, 40, 15, 5, 5] },
+        { zone: "Hostel North", data: [90, 70, 30, 40, 45, 60, 75, 85, 95] },
+        { zone: "Hostel South", data: [85, 65, 35, 45, 50, 55, 70, 80, 90] },
+        { zone: "Mess Area", data: [30, 95, 20, 90, 10, 15, 30, 95, 20] },
+        { zone: "Gym", data: [45, 65, 25, 15, 20, 75, 90, 60, 20] },
+    ];
+
+    const getCellBg = (val: number) => {
+        if (val < 25) return "#0d2b0d";
+        if (val <= 50) return "#1a4a1a";
+        if (val <= 75) return "rgba(255,107,53,0.2)";
+        return "rgba(255,68,68,0.27)";
     };
 
     return (
@@ -114,10 +144,10 @@ export default function EnvironmentPage() {
                                 <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                     <span
                                         className={`badge ${zone.aqi <= 50
-                                                ? "badge-green"
-                                                : zone.aqi <= 100
-                                                    ? "badge-yellow"
-                                                    : "badge-red"
+                                            ? "badge-green"
+                                            : zone.aqi <= 100
+                                                ? "badge-yellow"
+                                                : "badge-red"
                                             }`}
                                     >
                                         {zone.aqiStatus}
@@ -168,6 +198,76 @@ export default function EnvironmentPage() {
                         </div>
                     </div>
                 ))}
+            </div>
+
+            <div style={{ marginTop: "32px", marginBottom: "32px" }} className="animate-fade-in-up stagger-6">
+                <ChartCard
+                    title="Environmental Impact on Student Wellness"
+                    badge="Insights"
+                >
+                    <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "16px" }}>
+                        Students in zones with AQI below 50 show 18% lower stress scores on average.
+                    </p>
+                    <div style={{ width: "100%", height: 240 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={impactData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+                                <XAxis dataKey="zone" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
+                                <YAxis yAxisId="left" orientation="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                                <Tooltip
+                                    cursor={{ fill: "transparent" }}
+                                    contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                                />
+                                <Legend />
+                                <Bar yAxisId="left" dataKey="stress" name="Avg Stress Score" fill="#FF6B35" radius={[4, 4, 0, 0]} />
+                                <Bar yAxisId="right" dataKey="activity" name="Avg Activity Level" fill="#CCFF00" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </ChartCard>
+            </div>
+
+            <div style={{ marginTop: "32px", marginBottom: "32px" }} className="animate-fade-in-up stagger-6">
+                <ChartCard title="Zone Crowd Density — Time of Day">
+                    <div style={{ overflowX: "auto", marginTop: "16px" }}>
+                        <table style={{ width: "100%", borderSpacing: "4px", borderCollapse: "separate" }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ textAlign: "left", padding: "8px", fontSize: "11px", color: "var(--text-muted)", fontWeight: 600, width: "120px" }}>Zone</th>
+                                    {timeSlots.map(time => (
+                                        <th key={time} style={{ textAlign: "center", padding: "8px", fontSize: "11px", color: "var(--text-muted)", fontWeight: 600 }}>{time}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {heatmapData.map(row => (
+                                    <tr key={row.zone}>
+                                        <td style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-primary)", padding: "8px" }}>
+                                            {row.zone}
+                                        </td>
+                                        {row.data.map((val, i) => (
+                                            <td key={i} style={{ padding: "2px" }}>
+                                                <div style={{
+                                                    height: "32px",
+                                                    borderRadius: "4px",
+                                                    backgroundColor: getCellBg(val),
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: "11px",
+                                                    fontWeight: 600,
+                                                    color: val > 50 ? "rgba(255,255,255,0.9)" : "transparent"
+                                                }}>
+                                                    {Math.round(val)}%
+                                                </div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </ChartCard>
             </div>
         </>
     );
