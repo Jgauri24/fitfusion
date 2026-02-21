@@ -25,7 +25,7 @@ export const mockJournals = [
 ];
 
 export const mockUser = {
-    name: "Meghna Nair", initials: "MN",
+    name: "Kushal Sarkar", initials: "KS",
     branch: "B.Tech CS & AI", hostel: "Hostel A",
-    email: "meghna.nair2024@nst.rishihood.edu.in"
+    email: "kushal.sarkar2024@nst.rishihood.edu.in"
 };
