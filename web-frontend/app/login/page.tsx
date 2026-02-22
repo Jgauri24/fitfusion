@@ -2,19 +2,34 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMsg("");
         setLoading(true);
-        setTimeout(() => {
+        try {
+            const response = await api.post("/api/auth/login", { email, password });
+            const { token, user } = response.data;
+            if (user.role !== "ADMIN") {
+                setErrorMsg("Access Denied: Admins only.");
+                setLoading(false);
+                return;
+            }
+            localStorage.setItem("token", token);
+            localStorage.setItem("userInfo", JSON.stringify(user));
             router.push("/");
-        }, 1000);
+        } catch (error: any) {
+            setErrorMsg(error.response?.data?.message || "Invalid email or password.");
+            setLoading(false);
+        }
     };
 
     return (
@@ -160,6 +175,20 @@ export default function LoginPage() {
                             }}
                         />
                     </div>
+
+                    {errorMsg && (
+                        <div style={{
+                            padding: "12px",
+                            background: "rgba(255, 68, 68, 0.1)",
+                            border: "1px solid rgba(255, 68, 68, 0.2)",
+                            borderRadius: "8px",
+                            color: "var(--red)",
+                            fontSize: "13px",
+                            textAlign: "center"
+                        }}>
+                            {errorMsg}
+                        </div>
+                    )}
 
                     <button
                         type="submit"

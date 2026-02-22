@@ -4,8 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { Bell } from "lucide-react";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,7 +19,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [adminName, setAdminName] = useState("Admin");
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsClient(true);
+    const token = localStorage.getItem("token");
+    const userInfo = localStorage.getItem("userInfo");
+
+    if (!token && pathname !== "/login") {
+      router.push("/login");
+    } else if (userInfo) {
+      try {
+        const parsed = JSON.parse(userInfo);
+        if (parsed.firstName) {
+          setAdminName(`${parsed.firstName} ${parsed.lastName || ""}`.trim());
+        }
+      } catch (e) { }
+    }
+  }, [pathname, router]);
+
   const isLogin = pathname === "/login";
 
   return (
@@ -28,7 +49,9 @@ export default function RootLayout({
         <title>FitFusion Admin — Campus Fitness & Wellness</title>
       </head>
       <body className={`${inter.variable}`}>
-        {isLogin ? (
+        {!isClient ? (
+          <main style={{ minHeight: "100vh", background: "var(--bg-base)" }} />
+        ) : isLogin ? (
           <main style={{ minHeight: "100vh", background: "var(--bg-base)" }}>
             {children}
           </main>
