@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
-import {
-  dashboardStats,
-  weeklyActivityTrend,
-  nutritionByMeal,
-  hostelComparison,
-} from "@/lib/mockData";
+import api from "@/lib/api";
 import {
   BarChart,
   Bar,
@@ -21,19 +16,40 @@ import {
 
 export default function DashboardPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const maxActivity = Math.max(...weeklyActivityTrend.map((d) => d.count));
-  const avgActivity = weeklyActivityTrend.reduce((s, d) => s + d.count, 0) / weeklyActivityTrend.length;
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const weeklyData = weeklyActivityTrend.map(d => ({
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/api/admin/dashboard/stats');
+        setStats(res.data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const weeklyActivityTrend = stats?.weeklyActivityTrend || [];
+  const maxActivity = weeklyActivityTrend.length ? Math.max(...weeklyActivityTrend.map((d: any) => d.count)) : 0;
+  const avgActivity = weeklyActivityTrend.length ? weeklyActivityTrend.reduce((s: number, d: any) => s + d.count, 0) / weeklyActivityTrend.length : 0;
+
+  const weeklyData = weeklyActivityTrend.map((d: any) => ({
     ...d,
-    percentage: Math.round((d.count / maxActivity) * 100)
+    percentage: maxActivity > 0 ? Math.round((d.count / maxActivity) * 100) : 0
   }));
-  const avgPercentage = Math.round((avgActivity / maxActivity) * 100);
+  const avgPercentage = maxActivity > 0 ? Math.round((avgActivity / maxActivity) * 100) : 0;
 
+  const nutritionByMeal = stats?.nutritionByMeal || [];
   const totalMealCals = nutritionByMeal.reduce(
-    (s, m) => s + m.avgCalories,
+    (s: number, m: any) => s + m.avgCalories,
     0
   );
+
+  const hostelComparison = stats?.hostelComparison || [];
 
   const burnoutFlagsMap: Record<string, number> = {
     "Govind": 1,
@@ -43,6 +59,14 @@ export default function DashboardPage() {
     "Cautley": 2,
     "Jawahar": 4,
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh", color: "var(--text-muted)" }}>
+        Loading dashboard data...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -58,14 +82,14 @@ export default function DashboardPage() {
         <StatCard
           icon="👥"
           label="Total Users"
-          value={dashboardStats.totalUsers.toLocaleString()}
+          value={stats?.totalUsers?.toLocaleString() || "0"}
           trend={{ value: "12.5%", direction: "up" }}
           className="animate-fade-in-up stagger-1"
         />
         <StatCard
           icon="⚡"
           label="Active Today"
-          value={dashboardStats.activeToday.toLocaleString()}
+          value={stats?.activeToday?.toLocaleString() || "0"}
           trend={{ value: "8.2%", direction: "up" }}
           accentColor="var(--blue)"
           className="animate-fade-in-up stagger-2"
@@ -87,7 +111,7 @@ export default function DashboardPage() {
         <StatCard
           icon="💚"
           label="Wellness Score"
-          value={`${dashboardStats.wellnessScore}/100`}
+          value={`${stats?.wellnessScore || 0}/100`}
           trend={{ value: "5.4%", direction: "up" }}
           accentColor="var(--green)"
           className="animate-fade-in-up stagger-4"
@@ -132,8 +156,8 @@ export default function DashboardPage() {
             <div className="donut-chart">
               <svg viewBox="0 0 160 160" style={{ transform: "rotate(-90deg)" }}>
                 {nutritionByMeal.reduce(
-                  (acc, item, i) => {
-                    const percentage = (item.avgCalories / totalMealCals) * 100;
+                  (acc: { elements: React.ReactNode[]; offset: number }, item: any, i: number) => {
+                    const percentage = totalMealCals > 0 ? (item.avgCalories / totalMealCals) * 100 : 0;
                     const strokeDasharray = `${(percentage / 100) * 376.99
                       } 376.99`;
                     const element = (
@@ -168,7 +192,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="donut-legend">
-              {nutritionByMeal.map((item) => (
+              {nutritionByMeal.map((item: any) => (
                 <div key={item.meal} className="donut-legend-item">
                   <div
                     className="donut-legend-color"
@@ -209,7 +233,7 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {hostelComparison.map((h) => {
+              {hostelComparison.map((h: any) => {
                 const flags = burnoutFlagsMap[h.hostel] || 0;
                 return (
                   <tr key={h.hostel}>
