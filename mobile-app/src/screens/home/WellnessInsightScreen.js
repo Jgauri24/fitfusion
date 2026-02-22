@@ -69,7 +69,7 @@ export default function WellnessInsightScreen({ navigation }) {
             <Text style={globalStyles.sectionLabel}>SUMMARY</Text>
             <Card>
                 <Text style={styles.summaryText}>
-                    Your mood has been stable this week. Activity needs attention — you've missed 3 sessions.
+                    Your mood has been stable this week. Activity needs attention — you&apos;ve missed 3 sessions.
                 </Text>
             </Card>
 

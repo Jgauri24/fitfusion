@@ -1,0 +1,54 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  passwordHash  String
+  role          String          @default("STUDENT")
+  firstName     String
+  lastName      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  nutritionLogs NutritionLog[]
+  activityLogs  ActivityLog[]
+}
+
+model MessMenu {
+  id          String   @id @default(uuid())
+  date        DateTime
+  mealType    String   // e.g., BREAKFAST, LUNCH, DINNER
+  items       String   // SQLite doesn't support string arrays, so store as a JSON string
+  calories    Int      // Estimated total calories
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model NutritionLog {
+  id          String   @id @default(uuid())
+  userId      String
+  mealType    String   // e.g., BREAKFAST, LUNCH, DINNER, SNACK
+  foodGrams   Int      // Quantity consumed
+  calories    Float
+  loggedAt    DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id            String   @id @default(uuid())
+  userId        String
+  activityType  String   // e.g., RUNNING, GYM, SWIMMING
+  durationMins  Int
+  caloriesBurned Float
+  loggedAt      DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

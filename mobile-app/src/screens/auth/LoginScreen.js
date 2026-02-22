@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import api from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
@@ -8,6 +10,33 @@ export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please enter both email and password');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await api.post('/api/auth/login', {
+                email,
+                password
+            });
+
+            const { token, user } = response.data;
+            await AsyncStorage.setItem('userToken', token);
+            await AsyncStorage.setItem('userInfo', JSON.stringify(user));
+
+            navigation.replace('MainApp');
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to login. Please check your credentials and connection.';
+            Alert.alert('Login Failed', message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -45,17 +74,11 @@ export default function LoginScreen({ navigation }) {
                 </View>
 
                 <TouchableOpacity
-                    style={[globalStyles.pillButton, styles.loginButton]}
-                    onPress={() => navigation.replace('MainApp')}
+                    style={[globalStyles.pillButton, styles.loginButton, isLoading && { opacity: 0.7 }]}
+                    onPress={handleLogin}
+                    disabled={isLoading}
                 >
-                    <Text style={globalStyles.buttonText}>Login</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.footer}>
-                <Text style={globalStyles.subtitle}>New here? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')}>
-                    <Text style={styles.signupText}>Create account</Text>
+                    <Text style={globalStyles.buttonText}>{isLoading ? 'Logging in...' : 'Login'}</Text>
                 </TouchableOpacity>
             </View>
         </View>

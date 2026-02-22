@@ -3,6 +3,7 @@ import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity } from 
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { Card } from '../../components/Card';
@@ -36,16 +37,30 @@ export default function MealLogScreen({ navigation }) {
 
     const totalKcal = selectedItems.reduce((sum, item) => sum + (item.kcal * item.quantity), 0);
 
-    const handleLogMeal = () => {
+    const handleLogMeal = async () => {
         if (totalKcal === 0) return;
-        Toast.show({
-            type: 'success',
-            text1: 'Meal Logged 🎉',
-            text2: `Successfully added ${totalKcal} kcal to ${mealType}`,
-            position: 'bottom',
-            bottomOffset: 100,
-        });
-        navigation.goBack();
+        try {
+            await api.post('/api/student/nutrition/log', {
+                mealType,
+                foodItems: selectedItems.map(i => i.name),
+                calories: totalKcal,
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Meal Logged 🎉',
+                text2: `Successfully added ${totalKcal} kcal to ${mealType}`,
+                position: 'bottom',
+                bottomOffset: 100,
+            });
+            navigation.goBack();
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to log meal. Please try again.',
+                position: 'bottom',
+            });
+        }
     };
 
     return (

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { Card } from '../../components/Card';
@@ -47,12 +49,45 @@ const MealCard = ({ icon, name, subtitle, kcal, isLogged, onAdd }) => (
     </View>
 );
 
+const CALORIE_GOAL = 2000;
+
+const MEAL_TYPES = [
+    { key: 'Breakfast', icon: '🍳' },
+    { key: 'Lunch', icon: '🍛' },
+    { key: 'Dinner', icon: '🍽️' },
+    { key: 'Snacks', icon: '🍎' },
+];
+
 export default function NutritionHomeScreen({ navigation }) {
+    const [totalCalories, setTotalCalories] = useState(0);
+    const [meals, setMeals] = useState([]);
+
+    const fetchNutrition = async () => {
+        try {
+            const res = await api.get('/api/student/nutrition/today');
+            setTotalCalories(res.data.totalCalories || 0);
+            setMeals(res.data.meals || []);
+        } catch (e) {
+            console.error('Failed to fetch nutrition:', e);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchNutrition();
+        }, [])
+    );
+
+    const getMealData = (mealType) => {
+        const found = meals.find(m => m.mealType === mealType);
+        return found ? { subtitle: `${Math.round(found.calories)} kcal logged`, kcal: Math.round(found.calories), isLogged: true } : null;
+    };
+
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
             <View style={styles.header}>
-                <Text style={globalStyles.heading}>Today's Nutrition</Text>
+                <Text style={globalStyles.heading}>Today&apos;s Nutrition</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('NutritionHistoryScreen')}>
                     <Text style={styles.historyLink}>History →</Text>
                 </TouchableOpacity>
@@ -62,7 +97,7 @@ export default function NutritionHomeScreen({ navigation }) {
                 <AnimatedCircularProgress
                     size={180}
                     width={15}
-                    fill={(1450 / 2000) * 100}
+                    fill={Math.min((totalCalories / CALORIE_GOAL) * 100, 100)}
                     tintColor={COLORS.accent}
                     backgroundColor={COLORS.bg}
                     rotation={270}
@@ -70,35 +105,35 @@ export default function NutritionHomeScreen({ navigation }) {
                 >
                     {() => (
                         <View style={styles.calorieInner}>
-                            <Text style={styles.calorieText}>1450</Text>
-                            <Text style={styles.calorieMuted}>/ 2000 kcal</Text>
+                            <Text style={styles.calorieText}>{Math.round(totalCalories)}</Text>
+                            <Text style={styles.calorieMuted}>/ {CALORIE_GOAL} kcal</Text>
                         </View>
                     )}
                 </AnimatedCircularProgress>
 
                 <View style={styles.macrosContainer}>
-                    <MacroBar label="Protein" current={45} max={60} />
-                    <MacroBar label="Carbs" current={180} max={250} />
-                    <MacroBar label="Fats" current={40} max={65} />
+                    <MacroBar label="Protein" current={Math.round(totalCalories * 0.03)} max={60} />
+                    <MacroBar label="Carbs" current={Math.round(totalCalories * 0.12)} max={250} />
+                    <MacroBar label="Fats" current={Math.round(totalCalories * 0.03)} max={65} />
                 </View>
             </Card>
 
             <Text style={globalStyles.sectionLabel}>MEALS</Text>
             <View style={styles.mealsList}>
-                <MealCard
-                    icon="🍳" name="Breakfast" subtitle="Poha + Chai" kcal={380} isLogged={true}
-                />
-                <MealCard
-                    icon="🍛" name="Lunch" subtitle="Dal Rice + Salad" kcal={620} isLogged={true}
-                />
-                <MealCard
-                    icon="🍽️" name="Dinner" subtitle="Not logged yet" isLogged={false}
-                    onAdd={() => navigation.navigate('MealLogScreen')}
-                />
-                <MealCard
-                    icon="🍎" name="Snacks" subtitle="Not logged yet" isLogged={false}
-                    onAdd={() => navigation.navigate('MealLogScreen')}
-                />
+                {MEAL_TYPES.map(({ key, icon }) => {
+                    const data = getMealData(key);
+                    return (
+                        <MealCard
+                            key={key}
+                            icon={icon}
+                            name={key}
+                            subtitle={data ? data.subtitle : 'Not logged yet'}
+                            kcal={data?.kcal}
+                            isLogged={!!data}
+                            onAdd={() => navigation.navigate('MealLogScreen')}
+                        />
+                    );
+                })}
             </View>
 
         </ScrollView>

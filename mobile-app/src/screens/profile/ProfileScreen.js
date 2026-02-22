@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
@@ -26,7 +27,23 @@ const MenuListItem = ({ icon, label, onPress, danger }) => (
 );
 
 export default function ProfileScreen({ navigation }) {
-    const handleLogout = () => {
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const userInfoStr = await AsyncStorage.getItem('userInfo');
+                if (userInfoStr) {
+                    setUser(JSON.parse(userInfoStr));
+                }
+            } catch (error) {
+                console.error("Failed to load user info", error);
+            }
+        };
+        loadUser();
+    }, []);
+
+    const handleLogout = async () => {
         Alert.alert(
             "Log Out",
             "Are you sure you want to log out of VITA?",
@@ -35,21 +52,28 @@ export default function ProfileScreen({ navigation }) {
                 {
                     text: "Log Out",
                     style: "destructive",
-                    onPress: () => navigation.replace('LoginScreen')
+                    onPress: async () => {
+                        await AsyncStorage.clear();
+                        navigation.replace('LoginScreen');
+                    }
                 }
             ]
         );
     };
+
+    const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User' : 'User';
+    const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
+    const email = user?.email || 'Student';
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
             <View style={styles.header}>
                 <View style={styles.avatarLarge}>
-                    <Text style={styles.avatarTextLarge}>{mockUser.initials}</Text>
+                    <Text style={styles.avatarTextLarge}>{initials}</Text>
                 </View>
-                <Text style={styles.userName}>{mockUser.name}</Text>
-                <Text style={styles.userDetails}>{mockUser.branch}  •  {mockUser.hostel}</Text>
+                <Text style={styles.userName}>{fullName}</Text>
+                <Text style={styles.userDetails}>{email}</Text>
             </View>
 
             <View style={styles.statsRow}>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 
@@ -9,16 +10,26 @@ export default function JournalEntryScreen({ navigation }) {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!title && !body) return;
-        Toast.show({
-            type: 'success',
-            text1: 'Journal Saved',
-            text2: 'Entry securely stored.',
-            position: 'bottom',
-            bottomOffset: 100,
-        });
-        navigation.goBack();
+        try {
+            await api.post('/api/student/mood/journal', { title, body });
+            Toast.show({
+                type: 'success',
+                text1: 'Journal Saved',
+                text2: 'Entry securely stored.',
+                position: 'bottom',
+                bottomOffset: 100,
+            });
+            navigation.goBack();
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to save journal. Please try again.',
+                position: 'bottom',
+            });
+        }
     };
 
     return (
