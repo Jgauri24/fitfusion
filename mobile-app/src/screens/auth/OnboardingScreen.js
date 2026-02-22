@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import PagerView from 'react-native-pager-view';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
+
+const { width } = Dimensions.get('window');
 
 const slides = [
     {
@@ -27,16 +28,27 @@ const slides = [
 
 export default function OnboardingScreen({ navigation }) {
     const [currentPage, setCurrentPage] = useState(0);
+    const scrollRef = useRef(null);
+
+    const handleScroll = (event) => {
+        const xOffset = event.nativeEvent.contentOffset.x;
+        const pageIndex = Math.round(xOffset / width);
+        setCurrentPage(pageIndex);
+    };
 
     return (
         <View style={styles.container}>
-            <PagerView
+            <ScrollView
+                ref={scrollRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 style={styles.pagerView}
-                initialPage={0}
-                onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
             >
-                {slides.map((slide, index) => (
-                    <View key={slide.key} style={styles.slide}>
+                {slides.map((slide) => (
+                    <View key={slide.key} style={[styles.slide, { width }]}>
                         <View style={styles.iconCircle}>
                             <Text style={styles.icon}>{slide.icon}</Text>
                         </View>
@@ -44,7 +56,7 @@ export default function OnboardingScreen({ navigation }) {
                         <Text style={styles.subtitle}>{slide.subtitle}</Text>
                     </View>
                 ))}
-            </PagerView>
+            </ScrollView>
 
             <View style={styles.footer}>
                 <View style={styles.dotsContainer}>

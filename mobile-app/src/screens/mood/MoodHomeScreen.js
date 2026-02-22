@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from '@react-navigation/native';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { Card } from '../../components/Card';
-import { mockMoodTrend, mockJournals } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -15,18 +16,52 @@ const MOODS = ['😔', '😟', '😐', '🙂', '😄'];
 export default function MoodHomeScreen({ navigation }) {
     const [selectedMood, setSelectedMood] = useState(null);
     const [isLogged, setIsLogged] = useState(false);
+    const [moodTrend, setMoodTrend] = useState([2, 2, 2, 2, 2, 2, 2]);
+    const [journals, setJournals] = useState([]);
 
-    const handleSaveMood = () => {
-        if (selectedMood === null) return;
-        setIsLogged(true);
-        Toast.show({
-            type: 'success',
-            text1: 'Mood Checked-In 🌿',
-            text2: 'Thanks for taking a moment for yourself.',
-            position: 'bottom',
-            bottomOffset: 100,
-        });
+    const fetchMoodData = async () => {
+        try {
+            const [moodRes, journalRes] = await Promise.all([
+                api.get('/api/student/mood/weekly'),
+                api.get('/api/student/mood/journals'),
+            ]);
+            setMoodTrend(moodRes.data.moodTrend || [2, 2, 2, 2, 2, 2, 2]);
+            setJournals(journalRes.data.journals || []);
+        } catch (e) {
+            console.error('Failed to fetch mood data:', e);
+        }
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchMoodData();
+            setIsLogged(false);
+            setSelectedMood(null);
+        }, [])
+    );
+
+    const handleSaveMood = async () => {
+        if (selectedMood === null) return;
+        try {
+            await api.post('/api/student/mood/checkin', { moodScore: selectedMood });
+            setIsLogged(true);
+            Toast.show({
+                type: 'success',
+                text1: 'Mood Checked-In 🌿',
+                text2: 'Thanks for taking a moment for yourself.',
+                position: 'bottom',
+                bottomOffset: 100,
+            });
+            fetchMoodData();
+        } catch (e) {
+            Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to save mood.', position: 'bottom' });
+        }
+    };
+
+    // Calculate mood variance
+    const avg = moodTrend.reduce((a, b) => a + b, 0) / moodTrend.length;
+    const variance = moodTrend.reduce((sum, m) => sum + Math.pow(m - avg, 2), 0) / moodTrend.length;
+    const varianceLabel = variance < 0.5 ? '😌 Low Variance — Mood Stable' : variance < 1.5 ? '😐 Moderate Variance' : '😟 High Variance — Mood Fluctuating';
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
@@ -75,7 +110,7 @@ export default function MoodHomeScreen({ navigation }) {
             <LineChart
                 data={{
                     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                    datasets: [{ data: mockMoodTrend }]
+                    datasets: [{ data: moodTrend }]
                 }}
                 width={screenWidth - 40}
                 height={220}
@@ -98,29 +133,35 @@ export default function MoodHomeScreen({ navigation }) {
 
             {/* Variance Badge Card */}
             <Card style={styles.varianceCard}>
-                <Text style={styles.varianceText}>😌 Low Variance — Mood Stable</Text>
+                <Text style={styles.varianceText}>{varianceLabel}</Text>
             </Card>
 
             <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>RECENT JOURNALS</Text>
 
             <View style={styles.journalList}>
-                {mockJournals.map((journal) => (
-                    <TouchableOpacity
-                        key={journal.id}
-                        onPress={() => navigation.navigate('JournalViewScreen', { journal })}
-                    >
-                        <View style={styles.journalCard}>
-                            <View style={styles.journalHeader}>
-                                <View style={styles.dateChip}>
-                                    <Text style={styles.dateChipText}>{journal.date}</Text>
+                {journals.length === 0 ? (
+                    <View style={styles.journalCard}>
+                        <Text style={{ color: COLORS.muted, textAlign: 'center' }}>No journals yet. Start writing!</Text>
+                    </View>
+                ) : (
+                    journals.map((journal) => (
+                        <TouchableOpacity
+                            key={journal.id}
+                            onPress={() => navigation.navigate('JournalViewScreen', { journal })}
+                        >
+                            <View style={styles.journalCard}>
+                                <View style={styles.journalHeader}>
+                                    <View style={styles.dateChip}>
+                                        <Text style={styles.dateChipText}>{journal.date}</Text>
+                                    </View>
+                                    <Feather name="chevron-right" size={20} color={COLORS.muted} />
                                 </View>
-                                <Feather name="chevron-right" size={20} color={COLORS.muted} />
+                                <Text style={styles.journalTitle}>{journal.title}</Text>
+                                <Text style={styles.journalPreview}>{journal.preview}</Text>
                             </View>
-                            <Text style={styles.journalTitle}>{journal.title}</Text>
-                            <Text style={styles.journalPreview}>{journal.preview}</Text>
-                        </View>
-                    </TouchableOpacity>
-                ))}
+                        </TouchableOpacity>
+                    ))
+                )}
             </View>
 
             <TouchableOpacity

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 
@@ -11,15 +12,28 @@ export default function MoodCheckInScreen({ navigation }) {
     const [selectedMood, setSelectedMood] = useState(2); // Default Neutral
     const [note, setNote] = useState('');
 
-    const handleSave = () => {
-        Toast.show({
-            type: 'success',
-            text1: 'Mood Saved 🌿',
-            text2: 'Your well-being matters.',
-            position: 'bottom',
-            bottomOffset: 100,
-        });
-        navigation.goBack();
+    const handleSave = async () => {
+        try {
+            await api.post('/api/student/mood/checkin', {
+                moodScore: selectedMood,
+                note,
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Mood Saved 🌿',
+                text2: 'Your well-being matters.',
+                position: 'bottom',
+                bottomOffset: 100,
+            });
+            navigation.goBack();
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to save mood. Please try again.',
+                position: 'bottom',
+            });
+        }
     };
 
     return (

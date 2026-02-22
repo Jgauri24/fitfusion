@@ -3,6 +3,7 @@ import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity } from 
 import { Feather } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
 import Toast from 'react-native-toast-message';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 
@@ -21,15 +22,31 @@ export default function ActivityLogScreen({ navigation }) {
     const [intensity, setIntensity] = useState('Moderate');
     const [notes, setNotes] = useState('');
 
-    const handleSave = () => {
-        Toast.show({
-            type: 'success',
-            text1: 'Workout Saved ⚡',
-            text2: 'Your activity streak is looking good!',
-            position: 'bottom',
-            bottomOffset: 100,
-        });
-        navigation.goBack();
+    const handleSave = async () => {
+        const selectedActivity = ACTIVITY_TYPES.find(t => t.id === selectedType);
+        const caloriesBurned = intensity === 'High' ? duration * 10 : intensity === 'Moderate' ? duration * 7 : duration * 4;
+        try {
+            await api.post('/api/student/activity/log', {
+                activityType: selectedActivity?.name || 'Unknown',
+                durationMins: duration,
+                caloriesBurned,
+            });
+            Toast.show({
+                type: 'success',
+                text1: 'Workout Saved ⚡',
+                text2: 'Your activity streak is looking good!',
+                position: 'bottom',
+                bottomOffset: 100,
+            });
+            navigation.goBack();
+        } catch (error) {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to save workout. Please try again.',
+                position: 'bottom',
+            });
+        }
     };
 
     return (

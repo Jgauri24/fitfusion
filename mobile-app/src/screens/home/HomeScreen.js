@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { Card } from '../../components/Card';
-import { mockPWS, mockTrend, mockUser } from '../../constants/mockData';
+import { mockPWS, mockTrend } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -21,17 +22,36 @@ const DimensionCard = ({ icon, label, score, color }) => (
 );
 
 export default function HomeScreen({ navigation }) {
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            try {
+                const userInfoStr = await AsyncStorage.getItem('userInfo');
+                if (userInfoStr) {
+                    setUser(JSON.parse(userInfoStr));
+                }
+            } catch (error) {
+                console.error("Failed to load user info", error);
+            }
+        };
+        loadUser();
+    }, []);
+
+    const greetingName = user?.firstName || 'User';
+    const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
+
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
 
             {/* Header Row */}
             <View style={styles.headerRow}>
                 <View>
-                    <Text style={styles.greeting}>Hey, {mockUser.name.split(' ')[0]} 👋</Text>
+                    <Text style={styles.greeting}>Hey, {greetingName} 👋</Text>
                     <Text style={globalStyles.subtitle}>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</Text>
                 </View>
                 <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{mockUser.initials}</Text>
+                    <Text style={styles.avatarText}>{initials}</Text>
                 </View>
             </View>
 
@@ -69,7 +89,7 @@ export default function HomeScreen({ navigation }) {
 
             {/* Smart Nudge Card */}
             <Card style={[styles.nudgeCard, styles.limeBorderLeft]}>
-                <Text style={styles.nudgeText}>⚡ You haven't logged lunch yet. Stay fueled!</Text>
+                <Text style={styles.nudgeText}>⚡ You haven&apos;t logged lunch yet. Stay fueled!</Text>
             </Card>
 
             {/* Burnout Alert */}

@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
+import { useFocusEffect } from '@react-navigation/native';
+import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { Card } from '../../components/Card';
-import { mockWeekly, mockActivities } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
+
+const ACTIVITY_ICONS = { 'Run': '🏃', 'Walk': '🚶', 'Yoga': '🧘', 'Gym': '🏋️', 'Cycle': '🚴', 'Sport': '🏸' };
 
 const IntensityBadge = ({ intensity }) => {
     let color = COLORS.muted;
@@ -22,6 +25,31 @@ const IntensityBadge = ({ intensity }) => {
 };
 
 export default function ActivityHomeScreen({ navigation }) {
+    const [dailyMinutes, setDailyMinutes] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [streak, setStreak] = useState(0);
+    const [consistencyScore, setConsistencyScore] = useState(0);
+    const [recentActivities, setRecentActivities] = useState([]);
+
+    const fetchActivity = async () => {
+        try {
+            const res = await api.get('/api/student/activity/weekly');
+            setDailyMinutes(res.data.dailyMinutes || [0, 0, 0, 0, 0, 0, 0]);
+            setStreak(res.data.streak || 0);
+            setConsistencyScore(res.data.consistencyScore || 0);
+            setRecentActivities(res.data.recentActivities || []);
+        } catch (e) {
+            console.error('Failed to fetch activity:', e);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchActivity();
+        }, [])
+    );
+
+    const consistencyLabel = consistencyScore >= 70 ? 'Great' : consistencyScore >= 40 ? 'Needs Improvement' : 'Just Starting';
+
     return (
         <View style={globalStyles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -33,14 +61,14 @@ export default function ActivityHomeScreen({ navigation }) {
                 {/* Streak Card */}
                 <Card style={styles.streakCard}>
                     <Text style={styles.flameIcon}>🔥</Text>
-                    <Text style={styles.streakTitle}>4 Day Streak</Text>
-                    <Text style={styles.streakMuted}>Keep it going!</Text>
+                    <Text style={styles.streakTitle}>{streak} Day Streak</Text>
+                    <Text style={styles.streakMuted}>{streak > 0 ? 'Keep it going!' : 'Start today!'}</Text>
                 </Card>
 
                 {/* Consistency Score Card */}
                 <Card style={styles.consistencyCard}>
-                    <Text style={styles.consistencyTitle}>Consistency Score: <Text style={{ color: COLORS.white }}>65</Text></Text>
-                    <Text style={styles.consistencyWarning}>Needs Improvement</Text>
+                    <Text style={styles.consistencyTitle}>Consistency Score: <Text style={{ color: COLORS.white }}>{consistencyScore}</Text></Text>
+                    <Text style={styles.consistencyWarning}>{consistencyLabel}</Text>
                 </Card>
 
                 <Text style={globalStyles.sectionLabel}>THIS WEEK (MINUTES)</Text>
@@ -48,7 +76,7 @@ export default function ActivityHomeScreen({ navigation }) {
                     <BarChart
                         data={{
                             labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                            datasets: [{ data: mockWeekly }]
+                            datasets: [{ data: dailyMinutes.map(d => d || 0) }]
                         }}
                         width={screenWidth - 40}
                         height={220}
@@ -71,25 +99,31 @@ export default function ActivityHomeScreen({ navigation }) {
 
                 <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>RECENT WORKOUTS</Text>
                 <View style={styles.activitiesList}>
-                    {mockActivities.map(act => (
-                        <TouchableOpacity
-                            key={act.id}
-                            onPress={() => navigation.navigate('ActivityDetailScreen', { activity: act })}
-                        >
-                            <View style={styles.activityCard}>
-                                <View style={styles.activityLeft}>
-                                    <View style={styles.activityIconCircle}>
-                                        <Text style={styles.activityIcon}>{act.icon}</Text>
+                    {recentActivities.length === 0 ? (
+                        <View style={styles.activityCard}>
+                            <Text style={{ color: COLORS.muted, textAlign: 'center', width: '100%' }}>No workouts logged yet. Tap + to start!</Text>
+                        </View>
+                    ) : (
+                        recentActivities.map(act => (
+                            <TouchableOpacity
+                                key={act.id}
+                                onPress={() => navigation.navigate('ActivityDetailScreen', { activity: act })}
+                            >
+                                <View style={styles.activityCard}>
+                                    <View style={styles.activityLeft}>
+                                        <View style={styles.activityIconCircle}>
+                                            <Text style={styles.activityIcon}>{ACTIVITY_ICONS[act.type] || '🏃'}</Text>
+                                        </View>
+                                        <View>
+                                            <Text style={styles.activityName}>{act.type}</Text>
+                                            <Text style={styles.activityDuration}>{act.duration} • {act.date}</Text>
+                                        </View>
                                     </View>
-                                    <View>
-                                        <Text style={styles.activityName}>{act.type}</Text>
-                                        <Text style={styles.activityDuration}>{act.duration} • {act.date}</Text>
-                                    </View>
+                                    <IntensityBadge intensity={act.intensity} />
                                 </View>
-                                <IntensityBadge intensity={act.intensity} />
-                            </View>
-                        </TouchableOpacity>
-                    ))}
+                            </TouchableOpacity>
+                        ))
+                    )}
                 </View>
 
             </ScrollView>
