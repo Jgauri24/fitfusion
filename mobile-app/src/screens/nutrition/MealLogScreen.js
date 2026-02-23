@@ -13,6 +13,9 @@ export default function MealLogScreen({ navigation }) {
     const [mealType, setMealType] = useState('Dinner');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
+    const [customName, setCustomName] = useState('');
+    const [customKcal, setCustomKcal] = useState('');
+    const [nextCustomId, setNextCustomId] = useState(1000);
 
     const filteredItems = mockCanteenItems.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -27,6 +30,15 @@ export default function MealLogScreen({ navigation }) {
         } else {
             setSelectedItems([...selectedItems, { ...item, quantity: 1 }]);
         }
+    };
+
+    const addCustomItem = () => {
+        if (!customName.trim() || !customKcal.trim()) return;
+        const newItem = { id: nextCustomId, name: customName.trim(), kcal: parseInt(customKcal), icon: '🍽️', quantity: 1 };
+        setSelectedItems([...selectedItems, newItem]);
+        setNextCustomId(nextCustomId + 1);
+        setCustomName('');
+        setCustomKcal('');
     };
 
     const removeItem = (id) => {
@@ -98,6 +110,34 @@ export default function MealLogScreen({ navigation }) {
                         onChangeText={setSearchQuery}
                     />
                 </View>
+
+                <Text style={globalStyles.sectionLabel}>ADD CUSTOM FOOD</Text>
+                <Card style={styles.customEntryCard}>
+                    <View style={styles.customInputRow}>
+                        <TextInput
+                            style={[styles.customInput, { flex: 2 }]}
+                            placeholder="Food name"
+                            placeholderTextColor={COLORS.muted}
+                            value={customName}
+                            onChangeText={setCustomName}
+                        />
+                        <TextInput
+                            style={[styles.customInput, { flex: 1 }]}
+                            placeholder="kcal"
+                            placeholderTextColor={COLORS.muted}
+                            value={customKcal}
+                            onChangeText={setCustomKcal}
+                            keyboardType="numeric"
+                        />
+                        <TouchableOpacity
+                            style={[styles.customAddBtn, (!customName.trim() || !customKcal.trim()) && { opacity: 0.4 }]}
+                            onPress={addCustomItem}
+                            disabled={!customName.trim() || !customKcal.trim()}
+                        >
+                            <Feather name="plus" size={20} color="#000" />
+                        </TouchableOpacity>
+                    </View>
+                </Card>
 
                 <Text style={globalStyles.sectionLabel}>MENU</Text>
                 {filteredItems.map(item => (
@@ -301,5 +341,32 @@ const styles = StyleSheet.create({
     disabledButton: {
         backgroundColor: COLORS.cardBorder,
         opacity: 0.5,
+    },
+    customEntryCard: {
+        marginBottom: 20,
+        padding: 12,
+    },
+    customInputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    customInput: {
+        backgroundColor: COLORS.bg,
+        color: COLORS.white,
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderRadius: 10,
+        fontSize: 15,
+        borderWidth: 1,
+        borderColor: COLORS.cardBorder,
+    },
+    customAddBtn: {
+        backgroundColor: COLORS.accent,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
     }
 });
