@@ -3,6 +3,7 @@
 import { useState } from "react";
 import DataTable from "@/components/DataTable";
 import StatCard from "@/components/StatCard";
+import { Users, Sprout, Dumbbell, Trophy } from "lucide-react";
 
 const cohorts = [
     { id: 1, hostel: "Govind Bhawan", branch: "ME", year: "3", students: 45, wellness: 85, steps: 9200, diet: "61% Non-Veg", flags: 1, trend: "up" },
@@ -117,27 +118,27 @@ export default function UsersPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="👥"
+                    icon={<Users size={20} />}
                     label="Total Students (Aggregated)"
                     value={2847}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="🌱"
+                    icon={<Sprout size={20} />}
                     label="Beginners"
                     value={1040}
                     accentColor="var(--orange)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="💪"
+                    icon={<Dumbbell size={20} />}
                     label="Intermediate"
                     value={1255}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="🏆"
+                    icon={<Trophy size={20} />}
                     label="Advanced"
                     value={552}
                     accentColor="var(--green)"

@@ -2,6 +2,7 @@
 
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
+import { TrendingUp, Zap, UtensilsCrossed, Target } from "lucide-react";
 import { monthlyTrends, departmentStats, hostelComparison } from "@/lib/mockData";
 import {
     AreaChart,
@@ -60,7 +61,7 @@ export default function AnalyticsPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="📈"
+                    icon={<TrendingUp size={20} />}
                     label="User Growth"
                     value={`+${userGrowth}%`}
                     trend={{
@@ -70,7 +71,7 @@ export default function AnalyticsPage() {
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="⚡"
+                    icon={<Zap size={20} />}
                     label="Activity Growth"
                     value={`+${activityGrowth}%`}
                     trend={{ value: "MoM", direction: "up" }}
@@ -78,14 +79,14 @@ export default function AnalyticsPage() {
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="🍽"
+                    icon={<UtensilsCrossed size={20} />}
                     label="Meals Served"
                     value={latestMonth.meals.toLocaleString()}
                     accentColor="var(--orange)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="🎯"
+                    icon={<Target size={20} />}
                     label="Engagement Rate"
                     value="78%"
                     trend={{ value: "4.2%", direction: "up" }}

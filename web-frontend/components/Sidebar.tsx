@@ -2,17 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText } from "lucide-react";
+import {
+    LayoutDashboard,
+    Users,
+    Salad,
+    Activity,
+    HeartPulse,
+    TreePine,
+    TrendingUp,
+    FileText,
+} from "lucide-react";
 import React from "react";
 
 const navItems = [
-    { label: "Dashboard", href: "/", icon: "📊" },
-    { label: "Users", href: "/users", icon: "👥" },
-    { label: "Nutrition", href: "/nutrition", icon: "🥗" },
-    { label: "Activities", href: "/activities", icon: "🏃" },
-    { label: "Wellness", href: "/wellness", icon: "🧘" },
-    { label: "Environment", href: "/environment", icon: "🌿" },
-    { label: "Analytics", href: "/analytics", icon: "📈" },
+    { label: "Dashboard", href: "/", icon: <LayoutDashboard size={18} /> },
+    { label: "Users", href: "/users", icon: <Users size={18} /> },
+    { label: "Nutrition", href: "/nutrition", icon: <Salad size={18} /> },
+    { label: "Activities", href: "/activities", icon: <Activity size={18} /> },
+    { label: "Wellness", href: "/wellness", icon: <HeartPulse size={18} /> },
+    { label: "Environment", href: "/environment", icon: <TreePine size={18} /> },
+    { label: "Analytics", href: "/analytics", icon: <TrendingUp size={18} /> },
     { label: "Reports", href: "/reports", icon: <FileText size={18} /> },
 ];
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import StatCard from "@/components/StatCard";
+import { Users, Zap, AlertTriangle, Heart } from "lucide-react";
 import ChartCard from "@/components/ChartCard";
 import {
   dashboardStats,
@@ -56,14 +57,14 @@ export default function DashboardPage() {
       {/* KPI Stats */}
       <div className="stats-grid">
         <StatCard
-          icon="👥"
+          icon={<Users size={20} />}
           label="Total Users"
           value={dashboardStats.totalUsers.toLocaleString()}
           trend={{ value: "12.5%", direction: "up" }}
           className="animate-fade-in-up stagger-1"
         />
         <StatCard
-          icon="⚡"
+          icon={<Zap size={20} />}
           label="Active Today"
           value={dashboardStats.activeToday.toLocaleString()}
           trend={{ value: "8.2%", direction: "up" }}
@@ -76,7 +77,7 @@ export default function DashboardPage() {
           title="Click to review burnout alerts"
         >
           <StatCard
-            icon="🚨"
+            icon={<AlertTriangle size={20} />}
             label="Active Burnout Alerts"
             value="24"
             trend={{ value: "2 new", direction: "up" }}
@@ -85,7 +86,7 @@ export default function DashboardPage() {
           />
         </div>
         <StatCard
-          icon="💚"
+          icon={<Heart size={20} />}
           label="Wellness Score"
           value={`${dashboardStats.wellnessScore}/100`}
           trend={{ value: "5.4%", direction: "up" }}

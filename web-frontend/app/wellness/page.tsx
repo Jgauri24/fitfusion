@@ -2,6 +2,7 @@
 
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
+import { Smile, BookOpen, Users, Moon } from "lucide-react";
 import { wellnessData, moodDistribution } from "@/lib/mockData";
 import {
     LineChart,
@@ -60,14 +61,14 @@ export default function WellnessPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="😊"
+                    icon={<Smile size={20} />}
                     label="Avg Mood Score"
                     value={`${avgMood}/5`}
                     trend={{ value: "0.3", direction: "up" }}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="📝"
+                    icon={<BookOpen size={20} />}
                     label="Journal Entries"
                     value={totalJournals}
                     trend={{ value: "18%", direction: "up" }}
@@ -75,7 +76,7 @@ export default function WellnessPage() {
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="🤝"
+                    icon={<Users size={20} />}
                     label="Circle Participants"
                     value={totalCircle}
                     trend={{ value: "22%", direction: "up" }}
@@ -83,7 +84,7 @@ export default function WellnessPage() {
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="😴"
+                    icon={<Moon size={20} />}
                     label="Avg Sleep"
                     value={`${avgSleep}h`}
                     trend={{ value: "0.2h", direction: "up" }}

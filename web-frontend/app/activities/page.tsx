@@ -4,6 +4,7 @@ import { useState } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { activities } from "@/lib/mockData";
+import { Activity, Flame, Timer, Dumbbell, PersonStanding, Trophy, StretchHorizontal, BrainCircuit } from "lucide-react";
 
 export default function ActivitiesPage() {
     const [categoryFilter, setCategoryFilter] = useState("All");
@@ -47,28 +48,28 @@ export default function ActivitiesPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="🏃"
+                    icon={<Activity size={20} />}
                     label="Total Participants"
                     value={totalParticipants.toLocaleString()}
                     trend={{ value: "15.3%", direction: "up" }}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="🔥"
+                    icon={<Flame size={20} />}
                     label="Trending Activities"
                     value={trendingCount}
                     accentColor="var(--pink)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="⏱"
+                    icon={<Timer size={20} />}
                     label="Avg Duration"
                     value={`${avgDuration} min`}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="💪"
+                    icon={<Dumbbell size={20} />}
                     label="Avg Calories Burned"
                     value={`${avgCalBurned} kcal`}
                     accentColor="var(--orange)"
@@ -136,7 +137,7 @@ export default function ActivitiesPage() {
                                                         color: "var(--pink)",
                                                     }}
                                                 >
-                                                    🔥
+                                                    <Flame size={12} />
                                                 </span>
                                             )}
                                         </span>
@@ -189,19 +190,19 @@ export default function ActivitiesPage() {
                                 }}
                             >
                                 {a.category === "Strength"
-                                    ? "🏋️"
+                                    ? <Dumbbell size={18} />
                                     : a.category === "Cardio"
-                                        ? "🏃"
+                                        ? <PersonStanding size={18} />
                                         : a.category === "Sports"
-                                            ? "🏏"
+                                            ? <Trophy size={18} />
                                             : a.category === "Flexibility"
-                                                ? "🧘"
-                                                : "🧠"}
+                                                ? <StretchHorizontal size={18} />
+                                                : <BrainCircuit size={18} />}
                             </div>
                             <div>
                                 <div className="info-card-title">
                                     {a.type}
-                                    {a.trending && " 🔥"}
+                                    {a.trending && " ★"}
                                 </div>
                                 <div className="info-card-subtitle">{a.category}</div>
                             </div>
