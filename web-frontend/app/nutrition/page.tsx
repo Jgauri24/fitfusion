@@ -5,6 +5,7 @@ import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import DataTable from "@/components/DataTable";
 import { foodItems, nutritionByMeal } from "@/lib/mockData";
+import { Flame, Beef, Wheat, Droplet } from "lucide-react";
 
 export default function NutritionPage() {
     const [mealFilter, setMealFilter] = useState("All");
@@ -53,12 +54,12 @@ export default function NutritionPage() {
             render: (f: typeof foodItems[0]) => (
                 <span
                     className={`badge ${f.meal === "Breakfast"
-                            ? "badge-green"
-                            : f.meal === "Lunch"
-                                ? "badge-blue"
-                                : f.meal === "Dinner"
-                                    ? "badge-purple"
-                                    : "badge-orange"
+                        ? "badge-green"
+                        : f.meal === "Lunch"
+                            ? "badge-blue"
+                            : f.meal === "Dinner"
+                                ? "badge-purple"
+                                : "badge-orange"
                         }`}
                 >
                     {f.meal}
@@ -103,28 +104,28 @@ export default function NutritionPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="🔥"
+                    icon={<Flame size={20} />}
                     label="Avg Calories"
                     value={`${avgCalories} kcal`}
                     accentColor="var(--orange)"
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="🥩"
+                    icon={<Beef size={20} />}
                     label="Avg Protein"
                     value={`${avgProtein}g`}
                     accentColor="var(--red)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="🌾"
+                    icon={<Wheat size={20} />}
                     label="Avg Carbs"
                     value={`${avgCarbs}g`}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="🧈"
+                    icon={<Droplet size={20} />}
                     label="Avg Fats"
                     value={`${avgFats}g`}
                     accentColor="var(--yellow)"

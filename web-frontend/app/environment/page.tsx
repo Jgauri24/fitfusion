@@ -3,6 +3,7 @@
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { environmentData } from "@/lib/mockData";
+import { Wind, Volume2, Thermometer, Droplets, MapPin } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function EnvironmentPage() {
@@ -83,7 +84,7 @@ export default function EnvironmentPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon="🌬"
+                    icon={<Wind size={20} />}
                     label="Avg AQI"
                     value={avgAqi}
                     trend={{ value: "5pts", direction: "down" }}
@@ -91,21 +92,21 @@ export default function EnvironmentPage() {
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
-                    icon="🔊"
+                    icon={<Volume2 size={20} />}
                     label="Avg Noise"
                     value={`${avgNoise} dB`}
                     accentColor="var(--purple)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
-                    icon="🌡"
+                    icon={<Thermometer size={20} />}
                     label="Avg Temperature"
                     value={`${avgTemp}°C`}
                     accentColor="var(--orange)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
-                    icon="💧"
+                    icon={<Droplets size={20} />}
                     label="Avg Humidity"
                     value={`${avgHumidity}%`}
                     accentColor="var(--blue)"
@@ -128,7 +129,7 @@ export default function EnvironmentPage() {
                                     color: getAqiColor(zone.aqi),
                                 }}
                             >
-                                📍
+                                <MapPin size={18} />
                             </div>
                             <div>
                                 <div className="info-card-title">{zone.zone}</div>
