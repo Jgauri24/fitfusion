@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     LayoutDashboard,
     Users,
@@ -11,6 +11,7 @@ import {
     TreePine,
     TrendingUp,
     FileText,
+    LogOut,
 } from "lucide-react";
 import React from "react";
 
@@ -27,6 +28,13 @@ const navItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userInfo");
+        router.push("/login");
+    };
 
     return (
         <aside className="sidebar">
@@ -86,6 +94,17 @@ export default function Sidebar() {
                         </div>
                     </div>
                 </Link>
+                <button onClick={handleLogout} style={{
+                    display: "flex", alignItems: "center", gap: "8px",
+                    width: "100%", padding: "10px 16px", marginTop: "8px",
+                    background: "rgba(255,68,68,0.08)", border: "1px solid rgba(255,68,68,0.15)",
+                    borderRadius: "8px", color: "#ff6b6b", fontSize: "13px", fontWeight: 600,
+                    cursor: "pointer", transition: "all 0.2s ease"
+                }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,68,68,0.15)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,68,68,0.08)"; }}>
+                    <LogOut size={16} /> Sign Out
+                </button>
             </div>
         </aside>
     );
