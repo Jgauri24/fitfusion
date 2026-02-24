@@ -13,7 +13,7 @@ import {
     FileText,
     LogOut,
 } from "lucide-react";
-import React from "react";
+import React,{useEffect,useState} from "react";
 
 const navItems = [
     { label: "Dashboard", href: "/", icon: <LayoutDashboard size={18} /> },
@@ -29,6 +29,25 @@ const navItems = [
 export default function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
+    const [adminProfile, setAdminProfile] = useState({ name: "Admin", initials: "A", role: "Super Admin" });
+
+    useEffect(() => {
+        const userInfo = localStorage.getItem("userInfo");
+        if (userInfo) {
+            try {
+                const parsed = JSON.parse(userInfo);
+                const firstName = parsed.firstName || "Admin";
+                const lastName = parsed.lastName || "";
+                const fullName = `${firstName} ${lastName}`.trim();
+                const init = firstName.charAt(0).toUpperCase() + (lastName ? lastName.charAt(0).toUpperCase() : "");
+                setAdminProfile({
+                    name: fullName,
+                    initials: init,
+                    role: parsed.role || "Admin"
+                });
+            } catch (e) { }
+        }
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -87,10 +106,10 @@ export default function Sidebar() {
             <div className="sidebar-footer">
                 <Link href="/profile" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
                     <div className="admin-profile">
-                        <div className="admin-avatar">GA</div>
+                        <div className="admin-avatar">{adminProfile.initials}</div>
                         <div className="admin-info">
-                            <span className="admin-name">Gauri Admin</span>
-                            <span className="admin-role">Super Admin</span>
+                            <span className="admin-name">{adminProfile.name}</span>
+                            <span className="admin-role">{adminProfile.role}</span>
                         </div>
                     </div>
                 </Link>
