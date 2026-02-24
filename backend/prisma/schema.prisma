@@ -52,3 +52,26 @@ model ActivityLog {
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model FoodItem {
+  id        String   @id @default(uuid())
+  name      String
+  category  String   // e.g., Vegetarian, Non-Vegetarian, Beverage
+  meal      String   // e.g., Breakfast, Lunch, Dinner, Snack
+  portion   String   // e.g., 1 plate, 1 bowl, 250ml
+  calories  Int
+  protein   Float    @default(0)
+  carbs     Float    @default(0)
+  fats      Float    @default(0)
+  createdAt DateTime @default(now())
+}
+
+model EnvironmentZone {
+  id          String   @id @default(uuid())
+  zone        String
+  aqi         Int
+  noiseDb     Int
+  temperature Float
+  humidity    Float
+  createdAt   DateTime @default(now())
+}
