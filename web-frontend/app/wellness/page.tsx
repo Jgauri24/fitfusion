@@ -1,9 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { Smile, BookOpen, Users, Moon } from "lucide-react";
-import { wellnessData, moodDistribution } from "@/lib/mockData";
 import {
     LineChart,
     Line,
@@ -12,24 +12,74 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import api from "@/lib/api";
+
+interface WellnessData {
+    date: string;
+    avgMood: number;
+    journalEntries: number;
+    circleParticipants: number;
+    stressLevel: number;
+    sleepAvg: number;
+}
+
+interface MoodDistribution {
+    mood: string;
+    percentage: number;
+    color: string;
+}
+
+interface AttendanceData {
+    week: string;
+    attendance: number;
+}
 
 export default function WellnessPage() {
-    const avgMood =
-        (
-            wellnessData.reduce((s, w) => s + w.avgMood, 0) / wellnessData.length
-        ).toFixed(1);
+    const [wellnessData, setWellnessData] = useState<WellnessData[]>([]);
+    const [moodDistribution, setMoodDistribution] = useState<MoodDistribution[]>([]);
+    const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchWellnessStats = async () => {
+            try {
+                const res = await api.get('/api/admin/wellness/stats');
+                
+                // Only take the last 7 items to display, sorting by Date logic if needed,
+                // but our backend already returns 7 days in order.
+                const rawWellnessData = res.data.wellnessData || [];
+                // Reverse it so the charts flow left (oldest) to right (newest)
+                setWellnessData(rawWellnessData.reverse());
+                
+                setMoodDistribution(res.data.moodDistribution || []);
+                setAttendanceData(res.data.attendanceData || []);
+            } catch (error) {
+                console.error("Failed to fetch wellness stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchWellnessStats();
+    }, []);
+
+    const validWellnessDataWithMood = wellnessData.filter(w => w.avgMood > 0);
+    const avgMood = validWellnessDataWithMood.length > 0
+        ? (validWellnessDataWithMood.reduce((s, w) => s + w.avgMood, 0) / validWellnessDataWithMood.length).toFixed(1)
+        : "0.0";
+
     const totalJournals = wellnessData.reduce((s, w) => s + w.journalEntries, 0);
     const totalCircle = wellnessData.reduce(
         (s, w) => s + w.circleParticipants,
         0
     );
-    const avgSleep =
-        (
-            wellnessData.reduce((s, w) => s + w.sleepAvg, 0) / wellnessData.length
-        ).toFixed(1);
+
+    const validWellnessDataWithSleep = wellnessData.filter(w => w.sleepAvg > 0);
+    const avgSleep = validWellnessDataWithSleep.length > 0
+        ? (validWellnessDataWithSleep.reduce((s, w) => s + w.sleepAvg, 0) / validWellnessDataWithSleep.length).toFixed(1)
+        : "0.0";
 
     const maxMood = 5;
-    const maxJournal = Math.max(...wellnessData.map((w) => w.journalEntries));
+    const maxJournal = wellnessData.length > 0 ? Math.max(...wellnessData.map((w) => w.journalEntries), 1) : 1;
 
     const moodDeltas: Record<string, number> = {
         "😊 Happy": 4,
@@ -39,15 +89,9 @@ export default function WellnessPage() {
         "😞 Low": -2,
     };
 
-    const attendanceData = [
-        { week: 'W1', attendance: 210 },
-        { week: 'W2', attendance: 235 },
-        { week: 'W3', attendance: 198 },
-        { week: 'W4', attendance: 176 },
-        { week: 'W5', attendance: 220 },
-        { week: 'W6', attendance: 248 },
-        { week: 'W7', attendance: 270 },
-    ];
+    if (loading) {
+        return <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>Loading wellness data...</div>;
+    }
 
     return (
         <>
@@ -64,22 +108,22 @@ export default function WellnessPage() {
                     icon={<Smile size={20} />}
                     label="Avg Mood Score"
                     value={`${avgMood}/5`}
-                    trend={{ value: "0.3", direction: "up" }}
+                    trend={{ value: "Real-time", direction: "up" }}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
                     icon={<BookOpen size={20} />}
-                    label="Journal Entries"
+                    label="Weekly Journal Entries"
                     value={totalJournals}
-                    trend={{ value: "18%", direction: "up" }}
+                    trend={{ value: "Real-time", direction: "up" }}
                     accentColor="var(--purple)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
                     icon={<Users size={20} />}
-                    label="Circle Participants"
+                    label="Weekly Circle Participants"
                     value={totalCircle}
-                    trend={{ value: "22%", direction: "up" }}
+                    trend={{ value: "Real-time", direction: "up" }}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-3"
                 />
@@ -87,7 +131,7 @@ export default function WellnessPage() {
                     icon={<Moon size={20} />}
                     label="Avg Sleep"
                     value={`${avgSleep}h`}
-                    trend={{ value: "0.2h", direction: "up" }}
+                    trend={{ value: "Real-time", direction: "up" }}
                     accentColor="var(--accent)"
                     className="animate-fade-in-up stagger-4"
                 />
@@ -97,7 +141,7 @@ export default function WellnessPage() {
                 {/* Mood Distribution */}
                 <ChartCard
                     title="Mood Distribution"
-                    badge="This Week"
+                    badge="Last 7 Days"
                     className="animate-fade-in-up stagger-3"
                 >
                     <div
@@ -137,15 +181,7 @@ export default function WellnessPage() {
                                             >
                                                 {m.percentage}%
                                             </span>
-                                            {delta !== undefined && (
-                                                <span style={{
-                                                    fontSize: "11px",
-                                                    color: delta > 0 ? "var(--green)" : "var(--red)",
-                                                    fontWeight: 600
-                                                }}>
-                                                    {delta > 0 ? "↑" : "↓"} {Math.abs(delta)}%
-                                                </span>
-                                            )}
+                                            {/* We can hide delta for real data so it's not faked unless we compute real trend week-over-week */}
                                         </div>
                                     </div>
                                     <div className="progress-bar" style={{ height: "10px" }}>
@@ -170,16 +206,16 @@ export default function WellnessPage() {
                     className="animate-fade-in-up stagger-4"
                 >
                     <div className="bar-chart">
-                        {wellnessData.map((w) => (
-                            <div key={w.date} className="bar-chart-item">
+                        {wellnessData.map((w, i) => (
+                            <div key={i} className="bar-chart-item">
                                 <div
                                     className="bar"
                                     style={{
                                         height: `${(w.avgMood / maxMood) * 100}%`,
                                         background:
-                                            w.avgMood >= 4.2
+                                            w.avgMood >= 4.0
                                                 ? "var(--green)"
-                                                : w.avgMood >= 3.8
+                                                : w.avgMood >= 3.0
                                                     ? "var(--accent)"
                                                     : "var(--orange)",
                                     }}
@@ -196,12 +232,12 @@ export default function WellnessPage() {
                 {/* Journal Activity */}
                 <ChartCard
                     title="Journal Entries"
-                    badge="Daily"
+                    badge="Last 7 Days"
                     className="animate-fade-in-up stagger-5"
                 >
                     <div className="bar-chart">
-                        {wellnessData.map((w) => (
-                            <div key={w.date} className="bar-chart-item">
+                        {wellnessData.map((w, i) => (
+                            <div key={i} className="bar-chart-item">
                                 <div
                                     className="bar"
                                     style={{
@@ -234,16 +270,16 @@ export default function WellnessPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {wellnessData.map((w) => (
-                                    <tr key={w.date}>
+                                {[...wellnessData].reverse().map((w, i) => (
+                                    <tr key={i}>
                                         <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>
                                             {w.date}
                                         </td>
                                         <td>
                                             <span
-                                                className={`badge ${w.avgMood >= 4.2
+                                                className={`badge ${w.avgMood >= 4.0
                                                     ? "badge-green"
-                                                    : w.avgMood >= 3.8
+                                                    : w.avgMood >= 3.0
                                                         ? "badge-cyan"
                                                         : "badge-orange"
                                                     }`}
