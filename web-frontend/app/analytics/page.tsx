@@ -1,9 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import { TrendingUp, Zap, UtensilsCrossed, Target } from "lucide-react";
-import { monthlyTrends, departmentStats, hostelComparison } from "@/lib/mockData";
 import {
     AreaChart,
     Area,
@@ -13,22 +13,70 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from "recharts";
+import api from "@/lib/api";
+
+interface MonthlyTrend {
+    month: string;
+    users: number;
+    activities: number;
+    meals: number;
+}
+
+interface DepartmentStat {
+    dept: string;
+    users: number;
+    avgFitness: number;
+    engagement: number;
+}
+
+interface HostelStat {
+    hostel: string;
+    activeUsers: number;
+    avgSteps: number;
+    avgCalories: number;
+    wellnessScore: number;
+}
 
 export default function AnalyticsPage() {
-    const latestMonth = monthlyTrends[monthlyTrends.length - 1];
-    const prevMonth = monthlyTrends[monthlyTrends.length - 2];
-    const userGrowth = (
+    const [monthlyTrends, setMonthlyTrends] = useState<MonthlyTrend[]>([]);
+    const [departmentStats, setDepartmentStats] = useState<DepartmentStat[]>([]);
+    const [hostelComparison, setHostelComparison] = useState<HostelStat[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            try {
+                const res = await api.get('/api/admin/analytics/stats');
+                setMonthlyTrends(res.data.monthlyTrends || []);
+                setDepartmentStats(res.data.departmentStats || []);
+                setHostelComparison(res.data.hostelComparison || []);
+            } catch (error) {
+                console.error("Failed to fetch analytics stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAnalytics();
+    }, []);
+
+    // Provide safe fallbacks if data is empty while loading or on error
+    const latestMonth = monthlyTrends.length >= 1 ? monthlyTrends[monthlyTrends.length - 1] : { users: 0, activities: 0, meals: 0, month: "" };
+    const prevMonth = monthlyTrends.length >= 2 ? monthlyTrends[monthlyTrends.length - 2] : { users: 0, activities: 0, meals: 0, month: "" };
+    
+    const userGrowth = prevMonth.users > 0 ? (
         ((latestMonth.users - prevMonth.users) / prevMonth.users) *
         100
-    ).toFixed(1);
-    const activityGrowth = (
+    ).toFixed(1) : "0.0";
+    
+    const activityGrowth = prevMonth.activities > 0 ? (
         ((latestMonth.activities - prevMonth.activities) / prevMonth.activities) *
         100
-    ).toFixed(1);
+    ).toFixed(1) : "0.0";
 
-    const maxUsers = Math.max(...monthlyTrends.map((m) => m.users));
-    const maxDeptUsers = Math.max(...departmentStats.map((d) => d.users));
+    const maxUsers = monthlyTrends.length > 0 ? Math.max(...monthlyTrends.map((m) => m.users), 1) : 1;
+    const maxDeptUsers = departmentStats.length > 0 ? Math.max(...departmentStats.map((d) => d.users), 1) : 1;
 
+    // We can keep the correlation matrix static for now as mock data (or you can generate it in the backend later)
     const correlationData = [
         { week: "W1", mood: 75, stress: 30 },
         { week: "W2", mood: 78, stress: 28 },
@@ -49,6 +97,10 @@ export default function AnalyticsPage() {
         "EE": 2,
     };
 
+    if (loading) {
+        return <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>Loading analytics data...</div>;
+    }
+
     return (
         <>
             <div className="page-header animate-fade-in-up">
@@ -63,18 +115,18 @@ export default function AnalyticsPage() {
                 <StatCard
                     icon={<TrendingUp size={20} />}
                     label="User Growth"
-                    value={`+${userGrowth}%`}
+                    value={Number(userGrowth) > 0 ? `+${userGrowth}%` : `${userGrowth}%`}
                     trend={{
                         value: `${latestMonth.users - prevMonth.users} new`,
-                        direction: "up",
+                        direction: Number(userGrowth) >= 0 ? "up" : "down",
                     }}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
                     icon={<Zap size={20} />}
                     label="Activity Growth"
-                    value={`+${activityGrowth}%`}
-                    trend={{ value: "MoM", direction: "up" }}
+                    value={Number(activityGrowth) > 0 ? `+${activityGrowth}%` : `${activityGrowth}%`}
+                    trend={{ value: "MoM", direction: Number(activityGrowth) >= 0 ? "up" : "down" }}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-2"
                 />
@@ -132,7 +184,7 @@ export default function AnalyticsPage() {
                             gap: "14px",
                         }}
                     >
-                        {departmentStats
+                        {[...departmentStats]
                             .sort((a, b) => b.engagement - a.engagement)
                             .slice(0, 6)
                             .map((d) => {
@@ -170,6 +222,7 @@ export default function AnalyticsPage() {
                                                 >
                                                     {d.engagement}%
                                                 </span>
+                                                {/* Deltas could be hidden or mapped to real data eventually */}
                                                 {delta !== undefined && (
                                                     <span style={{
                                                         fontSize: "11px",
@@ -347,7 +400,7 @@ export default function AnalyticsPage() {
                     className="animate-fade-in-up stagger-6"
                 >
                     <div className="info-grid" style={{ marginBottom: 0 }}>
-                        {hostelComparison
+                        {[...hostelComparison]
                             .sort((a, b) => b.wellnessScore - a.wellnessScore)
                             .map((h, idx) => (
                                 <div className="info-card" key={h.hostel} style={{ border: idx === 0 ? "1px solid var(--border-accent)" : undefined }}>
@@ -380,12 +433,14 @@ export default function AnalyticsPage() {
                                         <div className="info-metric">
                                             <span className="info-metric-label">Avg Steps</span>
                                             <span className="info-metric-value">
-                                                {h.avgSteps.toLocaleString()}
+                                                {h.avgSteps.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                                             </span>
                                         </div>
                                         <div className="info-metric">
                                             <span className="info-metric-label">Avg Calories</span>
-                                            <span className="info-metric-value">{h.avgCalories}</span>
+                                            <span className="info-metric-value">
+                                                {h.avgCalories.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                            </span>
                                         </div>
                                         <div className="progress-bar" style={{ height: "4px" }}>
                                             <div

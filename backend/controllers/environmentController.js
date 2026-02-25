@@ -34,10 +34,20 @@ const createZone = async (req, res) => {
  */
 const getAllZones = async (req, res) => {
     try {
-        const zones = await prisma.environmentZone.findMany({
+        const allReadings = await prisma.environmentZone.findMany({
             orderBy: { createdAt: 'desc' }
         });
-        res.json(zones);
+
+        // Deduplicate: keep only the most recent reading per zone
+        const latestZonesMap = new Map();
+        for (const reading of allReadings) {
+            if (!latestZonesMap.has(reading.zone)) {
+                latestZonesMap.set(reading.zone, reading);
+            }
+        }
+
+        const uniqueZones = Array.from(latestZonesMap.values());
+        res.json(uniqueZones);
     } catch (error) {
         console.error('getAllZones error:', error);
         res.status(500).json({ message: 'Failed to fetch zone readings.' });
