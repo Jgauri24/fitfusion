@@ -296,7 +296,7 @@ export default function ReportsPage() {
 
                 {/* Right Column: Report Preview (60%) */}
                 <div style={{ flex: "1", minWidth: "320px", display: "flex", flexDirection: "column" }}>
-                    <ChartCard title="Report Preview" badge="Live Simulator" className="preview-card-h-full ">
+                    <ChartCard title="Report Preview" badge="Live Simulator" className="preview-card-h-full">
                         <div style={{
                             background: "#0a0a0a",
                             border: "1px solid var(--border)",
