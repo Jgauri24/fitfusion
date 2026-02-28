@@ -14,11 +14,28 @@ model User {
   role          String          @default("STUDENT")
   firstName     String
   lastName      String
+
+  // Profile fields (guideline requirement)
+  age           Int?
+  gender        String?         // MALE, FEMALE, OTHER
+  height        Float?          // in cm
+  weight        Float?          // in kg
+  fitnessLevel  String?         // BEGINNER, INTERMEDIATE, ADVANCED
+  dietaryPref   String?         // VEGETARIAN, NON_VEGETARIAN, VEGAN, EGGETARIAN
+
+  // Campus metadata (guideline requirement)
+  hostel        String?         // e.g., Rajendra Bhawan, Cautley Bhawan
+  branch        String?         // e.g., CSE, ECE, ME
+  academicYear  String?         // e.g., 1st, 2nd, 3rd, 4th
+
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
   nutritionLogs NutritionLog[]
   activityLogs  ActivityLog[]
+  eventParticipations EventParticipation[]
+  moodCheckIns  MoodCheckIn[]
+  journals      Journal[]
 }
 
 model MessMenu {
@@ -32,14 +49,19 @@ model MessMenu {
 }
 
 model NutritionLog {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   userId      String
-  mealType    String   // e.g., BREAKFAST, LUNCH, DINNER, SNACK
-  foodGrams   Int      // Quantity consumed
+  mealType    String    // e.g., BREAKFAST, LUNCH, DINNER, SNACK
+  foodGrams   Int       // Quantity consumed
   calories    Float
-  loggedAt    DateTime @default(now())
+  protein     Float     @default(0)  // grams of protein
+  carbs       Float     @default(0)  // grams of carbohydrates
+  fats        Float     @default(0)  // grams of fat
+  foodItemId  String?   // Optional link to the food catalog
+  loggedAt    DateTime  @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  foodItem    FoodItem? @relation(fields: [foodItemId], references: [id])
 }
 
 model ActivityLog {
@@ -48,6 +70,9 @@ model ActivityLog {
   activityType  String   // e.g., RUNNING, GYM, SWIMMING
   durationMins  Int
   caloriesBurned Float
+  sets          Int?     // Optional: number of sets (gym workouts)
+  reps          Int?     // Optional: number of reps per set
+  load          Float?   // Optional: weight in kg (gym workouts)
   loggedAt      DateTime @default(now())
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -64,14 +89,65 @@ model FoodItem {
   carbs     Float    @default(0)
   fats      Float    @default(0)
   createdAt DateTime @default(now())
+
+  nutritionLogs NutritionLog[]
 }
 
 model EnvironmentZone {
+  id           String   @id @default(uuid())
+  zone         String
+  aqi          Int
+  noiseDb      Int
+  temperature  Float
+  humidity     Float
+  crowdDensity Int?     // Estimated occupancy / crowd level
+  rainfall     Float?   // Rainfall in mm
+  createdAt    DateTime @default(now())
+}
+
+model WellnessEvent {
   id          String   @id @default(uuid())
-  zone        String
-  aqi         Int
-  noiseDb     Int
-  temperature Float
-  humidity    Float
+  name        String   // e.g., "Morning Yoga Session", "Meditation Circle"
+  type        String   // YOGA, MEDITATION, SPORTS, WORKSHOP, FITNESS_CAMP
+  description String?
+  location    String?  // Campus zone or venue
+  scheduledAt DateTime
+  durationMins Int     @default(60)
+  maxCapacity  Int?
   createdAt   DateTime @default(now())
+
+  participants EventParticipation[]
+}
+
+model EventParticipation {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  status    String   @default("REGISTERED") // REGISTERED, ATTENDED, CANCELLED
+  joinedAt  DateTime @default(now())
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     WellnessEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model MoodCheckIn {
+  id        String   @id @default(uuid())
+  userId    String
+  moodScore Int      // 0 to 4
+  note      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Journal {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  body      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

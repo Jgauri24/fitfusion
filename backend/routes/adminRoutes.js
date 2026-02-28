@@ -19,55 +19,61 @@ router.get('/users/stats', async (req, res) => {
     try {
         const totalStudents = await prisma.user.count({ where: { role: 'STUDENT' } });
 
-        // Activity-based fitness level classification
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        // Real fitness level counts from the fitnessLevel field + activity fallback
+        const fitnessGroups = await prisma.user.groupBy({
+            by: ['fitnessLevel'],
+            where: { role: 'STUDENT' },
+            _count: { id: true },
+        });
+        let beginners = 0, intermediate = 0, advanced = 0;
+        fitnessGroups.forEach(g => {
+            if (g.fitnessLevel === 'ADVANCED') advanced += g._count.id;
+            else if (g.fitnessLevel === 'INTERMEDIATE') intermediate += g._count.id;
+            else beginners += g._count.id; // BEGINNER + null
+        });
 
-        // Get activity counts per user in last 30 days
-        const activityCounts = await prisma.activityLog.groupBy({
-            by: ['userId'],
-            where: { loggedAt: { gte: thirtyDaysAgo } },
+        // Real Cohort data: group users by hostel (using actual DB data)
+        const hostelGroups = await prisma.user.groupBy({
+            by: ['hostel', 'branch', 'academicYear'],
+            where: { role: 'STUDENT', hostel: { not: null } },
             _count: { id: true },
         });
 
-        let beginners = 0, intermediate = 0, advanced = 0;
-        const activeUserIds = new Set();
-        activityCounts.forEach((a) => {
-            activeUserIds.add(a.userId);
-            if (a._count.id >= 20) advanced++;
-            else if (a._count.id >= 8) intermediate++;
-            else beginners++;
-        });
-        // Users with no activity in last 30 days are also beginners
-        beginners += totalStudents - activeUserIds.size;
+        const cohorts = hostelGroups.map((g, i) => ({
+            id: i + 1,
+            hostel: g.hostel || 'Unknown',
+            branch: g.branch || 'N/A',
+            year: g.academicYear || 'N/A',
+            students: g._count.id,
+            wellness: 0,
+            steps: 0,
+            diet: 'N/A',
+            flags: 0,
+            trend: 'neutral',
+        }));
 
-        // Cohort data grouped by hostel simulation
-        // Since we don't have hostel in User schema, we distribute evenly
-        const hostels = ['Govind Bhawan', 'Sarojini Bhawan', 'Rajendra Bhawan', 'Kasturba Bhawan', 'Cautley Bhawan', 'Jawahar Bhawan'];
-        const branches = ['CSE', 'ECE', 'ME', 'CE', 'EE', 'BT'];
-        const studentsPerHostel = Math.floor(totalStudents / hostels.length);
+        // Enrich top cohorts with real wellness data (limit to first 50 to avoid excessive queries)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const cohorts = hostels.map((hostel, i) => {
-            const students = i === hostels.length - 1
-                ? totalStudents - studentsPerHostel * (hostels.length - 1)
-                : studentsPerHostel;
-            const wellness = Math.floor(65 + Math.random() * 25);
-            const steps = Math.floor(6000 + Math.random() * 4000);
-            const vegPercent = Math.floor(50 + Math.random() * 45);
-            const flags = Math.floor(Math.random() * 6);
-            return {
-                id: i + 1,
-                hostel,
-                branch: branches[i % branches.length],
-                year: String((i % 4) + 1),
-                students,
-                wellness,
-                steps,
-                diet: `${vegPercent}% Veg`,
-                flags,
-                trend: wellness >= 78 ? 'up' : wellness >= 70 ? 'neutral' : 'down',
-            };
-        });
+        for (const cohort of cohorts.slice(0, 50)) {
+            const whereClause = { role: 'STUDENT', hostel: cohort.hostel, branch: cohort.branch === 'N/A' ? undefined : cohort.branch };
+            const users = await prisma.user.findMany({ where: whereClause, select: { id: true, dietaryPref: true } });
+            const userIds = users.map(u => u.id);
+
+            if (userIds.length > 0) {
+                const actAgg = await prisma.activityLog.aggregate({
+                    where: { userId: { in: userIds }, loggedAt: { gte: thirtyDaysAgo } },
+                    _avg: { caloriesBurned: true },
+                });
+                cohort.steps = Math.round(5000 + (actAgg._avg.caloriesBurned || 0) * 5);
+                cohort.wellness = Math.min(100, 60 + Math.round((actAgg._avg.caloriesBurned || 0) / 10));
+                cohort.trend = cohort.wellness >= 78 ? 'up' : cohort.wellness >= 70 ? 'neutral' : 'down';
+
+                const vegCount = users.filter(u => u.dietaryPref === 'VEGETARIAN' || u.dietaryPref === 'VEGAN').length;
+                cohort.diet = `${Math.round((vegCount / users.length) * 100)}% Veg`;
+            }
+        }
 
         res.json({
             totalStudents,
@@ -83,7 +89,6 @@ router.get('/users/stats', async (req, res) => {
 });
 
 // Wellness Stats
-const Journal = require('../models/Journal');
 router.get('/wellness/stats', async (req, res) => {
     try {
         const now = new Date();
@@ -92,8 +97,12 @@ router.get('/wellness/stats', async (req, res) => {
         sevenDaysAgo.setHours(0, 0, 0, 0);
 
         // Fetch last 7 days of moods and journals
-        const moods = await MoodCheckIn.find({ createdAt: { $gte: sevenDaysAgo } });
-        const journals = await Journal.find({ createdAt: { $gte: sevenDaysAgo } });
+        const moods = await prisma.moodCheckIn.findMany({
+            where: { createdAt: { gte: sevenDaysAgo } }
+        });
+        const journals = await prisma.journal.findMany({
+            where: { createdAt: { gte: sevenDaysAgo } }
+        });
 
         // Group by day (e.g., 'Mon', 'Tue')
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -164,58 +173,101 @@ router.get('/wellness/stats', async (req, res) => {
     }
 });
 
-// Analytics Stats
+// Analytics Stats — Real aggregated data
 router.get('/analytics/stats', async (req, res) => {
     try {
         const now = new Date();
         const thirtyDaysAgo = new Date(now);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        // Fetch real totals
-        const totalUsers = await prisma.user.count({ where: { role: 'STUDENT' } });
-        const recentActivities = await prisma.activityLog.count({ where: { loggedAt: { gte: thirtyDaysAgo } } });
-        const recentMeals = await prisma.nutritionLog.count({ where: { loggedAt: { gte: thirtyDaysAgo } } });
-
-        // Generate 6 months of trends (last 5 months simulated to show growth + current month real)
+        // ── Monthly Trends (last 6 months, real data) ──
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const monthlyTrends = [];
         for (let i = 5; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            const factor = 1 - (i * 0.15); // simulate growth, 15% drop per month back
+            const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+
+            const [users, activities, meals] = await Promise.all([
+                prisma.user.count({ where: { role: 'STUDENT', createdAt: { lt: monthEnd } } }),
+                prisma.activityLog.count({ where: { loggedAt: { gte: monthStart, lt: monthEnd } } }),
+                prisma.nutritionLog.count({ where: { loggedAt: { gte: monthStart, lt: monthEnd } } }),
+            ]);
+
             monthlyTrends.push({
-                month: months[d.getMonth()],
-                users: Math.max(100, Math.round(totalUsers * factor)),
-                activities: Math.max(500, Math.round(recentActivities * factor)),
-                meals: Math.max(1000, Math.round(recentMeals * factor))
+                month: months[monthStart.getMonth()],
+                users,
+                activities,
+                meals,
             });
         }
 
-        // Department Stats (distributing total users)
-        const depts = ['CSE', 'ECE', 'ME', 'EE', 'Civil', 'BT', 'CH', 'IT'];
-        const deptWeights = [0.25, 0.15, 0.15, 0.10, 0.10, 0.05, 0.05, 0.15];
-        const departmentStats = depts.map((dept, i) => {
-            const users = Math.round(totalUsers * deptWeights[i]);
-            return {
-                dept,
-                users,
-                avgFitness: 70 + (i % 5) * 4, // 70-86
-                engagement: 65 + (i % 6) * 5, // 65-90
-            };
+        // ── Department Stats (real groupBy on user.branch) ──
+        const branchGroups = await prisma.user.groupBy({
+            by: ['branch'],
+            where: { role: 'STUDENT', branch: { not: null } },
+            _count: { id: true },
         });
 
-        // Hostel Comparison (distributing total users)
-        const hostels = ['Rajendra', 'Govind', 'Jawahar', 'Cautley', 'Sarojini', 'Kasturba'];
-        const hostelWeights = [0.2, 0.2, 0.15, 0.15, 0.15, 0.15];
-        const hostelComparison = hostels.map((hostel, i) => {
-            const activeUsers = Math.round((totalUsers * 0.4) * hostelWeights[i]); // assume 40% are "active"
-            return {
-                hostel,
-                activeUsers,
-                avgSteps: 6000 + (i * 500) + (Math.random() * 1000), // 6000-9500
-                avgCalories: 1800 + (i * 100) + (Math.random() * 200), // 1800-2500
-                wellnessScore: 70 + (i * 3) + Math.round(Math.random() * 5), // 70-90
-            };
+        const departmentStats = [];
+        for (const bg of branchGroups) {
+            const branchUsers = await prisma.user.findMany({
+                where: { branch: bg.branch, role: 'STUDENT' },
+                select: { id: true },
+            });
+            const userIds = branchUsers.map(u => u.id);
+
+            const activityCount = userIds.length > 0
+                ? await prisma.activityLog.count({ where: { userId: { in: userIds }, loggedAt: { gte: thirtyDaysAgo } } })
+                : 0;
+
+            const engagement = userIds.length > 0 ? Math.round((activityCount / (userIds.length * 30)) * 100) : 0;
+
+            departmentStats.push({
+                dept: bg.branch,
+                users: bg._count.id,
+                avgFitness: Math.min(100, 60 + engagement),
+                engagement: Math.min(100, engagement),
+            });
+        }
+
+        // ── Hostel Comparison (real groupBy on user.hostel) ──
+        const hostelGroups = await prisma.user.groupBy({
+            by: ['hostel'],
+            where: { role: 'STUDENT', hostel: { not: null } },
+            _count: { id: true },
         });
+
+        const hostelComparison = [];
+        for (const hg of hostelGroups) {
+            const hostelUsers = await prisma.user.findMany({
+                where: { hostel: hg.hostel, role: 'STUDENT' },
+                select: { id: true },
+            });
+            const userIds = hostelUsers.map(u => u.id);
+
+            let avgCalories = 0;
+            let avgCaloriesBurned = 0;
+            if (userIds.length > 0) {
+                const nutritionAgg = await prisma.nutritionLog.aggregate({
+                    where: { userId: { in: userIds }, loggedAt: { gte: thirtyDaysAgo } },
+                    _avg: { calories: true },
+                });
+                const activityAgg = await prisma.activityLog.aggregate({
+                    where: { userId: { in: userIds }, loggedAt: { gte: thirtyDaysAgo } },
+                    _avg: { caloriesBurned: true },
+                });
+                avgCalories = Math.round(nutritionAgg._avg.calories || 0);
+                avgCaloriesBurned = Math.round(activityAgg._avg.caloriesBurned || 0);
+            }
+
+            hostelComparison.push({
+                hostel: hg.hostel,
+                activeUsers: hg._count.id,
+                avgSteps: 5000 + avgCaloriesBurned * 5, // approximate from calories burned
+                avgCalories,
+                wellnessScore: Math.min(100, 60 + Math.round(avgCaloriesBurned / 10)),
+            });
+        }
 
         res.json({ monthlyTrends, departmentStats, hostelComparison });
     } catch (error) {
@@ -233,6 +285,36 @@ let recentReports = [
 
 router.get('/reports', (req, res) => {
     res.json(recentReports);
+});
+
+// CSV Export Endpoint (Anonymized Data)
+router.get('/reports/export', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            where: { role: 'STUDENT' },
+            include: {
+                _count: {
+                    select: { activityLogs: true, nutritionLogs: true, moodCheckIns: true }
+                }
+            }
+        });
+
+        // CSV Header
+        let csv = 'UserHash,Age,Gender,FitnessLevel,DietaryPref,Hostel,Branch,AcademicYear,TotalActivities,TotalMeals,TotalMoodLogs\n';
+
+        // CSV Rows - Anonymized (no email, firstName, or lastName)
+        users.forEach(u => {
+            const hash = u.id.substring(0, 8); // simple pseudo-anonymization hash
+            csv += `${hash},${u.age || ''},${u.gender || ''},${u.fitnessLevel || ''},${u.dietaryPref || ''},${u.hostel || ''},${u.branch || ''},${u.academicYear || ''},${u._count.activityLogs},${u._count.nutritionLogs},${u._count.moodCheckIns}\n`;
+        });
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('fitfusion_anonymized_data.csv');
+        res.send(csv);
+    } catch (error) {
+        console.error('export error:', error);
+        res.status(500).json({ message: 'Failed to generate export file.' });
+    }
 });
 
 router.post('/reports', (req, res) => {
@@ -256,7 +338,6 @@ router.post('/reports', (req, res) => {
 });
 
 // Notifications — dynamic, data-driven alerts
-const MoodCheckIn = require('../models/MoodCheckIn');
 router.get('/notifications', async (req, res) => {
     try {
         const notifications = [];
@@ -266,11 +347,17 @@ router.get('/notifications', async (req, res) => {
         // 1. Check for students with consistently low mood (burnout risk)
         const oneWeekAgo = new Date(now);
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        const lowMoodStudents = await MoodCheckIn.aggregate([
-            { $match: { createdAt: { $gte: oneWeekAgo }, moodScore: { $lte: 1 } } },
-            { $group: { _id: "$userId", count: { $sum: 1 } } },
-            { $match: { count: { $gte: 2 } } },
-        ]);
+
+        const lowMoodStudents = await prisma.moodCheckIn.groupBy({
+            by: ['userId'],
+            where: {
+                createdAt: { gte: oneWeekAgo },
+                moodScore: { lte: 1 }
+            },
+            _count: { userId: true },
+            having: { userId: { _count: { gte: 2 } } }
+        });
+
         if (lowMoodStudents.length > 0) {
             notifications.push({
                 id: String(id++), type: "alert",
@@ -411,5 +498,33 @@ router.post('/food-items', createFoodItem);
 // Environment Zones CRUD
 router.get('/environment', getAllZones);
 router.post('/environment', createZone);
+
+// Wellness Event Management (Admin)
+router.post('/wellness/manage', async (req, res) => {
+    try {
+        const { name, type, description, location, scheduledAt, durationMins, maxCapacity } = req.body;
+
+        if (!name || !type || !scheduledAt) {
+            return res.status(400).json({ message: 'name, type, and scheduledAt are required.' });
+        }
+
+        const event = await prisma.wellnessEvent.create({
+            data: {
+                name,
+                type,
+                description: description || null,
+                location: location || null,
+                scheduledAt: new Date(scheduledAt),
+                durationMins: durationMins ? parseInt(durationMins) : 60,
+                maxCapacity: maxCapacity ? parseInt(maxCapacity) : null,
+            }
+        });
+
+        res.status(201).json({ message: 'Wellness event created successfully.', event });
+    } catch (error) {
+        console.error('createWellnessEvent error:', error);
+        res.status(500).json({ message: 'Failed to create wellness event.' });
+    }
+});
 
 module.exports = router;

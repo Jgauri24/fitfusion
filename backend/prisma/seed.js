@@ -1,10 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
-const connectMongo = require('../config/mongo');
-const MoodCheckIn = require('../models/MoodCheckIn');
-const Journal = require('../models/Journal');
-
 require('dotenv').config();
 
 const prisma = new PrismaClient();
@@ -99,18 +94,15 @@ async function main() {
     console.log('🌱 Starting FitFusion comprehensive seed...\n');
     const startTime = Date.now();
 
-    // Connect MongoDB
-    await connectMongo();
-
     // ── Step 0: Clear existing data ──
     console.log('🗑️  Clearing existing data...');
     await prisma.nutritionLog.deleteMany();
     await prisma.activityLog.deleteMany();
     await prisma.foodItem.deleteMany();
     await prisma.environmentZone.deleteMany();
+    await prisma.moodCheckIn.deleteMany();
+    await prisma.journal.deleteMany();
     await prisma.user.deleteMany();
-    await MoodCheckIn.deleteMany({});
-    await Journal.deleteMany({});
     console.log('   ✅ Old data cleared.\n');
 
     // ── Step 1: Create Admin ──
@@ -127,7 +119,7 @@ async function main() {
     });
     console.log(`   ✅ Admin created: ${admin.email}\n`);
 
-    // ── Step 2: Create 1500 Students in batches ──
+    // ── Step 2: Create Students in batches ──
     console.log(`👥 Creating ${TOTAL_STUDENTS} students...`);
     const studentPassword = await bcrypt.hash('student123', 10);
     const studentIds = [];
@@ -148,6 +140,9 @@ async function main() {
                 firstName: fn,
                 lastName: ln,
                 role: 'STUDENT',
+                hostel: pick(HOSTELS),
+                branch: branch,
+                academicYear: `Year ${year}`
             });
         }
 
@@ -244,8 +239,8 @@ async function main() {
     await prisma.environmentZone.createMany({ data: envData });
     console.log(`   ✅ ${envData.length} environment readings created.\n`);
 
-    // ── Step 7: Seed MongoDB – Mood Check-ins ──
-    console.log('😊 Generating mood check-ins (MongoDB, last 60 days)...');
+    // ── Step 7: Seed Mood Check-ins ──
+    console.log('😊 Generating mood check-ins (Prisma SQLite, last 60 days)...');
     let moodDocs = [];
     for (const uid of studentIds) {
         const daysChecked = rand(10, 40);
@@ -257,17 +252,17 @@ async function main() {
                 createdAt: randomDate(60),
             });
             if (moodDocs.length >= 5000) {
-                await MoodCheckIn.insertMany(moodDocs);
+                await prisma.moodCheckIn.createMany({ data: moodDocs });
                 moodDocs = [];
             }
         }
     }
-    if (moodDocs.length > 0) await MoodCheckIn.insertMany(moodDocs);
-    const totalMoods = await MoodCheckIn.countDocuments();
+    if (moodDocs.length > 0) await prisma.moodCheckIn.createMany({ data: moodDocs });
+    const totalMoods = await prisma.moodCheckIn.count();
     console.log(`   ✅ ${totalMoods.toLocaleString()} mood check-ins created.\n`);
 
-    // ── Step 8: Seed MongoDB – Journals ──
-    console.log('📝 Generating journal entries (MongoDB, last 90 days)...');
+    // ── Step 8: Seed Journals ──
+    console.log('📝 Generating journal entries (Prisma SQLite, last 90 days)...');
     let journalDocs = [];
     for (const uid of studentIds) {
         const entries = rand(2, 10);
@@ -279,13 +274,13 @@ async function main() {
                 createdAt: randomDate(90),
             });
             if (journalDocs.length >= 5000) {
-                await Journal.insertMany(journalDocs);
+                await prisma.journal.createMany({ data: journalDocs });
                 journalDocs = [];
             }
         }
     }
-    if (journalDocs.length > 0) await Journal.insertMany(journalDocs);
-    const totalJournals = await Journal.countDocuments();
+    if (journalDocs.length > 0) await prisma.journal.createMany({ data: journalDocs });
+    const totalJournals = await prisma.journal.count();
     console.log(`   ✅ ${totalJournals.toLocaleString()} journal entries created.\n`);
 
     // ── Done ──
@@ -309,5 +304,4 @@ main()
     })
     .finally(async () => {
         await prisma.$disconnect();
-        await mongoose.disconnect();
     });

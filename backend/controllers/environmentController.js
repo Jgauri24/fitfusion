@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
  */
 const createZone = async (req, res) => {
     try {
-        const { zone, aqi, noiseDb, temperature, humidity } = req.body;
+        const { zone, aqi, noiseDb, temperature, humidity, crowdDensity, rainfall } = req.body;
 
         if (!zone || aqi == null || noiseDb == null || temperature == null || humidity == null) {
             return res.status(400).json({ message: 'zone, aqi, noiseDb, temperature, and humidity are required.' });
@@ -19,6 +19,8 @@ const createZone = async (req, res) => {
                 noiseDb: parseInt(noiseDb),
                 temperature: parseFloat(temperature),
                 humidity: parseFloat(humidity),
+                crowdDensity: crowdDensity != null ? parseInt(crowdDensity) : null,
+                rainfall: rainfall != null ? parseFloat(rainfall) : null,
             }
         });
 

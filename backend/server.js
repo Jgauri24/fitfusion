@@ -5,7 +5,6 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 
 // Import Database Connections
-const connectMongo = require('./config/mongo');
 const { PrismaClient } = require('@prisma/client');
 const { startAutoUpdater } = require('./utils/autoUpdater');
 
@@ -16,10 +15,8 @@ const PORT = process.env.PORT || 5000;
 // Initialize Prisma
 const prisma = new PrismaClient();
 
-// Connect MongoDB (Unstructured Data) then start auto-updater
-connectMongo().then(() => {
-    startAutoUpdater(30); // Generate new data every 30 minutes
-});
+// Start auto-updater (Generates new simulated data every 30 minutes)
+startAutoUpdater(30);
 
 // Security Middlewares
 app.use(helmet()); // Set security HTTP headers

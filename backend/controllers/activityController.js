@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const logActivity = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { activityType, durationMins, caloriesBurned } = req.body;
+        const { activityType, durationMins, caloriesBurned, sets, reps, load } = req.body;
 
         if (!activityType || !durationMins) {
             return res.status(400).json({ message: 'activityType and durationMins are required.' });
@@ -19,6 +19,9 @@ const logActivity = async (req, res) => {
                 activityType,
                 durationMins: parseInt(durationMins),
                 caloriesBurned: parseFloat(caloriesBurned || 0),
+                sets: sets ? parseInt(sets) : null,
+                reps: reps ? parseInt(reps) : null,
+                load: load ? parseFloat(load) : null,
             }
         });
 
@@ -74,6 +77,9 @@ const getWeeklyActivity = async (req, res) => {
             duration: `${log.durationMins} min`,
             intensity: log.caloriesBurned > 300 ? 'High' : log.caloriesBurned > 150 ? 'Moderate' : 'Low',
             date: new Date(log.loggedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            sets: log.sets,
+            reps: log.reps,
+            load: log.load ? `${log.load}kg` : null,
         }));
 
         res.json({

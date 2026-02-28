@@ -15,7 +15,12 @@ router.get('/me', verifyToken, async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
-            select: { id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true }
+            select: {
+                id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true,
+                age: true, gender: true, height: true, weight: true,
+                fitnessLevel: true, dietaryPref: true,
+                hostel: true, branch: true, academicYear: true
+            }
         });
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
@@ -30,7 +35,7 @@ router.get('/me', verifyToken, async (req, res) => {
 // PUT /api/auth/profile — update name and email
 router.put('/profile', verifyToken, async (req, res) => {
     try {
-        const { firstName, lastName, email } = req.body;
+        const { firstName, lastName, email, age, gender, height, weight, fitnessLevel, dietaryPref, hostel, branch, academicYear } = req.body;
 
         // Check if email is taken by another user
         if (email) {
@@ -45,9 +50,23 @@ router.put('/profile', verifyToken, async (req, res) => {
             data: {
                 ...(firstName && { firstName }),
                 ...(lastName !== undefined && { lastName }),
-                ...(email && { email })
+                ...(email && { email }),
+                ...(age !== undefined && { age: age ? parseInt(age) : null }),
+                ...(gender !== undefined && { gender }),
+                ...(height !== undefined && { height: height ? parseFloat(height) : null }),
+                ...(weight !== undefined && { weight: weight ? parseFloat(weight) : null }),
+                ...(fitnessLevel !== undefined && { fitnessLevel }),
+                ...(dietaryPref !== undefined && { dietaryPref }),
+                ...(hostel !== undefined && { hostel }),
+                ...(branch !== undefined && { branch }),
+                ...(academicYear !== undefined && { academicYear }),
             },
-            select: { id: true, email: true, firstName: true, lastName: true, role: true }
+            select: {
+                id: true, email: true, firstName: true, lastName: true, role: true,
+                age: true, gender: true, height: true, weight: true,
+                fitnessLevel: true, dietaryPref: true,
+                hostel: true, branch: true, academicYear: true
+            }
         });
 
         res.json({ message: 'Profile updated successfully.', user: updated });
