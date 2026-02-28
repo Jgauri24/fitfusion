@@ -6,7 +6,6 @@
  */
 
 const { PrismaClient } = require('@prisma/client');
-const MoodCheckIn = require('../models/MoodCheckIn');
 
 const prisma = new PrismaClient();
 
@@ -85,7 +84,7 @@ async function autoUpdate() {
             await prisma.activityLog.createMany({ data: activityLogs });
         }
 
-        // ── Mood Check-ins (MongoDB) ──
+        // ── Mood Check-ins (Prisma) ──
         const moodDocs = [];
         const moodSubset = selectedStudents.slice(0, Math.floor(selectedStudents.length * 0.3));
         for (const s of moodSubset) {
@@ -97,7 +96,7 @@ async function autoUpdate() {
             });
         }
         if (moodDocs.length > 0) {
-            await MoodCheckIn.insertMany(moodDocs);
+            await prisma.moodCheckIn.createMany({ data: moodDocs });
         }
 
         // ── Environment Zone Readings ──

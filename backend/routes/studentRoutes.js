@@ -4,6 +4,7 @@ const { verifyToken, requireRole } = require('../middleware/auth');
 const { logMeal, getTodayNutrition } = require('../controllers/nutritionController');
 const { logActivity, getWeeklyActivity } = require('../controllers/activityController');
 const { saveMoodCheckIn, saveJournalEntry, getWeeklyMood, getJournals } = require('../controllers/moodController');
+const { getEvents, joinEvent, leaveEvent } = require('../controllers/wellnessController');
 
 // Apply auth constraints to all student routes
 router.use(verifyToken);
@@ -29,5 +30,10 @@ router.get('/mood/weekly', getWeeklyMood);
 // Journal
 router.post('/mood/journal', saveJournalEntry);
 router.get('/mood/journals', getJournals);
+
+// Wellness Events (Circles)
+router.get('/wellness/events', getEvents);
+router.post('/wellness/:eventId/join', joinEvent);
+router.delete('/wellness/:eventId/leave', leaveEvent);
 
 module.exports = router;

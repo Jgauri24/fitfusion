@@ -13,6 +13,19 @@ export default function ProfilePage() {
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    // New profile fields
+    const [age, setAge] = useState("");
+    const [gender, setGender] = useState("");
+    const [height, setHeight] = useState("");
+    const [weight, setWeight] = useState("");
+    const [fitnessLevel, setFitnessLevel] = useState("");
+    const [dietaryPref, setDietaryPref] = useState("");
+
+    // Campus metadata
+    const [hostel, setHostel] = useState("");
+    const [branch, setBranch] = useState("");
+    const [academicYear, setAcademicYear] = useState("");
+
     const [currentPwd, setCurrentPwd] = useState("");
     const [newPwd, setNewPwd] = useState("");
     const [confirmPwd, setConfirmPwd] = useState("");
@@ -30,6 +43,17 @@ export default function ProfilePage() {
                 const fi = user.firstName?.charAt(0)?.toUpperCase() || "";
                 const li = user.lastName?.charAt(0)?.toUpperCase() || "";
                 setInitials(`${fi}${li}` || "U");
+
+                // Load new fields
+                setAge(user.age?.toString() || "");
+                setGender(user.gender || "");
+                setHeight(user.height?.toString() || "");
+                setWeight(user.weight?.toString() || "");
+                setFitnessLevel(user.fitnessLevel || "");
+                setDietaryPref(user.dietaryPref || "");
+                setHostel(user.hostel || "");
+                setBranch(user.branch || "");
+                setAcademicYear(user.academicYear || "");
             } catch (error) {
                 console.error("Failed to fetch profile:", error);
             } finally {
@@ -47,7 +71,18 @@ export default function ProfilePage() {
             const firstName = parts[0] || "";
             const lastName = parts.slice(1).join(" ") || "";
 
-            const res = await api.put("/api/auth/profile", { firstName, lastName, email });
+            const res = await api.put("/api/auth/profile", {
+                firstName, lastName, email,
+                age: age ? parseInt(age) : null,
+                gender: gender || null,
+                height: height ? parseFloat(height) : null,
+                weight: weight ? parseFloat(weight) : null,
+                fitnessLevel: fitnessLevel || null,
+                dietaryPref: dietaryPref || null,
+                hostel: hostel || null,
+                branch: branch || null,
+                academicYear: academicYear || null,
+            });
             const user = res.data.user;
 
             // Update localStorage so sidebar reflects the change
@@ -228,6 +263,156 @@ export default function ProfilePage() {
                                 {saving ? "Saving..." : "Save Changes"}
                             </button>
                             {success && <span style={{ marginLeft: "16px", color: "var(--green)", fontSize: "13px", fontWeight: 600 }}>✓ Saved!</span>}
+                        </div>
+                    </form>
+                </ChartCard>
+
+                {/* Physical Profile */}
+                <ChartCard title="Physical Profile">
+                    <form onSubmit={handleSaveProfile} style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "16px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                            <div>
+                                <label style={labelStyle}>Age</label>
+                                <input
+                                    type="number"
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                    placeholder="e.g. 20"
+                                    min={15} max={60}
+                                    style={inputStyle}
+                                    onFocus={(e) => e.target.style.borderColor = "var(--accent)"}
+                                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Gender</label>
+                                <select value={gender} onChange={(e) => setGender(e.target.value)} style={inputStyle}>
+                                    <option value="">Select</option>
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                            <div>
+                                <label style={labelStyle}>Height (cm)</label>
+                                <input
+                                    type="number"
+                                    value={height}
+                                    onChange={(e) => setHeight(e.target.value)}
+                                    placeholder="e.g. 175"
+                                    step="0.1"
+                                    style={inputStyle}
+                                    onFocus={(e) => e.target.style.borderColor = "var(--accent)"}
+                                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                                />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Weight (kg)</label>
+                                <input
+                                    type="number"
+                                    value={weight}
+                                    onChange={(e) => setWeight(e.target.value)}
+                                    placeholder="e.g. 68"
+                                    step="0.1"
+                                    style={inputStyle}
+                                    onFocus={(e) => e.target.style.borderColor = "var(--accent)"}
+                                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                            <div>
+                                <label style={labelStyle}>Fitness Level</label>
+                                <select value={fitnessLevel} onChange={(e) => setFitnessLevel(e.target.value)} style={inputStyle}>
+                                    <option value="">Select</option>
+                                    <option value="BEGINNER">Beginner</option>
+                                    <option value="INTERMEDIATE">Intermediate</option>
+                                    <option value="ADVANCED">Advanced</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Dietary Preference</label>
+                                <select value={dietaryPref} onChange={(e) => setDietaryPref(e.target.value)} style={inputStyle}>
+                                    <option value="">Select</option>
+                                    <option value="VEGETARIAN">Vegetarian</option>
+                                    <option value="NON_VEGETARIAN">Non-Vegetarian</option>
+                                    <option value="VEGAN">Vegan</option>
+                                    <option value="EGGETARIAN">Eggetarian</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: "4px" }}>
+                            <button type="submit" disabled={saving} style={{
+                                padding: "12px 24px", background: "var(--accent)", color: "#000",
+                                border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 700,
+                                cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.8 : 1,
+                            }}>
+                                {saving ? "Saving..." : "Save Physical Profile"}
+                            </button>
+                        </div>
+                    </form>
+                </ChartCard>
+
+                {/* Campus Details */}
+                <ChartCard title="Campus Details">
+                    <form onSubmit={handleSaveProfile} style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "16px" }}>
+                        <div>
+                            <label style={labelStyle}>Hostel / Residence</label>
+                            <select value={hostel} onChange={(e) => setHostel(e.target.value)} style={inputStyle}>
+                                <option value="">Select Hostel</option>
+                                <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+                                <option value="Cautley Bhawan">Cautley Bhawan</option>
+                                <option value="Kasturba Bhawan">Kasturba Bhawan</option>
+                                <option value="Govind Bhawan">Govind Bhawan</option>
+                                <option value="Radhakrishnan Bhawan">Radhakrishnan Bhawan</option>
+                                <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+                                <option value="Sarojini Bhawan">Sarojini Bhawan</option>
+                                <option value="Azad Bhawan">Azad Bhawan</option>
+                                <option value="Jawahar Bhawan">Jawahar Bhawan</option>
+                                <option value="Ganga Bhawan">Ganga Bhawan</option>
+                            </select>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                            <div>
+                                <label style={labelStyle}>Branch / Department</label>
+                                <select value={branch} onChange={(e) => setBranch(e.target.value)} style={inputStyle}>
+                                    <option value="">Select Branch</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="ME">ME</option>
+                                    <option value="CE">CE (Civil)</option>
+                                    <option value="EE">EE</option>
+                                    <option value="BT">BT (Biotech)</option>
+                                    <option value="CH">CH (Chemical)</option>
+                                    <option value="IT">IT</option>
+                                    <option value="MT">MT (Metallurgy)</option>
+                                    <option value="AR">AR (Architecture)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={labelStyle}>Academic Year</label>
+                                <select value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} style={inputStyle}>
+                                    <option value="">Select Year</option>
+                                    <option value="1st">1st Year</option>
+                                    <option value="2nd">2nd Year</option>
+                                    <option value="3rd">3rd Year</option>
+                                    <option value="4th">4th Year</option>
+                                    <option value="5th">5th Year</option>
+                                    <option value="PG">PG</option>
+                                    <option value="PhD">PhD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style={{ marginTop: "4px" }}>
+                            <button type="submit" disabled={saving} style={{
+                                padding: "12px 24px", background: "var(--accent)", color: "#000",
+                                border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 700,
+                                cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.8 : 1,
+                            }}>
+                                {saving ? "Saving..." : "Save Campus Details"}
+                            </button>
                         </div>
                     </form>
                 </ChartCard>

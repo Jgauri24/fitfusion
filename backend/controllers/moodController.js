@@ -1,5 +1,5 @@
-const MoodCheckIn = require('../models/MoodCheckIn');
-const Journal = require('../models/Journal');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 /**
  * Save a mood check-in for the authenticated user.
@@ -13,10 +13,12 @@ const saveMoodCheckIn = async (req, res) => {
             return res.status(400).json({ message: 'moodScore is required.' });
         }
 
-        const checkIn = await MoodCheckIn.create({
-            userId,
-            moodScore: parseInt(moodScore),
-            note: note || '',
+        const checkIn = await prisma.moodCheckIn.create({
+            data: {
+                userId,
+                moodScore: parseInt(moodScore),
+                note: note || '',
+            }
         });
 
         res.status(201).json({ message: 'Mood saved successfully.', checkIn });
@@ -38,10 +40,12 @@ const saveJournalEntry = async (req, res) => {
             return res.status(400).json({ message: 'title is required.' });
         }
 
-        const journal = await Journal.create({
-            userId,
-            title,
-            body: body || '',
+        const journal = await prisma.journal.create({
+            data: {
+                userId,
+                title,
+                body: body || '',
+            }
         });
 
         res.status(201).json({ message: 'Journal saved successfully.', journal });
@@ -61,10 +65,13 @@ const getWeeklyMood = async (req, res) => {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         sevenDaysAgo.setHours(0, 0, 0, 0);
 
-        const checkIns = await MoodCheckIn.find({
-            userId,
-            createdAt: { $gte: sevenDaysAgo }
-        }).sort({ createdAt: 1 });
+        const checkIns = await prisma.moodCheckIn.findMany({
+            where: {
+                userId,
+                createdAt: { gte: sevenDaysAgo }
+            },
+            orderBy: { createdAt: 'asc' }
+        });
 
         // Build daily mood averages (Mon-Sun)
         const dailyMoods = [0, 0, 0, 0, 0, 0, 0];
@@ -98,16 +105,18 @@ const getJournals = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const journals = await Journal.find({ userId })
-            .sort({ createdAt: -1 })
-            .limit(20);
+        const journals = await prisma.journal.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            take: 20
+        });
 
         const formatted = journals.map(j => ({
-            id: j._id,
+            id: j.id,
             title: j.title,
             date: j.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            preview: j.body.substring(0, 60) + (j.body.length > 60 ? '...' : ''),
-            full: j.body,
+            preview: (j.body || '').substring(0, 60) + ((j.body || '').length > 60 ? '...' : ''),
+            full: j.body || '',
         }));
 
         res.json({ journals: formatted });
