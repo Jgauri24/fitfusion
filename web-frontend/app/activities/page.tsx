@@ -34,7 +34,7 @@ export default function ActivitiesPage() {
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                const res = await api.get("/api/admin/activities");
+                const res = await api.get("/api/admin/activities/stats");
                 setActivities(res.data);
             } catch (e) {
                 console.error("Failed to fetch activities:", e);
