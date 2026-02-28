@@ -3,8 +3,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
-import { Bell, X, Check, AlertTriangle, Info, Users as UsersIcon, Zap } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Bell, Search } from "lucide-react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import api from "@/lib/api";
 
@@ -31,7 +31,7 @@ export default function RootLayout({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [adminInitials, setAdminInitials] = useState("A");
   const pathname = usePathname();
   const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,12 @@ export default function RootLayout({
       try {
         const parsed = JSON.parse(userInfo);
         if (parsed.firstName) {
-          setAdminName(`${parsed.firstName} ${parsed.lastName || ""}`.trim());
+          const fullName = `${parsed.firstName} ${parsed.lastName || ""}`.trim();
+          setAdminName(fullName);
+          setAdminInitials(
+            parsed.firstName.charAt(0).toUpperCase() +
+            (parsed.lastName ? parsed.lastName.charAt(0).toUpperCase() : "")
+          );
         }
       } catch (e) { }
     }
@@ -113,163 +118,84 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable}`}>
         {!isClient ? (
-          <main style={{ minHeight: "100vh", background: "var(--bg-base)" }} />
+          <main style={{ minHeight: "100vh", background: "var(--bg-primary)" }} />
         ) : isLogin ? (
-          <main style={{ minHeight: "100vh", background: "var(--bg-base)" }}>
+          <main style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
             {children}
           </main>
         ) : (
           <div className="admin-layout">
             <Sidebar />
             <main className="main-content">
-              <header style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                paddingBottom: "16px",
-              }}>
-                <button
-                  onClick={() => setDrawerOpen(!drawerOpen)}
-                  style={{
-                    background: "#111",
-                    border: "1px solid #1f1f1f",
-                    borderRadius: "8px",
-                    padding: "8px 10px",
-                    position: "relative",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}>
-                  <Bell size={20} color="var(--text-secondary)" />
-                  {unreadCount > 0 && (
-                    <span style={{
-                      position: "absolute",
-                      top: "-4px",
-                      right: "-4px",
-                      background: "#FF4444",
-                      color: "white",
-                      borderRadius: "50%",
-                      width: "18px",
-                      height: "18px",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}>{unreadCount > 99 ? "99+" : unreadCount}</span>
-                  )}
-                </button>
+              {/* Top Header Bar */}
+              <header className="top-header">
+                <div className="top-header-left">
+                  <div className="header-search">
+                    <span className="header-search-icon">
+                      <Search size={16} />
+                    </span>
+                    <input type="text" placeholder="Search anything..." />
+                  </div>
+                </div>
+
+                <div className="top-header-right">
+                  {/* Avatar Group */}
+                  <div className="header-avatar-group">
+                    <div className="avatar-circle" style={{ background: "#a855f7" }}>A</div>
+                    <div className="avatar-circle" style={{ background: "#f59e0b" }}>B</div>
+                    <div className="avatar-circle" style={{ background: "#5e9eff" }}>C</div>
+                    <div className="avatar-overflow">+12</div>
+                  </div>
+
+                  {/* Status Pills */}
+                  <div className="header-status-pill">
+                    <span className="status-dot online"></span>
+                    12 of 15 <span style={{ color: "var(--text-muted)" }}>active</span>
+                  </div>
+
+                  <div className="header-status-pill">
+                    <span className="status-dot break"></span>
+                    2 on break
+                  </div>
+
+                  {/* Notifications */}
+                  <button
+                    className="notification-btn"
+                    onClick={() => setDrawerOpen(!drawerOpen)}
+                  >
+                    <Bell size={18} color="var(--text-secondary)" />
+                    <span className="notification-badge">24</span>
+                  </button>
+
+                  {/* Profile */}
+                  <div className="header-profile" onClick={() => router.push("/profile")}>
+                    <div className="header-profile-avatar">{adminInitials}</div>
+                    <div className="header-profile-info">
+                      <span className="header-profile-name">{adminName}</span>
+                      <span className="header-profile-role">Admin</span>
+                    </div>
+                  </div>
+                </div>
               </header>
 
-              {/* Notification Panel — Fixed, Scrollable, Closable */}
+              {/* Notification Drawer */}
               {drawerOpen && (
                 <div ref={panelRef} style={{
                   position: "fixed",
-                  top: "12px",
-                  right: "12px",
-                  width: "380px",
-                  maxHeight: "calc(100vh - 24px)",
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "16px",
-                  zIndex: 1000,
-                  boxShadow: "0 24px 48px rgba(0,0,0,0.5)",
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
+                  top: "70px",
+                  right: "60px",
+                  width: "320px",
+                  background: "var(--bg-card-solid)",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "20px",
+                  zIndex: 100,
+                  boxShadow: "var(--shadow-lg)",
+                  backdropFilter: "blur(16px)",
                 }}>
-                  {/* Header — Fixed */}
-                  <div style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "20px 20px 16px", borderBottom: "1px solid var(--border)",
-                    flexShrink: 0
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "16px", color: "var(--text-primary)" }}>Notifications</div>
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
-                        {unreadCount} unread
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      {unreadCount > 0 && (
-                        <button onClick={markAllRead} style={{
-                          background: "none", border: "none", color: "var(--accent)",
-                          fontSize: "12px", fontWeight: 600, cursor: "pointer", padding: "4px 8px"
-                        }}>Mark all read</button>
-                      )}
-                      <button onClick={() => setDrawerOpen(false)} style={{
-                        background: "var(--bg-elevated)", border: "1px solid var(--border)",
-                        borderRadius: "8px", cursor: "pointer", color: "var(--text-muted)",
-                        padding: "6px", display: "flex", alignItems: "center", justifyContent: "center"
-                      }}>
-                        <X size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Scrollable notification list */}
-                  <div style={{
-                    flex: 1, overflowY: "auto", padding: "8px 12px",
-                    scrollbarWidth: "thin", scrollbarColor: "var(--border) transparent"
-                  }}>
-                    {notifications.length === 0 ? (
-                      <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
-                        🎉 No notifications right now!
-                      </div>
-                    ) : (
-                      notifications.map((n) => (
-                        <div key={n.id} style={{
-                          padding: "14px 12px",
-                          borderRadius: "10px",
-                          marginBottom: "4px",
-                          background: n.read ? "transparent" : "rgba(204,255,0,0.03)",
-                          borderLeft: n.read ? "3px solid transparent" : "3px solid var(--accent)",
-                          cursor: "pointer",
-                          transition: "background 0.15s ease",
-                          position: "relative",
-                        }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--bg-elevated)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = n.read ? "transparent" : "rgba(204,255,0,0.03)"; }}
-                          onClick={() => markAsRead(n.id)}
-                        >
-                          <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                            <div style={{
-                              flexShrink: 0, width: "32px", height: "32px", borderRadius: "8px",
-                              background: "var(--bg-elevated)", display: "flex", alignItems: "center",
-                              justifyContent: "center", marginTop: "2px"
-                            }}>
-                              {getIcon(n.type)}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "3px" }}>
-                                {n.title}
-                              </div>
-                              <div style={{
-                                fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.4,
-                                overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box",
-                                WebkitLineClamp: 2, WebkitBoxOrient: "vertical"
-                              }}>
-                                {n.message}
-                              </div>
-                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "6px" }}>
-                                {n.time}
-                              </div>
-                            </div>
-                            <button onClick={(e) => { e.stopPropagation(); dismissNotification(n.id); }} style={{
-                              background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)",
-                              padding: "4px", flexShrink: 0, opacity: 0.5
-                            }}
-                              onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.5"; }}
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                  <div style={{ fontWeight: 600, marginBottom: "12px", color: "var(--text-primary)" }}>Notifications</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "8px" }}>🚨 You have 24 unread burnout alerts.</div>
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Review flagged cohorts in the Users section.</p>
                 </div>
               )}
 

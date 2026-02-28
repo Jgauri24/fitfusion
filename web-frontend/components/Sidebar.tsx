@@ -17,14 +17,14 @@ import {
 import React, { useEffect, useState } from "react";
 
 const navItems = [
-    { label: "Dashboard", href: "/", icon: <LayoutDashboard size={18} /> },
-    { label: "Wellness", href: "/wellness", icon: <HeartPulse size={18} /> },
-    { label: "Environment", href: "/environment", icon: <TreePine size={18} /> },
-    { label: "Users", href: "/users", icon: <Users size={18} /> },
-    { label: "Nutrition", href: "/nutrition", icon: <Salad size={18} /> },
-    { label: "Activities", href: "/activities", icon: <Activity size={18} /> },
-    { label: "Analytics", href: "/analytics", icon: <TrendingUp size={18} /> },
-    { label: "Reports", href: "/reports", icon: <FileText size={18} /> },
+    { label: "Dashboard", href: "/", icon: <LayoutDashboard size={20} /> },
+    { label: "Users", href: "/users", icon: <Users size={20} /> },
+    { label: "Nutrition", href: "/nutrition", icon: <Salad size={20} /> },
+    { label: "Activities", href: "/activities", icon: <Activity size={20} /> },
+    { label: "Wellness", href: "/wellness", icon: <HeartPulse size={20} /> },
+    { label: "Environment", href: "/environment", icon: <TreePine size={20} /> },
+    { label: "Analytics", href: "/analytics", icon: <TrendingUp size={20} /> },
+    { label: "Reports", href: "/reports", icon: <FileText size={20} /> },
 ];
 
 export default function Sidebar() {
@@ -60,15 +60,7 @@ export default function Sidebar() {
         <aside className="sidebar">
             {/* Brand */}
             <div className="sidebar-brand">
-                <div className="sidebar-brand-icon">
-                    <img src="/fitfusion-icon.svg" alt="FF" style={{ width: 20, height: 20 }}
-                        onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.textContent = 'FF'; }}
-                    />
-                </div>
-                <div className="sidebar-brand-text">
-                    <span className="sidebar-brand-title">FitFusion Admin</span>
-                    <span className="sidebar-brand-subtitle">Campus Wellness</span>
-                </div>
+                <div className="sidebar-brand-icon">FF</div>
             </div>
 
             {/* Navigation */}
@@ -78,33 +70,35 @@ export default function Sidebar() {
                         key={item.href}
                         href={item.href}
                         className={`nav-item ${pathname === item.href ? "active" : ""}`}
+                        data-tooltip={item.label}
                     >
                         <span className="nav-icon">{item.icon}</span>
-                        <span>{item.label}</span>
                     </Link>
                 ))}
             </nav>
 
             {/* Footer */}
             <div className="sidebar-footer">
-                <Link href="/profile" style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-                    <div className="admin-profile">
+                <Link href="/profile" style={{ textDecoration: "none", color: "inherit" }}>
+                    <div className="admin-profile" data-tooltip={adminProfile.name}>
                         <div className="admin-avatar">{adminProfile.initials}</div>
-                        <div className="admin-info">
-                            <span className="admin-name">{adminProfile.name}</span>
-                            <span className="admin-role">{adminProfile.role}</span>
-                        </div>
-                        <LogOut
-                            size={16}
-                            className="admin-logout-icon"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleLogout();
-                            }}
-                        />
                     </div>
                 </Link>
+                <button
+                    onClick={handleLogout}
+                    className="nav-item"
+                    data-tooltip="Sign Out"
+                    style={{
+                        border: "none",
+                        color: "var(--red)",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,68,68,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                    <span className="nav-icon"><LogOut size={20} /></span>
+                </button>
             </div>
         </aside>
     );
