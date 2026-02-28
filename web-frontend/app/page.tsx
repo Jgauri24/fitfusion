@@ -51,7 +51,6 @@ function DateSelector() {
 }
 
 export default function DashboardPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("Days");
@@ -167,20 +166,14 @@ export default function DashboardPage() {
           accentColor="var(--blue)"
           className="animate-fade-in-up stagger-2"
         />
-        <div
-          onClick={() => setDrawerOpen(!drawerOpen)}
-          style={{ cursor: "pointer" }}
-          title="Click to review burnout alerts"
-        >
-          <StatCard
-            icon={<AlertTriangle size={20} />}
-            label="Active Burnout Alerts"
-            value="24"
-            trend={{ value: "2 new", direction: "up" }}
-            accentColor="var(--red)"
-            className="animate-fade-in-up stagger-3"
-          />
-        </div>
+        <StatCard
+          icon={<AlertTriangle size={20} />}
+          label="Active Burnout Alerts"
+          value="24"
+          trend={{ value: "2 new", direction: "up" }}
+          accentColor="var(--red)"
+          className="animate-fade-in-up stagger-3"
+        />
         <StatCard
           icon={<Heart size={20} />}
           label="Wellness Score"
@@ -203,8 +196,8 @@ export default function DashboardPage() {
               <AreaChart data={weeklyData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#a855f7" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#a855f7" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#a855f7" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#a855f7" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
@@ -225,7 +218,7 @@ export default function DashboardPage() {
                   type="monotone"
                   dataKey="percentage"
                   stroke="#a855f7"
-                  strokeWidth={2.5}
+                  strokeWidth={2}
                   fill="url(#purpleGradient)"
                 />
               </AreaChart>
@@ -246,7 +239,7 @@ export default function DashboardPage() {
                     const percentage = totalMealCals > 0 ? (item.avgCalories / totalMealCals) * 100 : 0;
                     const strokeDasharray = `${(percentage / 100) * 376.99
                       } 376.99`;
-                    const mealColors = ["#a855f7", "#f59e0b", "#5e9eff", "#ff6b9d"];
+                    const mealColors = ["#8b5cf6", "#d4a054", "#6b8cce", "#c97088"];
                     const element = (
                       <circle
                         key={i}
@@ -280,7 +273,7 @@ export default function DashboardPage() {
             </div>
             <div className="donut-legend">
               {nutritionByMeal.map((item: any, i: number) => {
-                const mealColors = ["#a855f7", "#f59e0b", "#5e9eff", "#ff6b9d"];
+                const mealColors = ["#8b5cf6", "#d4a054", "#6b8cce", "#c97088"];
                 return (
                   <div key={item.meal} className="donut-legend-item">
                     <div
@@ -379,15 +372,6 @@ export default function DashboardPage() {
         </div>
       </ChartCard>
 
-      {/* Feature Card */}
-      <div style={{ marginTop: "28px" }} className="animate-fade-in-up stagger-6">
-        <div className="feature-card">
-          <div className="feature-card-value">
-            +{stats?.totalUsers?.toLocaleString() || "2,847"}
-          </div>
-          <div className="feature-card-label">Total Campus Users</div>
-        </div>
-      </div>
     </>
   );
 }

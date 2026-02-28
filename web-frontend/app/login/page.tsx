@@ -33,90 +33,55 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="login-wrapper">
-            {/* Left — Form Panel */}
-            <div className="login-form-panel">
-                <div className="login-card">
-                    {/* Decorative dots */}
-                    <div className="login-dots">
-                        <span className="login-dot login-dot--green" />
-                        <span className="login-dot login-dot--yellow" />
-                        <span className="login-dot login-dot--red" />
+        <div className="login-page">
+            <div className="login-card-simple">
+                {/* Brand */}
+                <div className="login-brand">
+                    <div className="login-brand-icon">FF</div>
+                    <span className="login-brand-text">FitFusion</span>
+                </div>
+
+                <h1 className="login-heading-simple">Welcome back</h1>
+                <p className="login-sub">Sign in to your admin dashboard</p>
+
+                <form onSubmit={handleLogin} className="login-form-simple">
+                    <div className="login-group">
+                        <label htmlFor="login-email">Email</label>
+                        <input
+                            id="login-email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="you@example.com"
+                            required
+                        />
                     </div>
 
-                    <h1 className="login-heading">Login</h1>
+                    <div className="login-group">
+                        <label htmlFor="login-password">Password</label>
+                        <input
+                            id="login-password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                            required
+                        />
+                    </div>
 
-                    <form onSubmit={handleLogin} className="login-form">
-                        <div className="login-field">
-                            <label className="login-label" htmlFor="login-email">
-                                Email address
-                            </label>
-                            <input
-                                id="login-email"
-                                className="login-input"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="you@example.com"
-                                required
-                            />
-                        </div>
+                    <a href="#" className="login-forgot-simple">Forgot password?</a>
 
-                        <div className="login-field">
-                            <label className="login-label" htmlFor="login-password">
-                                Password
-                            </label>
-                            <input
-                                id="login-password"
-                                className="login-input"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
+                    {errorMsg && <div className="login-error-simple">{errorMsg}</div>}
 
-                        <a href="#" className="login-forgot">
-                            Forgot your password?
-                        </a>
+                    <button type="submit" disabled={loading} className="login-btn-simple">
+                        {loading ? "Signing in..." : "Sign In"}
+                    </button>
 
-                        {errorMsg && (
-                            <div className="login-error">{errorMsg}</div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="login-submit"
-                        >
-                            {loading ? "Logging in..." : "LOGIN"}
-                        </button>
-
-                        <p className="login-signup-text">
-                            Don&apos;t have account?{" "}
-                            <a href="#" className="login-signup-link">
-                                Sign up
-                            </a>
-                        </p>
-                    </form>
-                </div>
-            </div>
-
-            {/* Right — Image Panel */}
-            <div className="login-image-panel">
-                {/* Dot grid decoration */}
-                <div className="login-dot-grid" />
-
-                {/* Sports illustration */}
-                <img
-                    src="/sports_login.png"
-                    alt="Sports & Fitness Illustration"
-                    className="login-image"
-                />
-
-                {/* Overlay gradient */}
-                <div className="login-image-overlay" />
+                    <p className="login-footer-simple">
+                        Don&apos;t have an account?{" "}
+                        <a href="#">Sign up</a>
+                    </p>
+                </form>
             </div>
         </div>
     );

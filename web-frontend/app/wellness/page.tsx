@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
-import { Smile, BookOpen, Users, Moon } from "lucide-react";
+import { Smile, BookOpen, Users, Moon, Frown, Meh, AlertCircle, Heart } from "lucide-react";
 import {
     LineChart,
     Line,
@@ -34,6 +34,22 @@ interface AttendanceData {
     attendance: number;
 }
 
+const moodIcons: Record<string, React.ReactNode> = {
+    "😊 Happy": <Smile size={16} style={{ color: "#6bff8d" }} />,
+    "😌 Calm": <Heart size={16} style={{ color: "#5e9eff" }} />,
+    "😐 Neutral": <Meh size={16} style={{ color: "#f59e0b" }} />,
+    "😰 Anxious": <AlertCircle size={16} style={{ color: "#ff9f43" }} />,
+    "😞 Low": <Frown size={16} style={{ color: "#ff6b6b" }} />,
+};
+
+const moodLabels: Record<string, string> = {
+    "😊 Happy": "Happy",
+    "😌 Calm": "Calm",
+    "😐 Neutral": "Neutral",
+    "😰 Anxious": "Anxious",
+    "😞 Low": "Low",
+};
+
 export default function WellnessPage() {
     const [wellnessData, setWellnessData] = useState<WellnessData[]>([]);
     const [moodDistribution, setMoodDistribution] = useState<MoodDistribution[]>([]);
@@ -44,13 +60,8 @@ export default function WellnessPage() {
         const fetchWellnessStats = async () => {
             try {
                 const res = await api.get('/api/admin/wellness/stats');
-                
-                // Only take the last 7 items to display, sorting by Date logic if needed,
-                // but our backend already returns 7 days in order.
                 const rawWellnessData = res.data.wellnessData || [];
-                // Reverse it so the charts flow left (oldest) to right (newest)
                 setWellnessData(rawWellnessData.reverse());
-                
                 setMoodDistribution(res.data.moodDistribution || []);
                 setAttendanceData(res.data.attendanceData || []);
             } catch (error) {
@@ -68,10 +79,7 @@ export default function WellnessPage() {
         : "0.0";
 
     const totalJournals = wellnessData.reduce((s, w) => s + w.journalEntries, 0);
-    const totalCircle = wellnessData.reduce(
-        (s, w) => s + w.circleParticipants,
-        0
-    );
+    const totalCircle = wellnessData.reduce((s, w) => s + w.circleParticipants, 0);
 
     const validWellnessDataWithSleep = wellnessData.filter(w => w.sleepAvg > 0);
     const avgSleep = validWellnessDataWithSleep.length > 0
@@ -80,14 +88,6 @@ export default function WellnessPage() {
 
     const maxMood = 5;
     const maxJournal = wellnessData.length > 0 ? Math.max(...wellnessData.map((w) => w.journalEntries), 1) : 1;
-
-    const moodDeltas: Record<string, number> = {
-        "😊 Happy": 4,
-        "😌 Calm": 2,
-        "😐 Neutral": -1,
-        "😰 Anxious": -3,
-        "😞 Low": -2,
-    };
 
     if (loading) {
         return <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>Loading wellness data...</div>;
@@ -98,8 +98,7 @@ export default function WellnessPage() {
             <div className="page-header animate-fade-in-up">
                 <h1 className="page-title">Mental Wellness</h1>
                 <p className="page-subtitle">
-                    Monitor campus-wide mental well-being, mood trends, and wellness
-                    participation
+                    Monitor campus-wide mental well-being, mood trends, and wellness participation
                 </p>
             </div>
 
@@ -138,64 +137,29 @@ export default function WellnessPage() {
             </div>
 
             <div className="charts-grid">
-                {/* Mood Distribution */}
+                {/* Mood Distribution — icons instead of emojis */}
                 <ChartCard
                     title="Mood Distribution"
                     badge="Last 7 Days"
                     className="animate-fade-in-up stagger-3"
                 >
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "16px",
-                            padding: "8px 0",
-                        }}
-                    >
-                        {moodDistribution.map((m) => {
-                            const delta = moodDeltas[m.mood];
-                            return (
-                                <div key={m.mood}>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            marginBottom: "8px",
-                                        }}
-                                    >
-                                        <span
-                                            style={{
-                                                fontSize: "14px",
-                                                color: "var(--text-secondary)",
-                                            }}
-                                        >
-                                            {m.mood}
-                                        </span>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                            <span
-                                                style={{
-                                                    fontSize: "14px",
-                                                    fontWeight: 600,
-                                                    color: m.color,
-                                                }}
-                                            >
-                                                {m.percentage}%
-                                            </span>
-                                            {/* We can hide delta for real data so it's not faked unless we compute real trend week-over-week */}
-                                        </div>
-                                    </div>
-                                    <div className="progress-bar" style={{ height: "10px" }}>
-                                        <div
-                                            className="progress-bar-fill"
-                                            style={{
-                                                width: `${m.percentage}%`,
-                                                background: m.color,
-                                            }}
-                                        />
-                                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "8px 0" }}>
+                        {moodDistribution.map((m) => (
+                            <div key={m.mood}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                                    <span style={{ fontSize: "14px", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "8px" }}>
+                                        {moodIcons[m.mood] || <Meh size={16} />}
+                                        {moodLabels[m.mood] || m.mood}
+                                    </span>
+                                    <span style={{ fontSize: "14px", fontWeight: 600, color: m.color }}>
+                                        {m.percentage}%
+                                    </span>
                                 </div>
-                            )
-                        })}
+                                <div className="progress-bar" style={{ height: "10px" }}>
+                                    <div className="progress-bar-fill" style={{ width: `${m.percentage}%`, background: m.color }} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </ChartCard>
 
@@ -280,7 +244,7 @@ export default function WellnessPage() {
                                                 className={`badge ${w.avgMood >= 4.0
                                                     ? "badge-green"
                                                     : w.avgMood >= 3.0
-                                                        ? "badge-cyan"
+                                                        ? "badge-purple"
                                                         : "badge-orange"
                                                     }`}
                                             >
@@ -317,7 +281,7 @@ export default function WellnessPage() {
                                 <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
                                 <Tooltip
-                                    contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                                    contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-light)", borderRadius: "12px", color: "var(--text-primary)" }}
                                 />
                                 <Line type="monotone" dataKey="attendance" stroke="#A78BFA" strokeWidth={2} dot={{ r: 3, fill: "#A78BFA" }} activeDot={{ r: 5 }} />
                             </LineChart>
@@ -326,12 +290,14 @@ export default function WellnessPage() {
                 </ChartCard>
             </div>
 
+            {/* Footer disclaimer — fixed CSS */}
             <div style={{
-                borderTop: "1px solid #1a1a1a",
+                borderTop: "1px solid var(--border)",
                 paddingTop: "16px",
                 marginTop: "24px",
+                marginBottom: "24px",
                 fontSize: "12px",
-                color: "#333",
+                color: "var(--text-muted)",
                 textAlign: "center"
             }}>
                 All wellness data represents campus-wide aggregates (min. group: 10). No individual mood, journal, or stress data is accessible to administrators. Journal content is never stored or viewable by this panel.

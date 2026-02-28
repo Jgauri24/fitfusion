@@ -3,7 +3,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
-import { Bell, Search } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -18,10 +18,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
   const [adminInitials, setAdminInitials] = useState("A");
+  const [showNotif, setShowNotif] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -65,77 +65,120 @@ export default function RootLayout({
           <div className="admin-layout">
             <Sidebar />
             <main className="main-content">
-              {/* Top Header Bar */}
-              <header className="top-header">
-                <div className="top-header-left">
-                  <div className="header-search">
-                    <span className="header-search-icon">
-                      <Search size={16} />
-                    </span>
-                    <input type="text" placeholder="Search anything..." />
-                  </div>
-                </div>
-
-                <div className="top-header-right">
-                  {/* Avatar Group */}
-                  <div className="header-avatar-group">
-                    <div className="avatar-circle" style={{ background: "#a855f7" }}>A</div>
-                    <div className="avatar-circle" style={{ background: "#f59e0b" }}>B</div>
-                    <div className="avatar-circle" style={{ background: "#5e9eff" }}>C</div>
-                    <div className="avatar-overflow">+12</div>
-                  </div>
-
-                  {/* Status Pills */}
-                  <div className="header-status-pill">
-                    <span className="status-dot online"></span>
-                    12 of 15 <span style={{ color: "var(--text-muted)" }}>active</span>
-                  </div>
-
-                  <div className="header-status-pill">
-                    <span className="status-dot break"></span>
-                    2 on break
-                  </div>
-
-                  {/* Notifications */}
+              {/* Clean Header — Notification + Profile */}
+              <header style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "16px",
+                padding: "16px 0 20px",
+                marginBottom: "4px",
+              }}>
+                {/* Notification Bell */}
+                <div style={{ position: "relative" }}>
                   <button
-                    className="notification-btn"
-                    onClick={() => setDrawerOpen(!drawerOpen)}
+                    onClick={() => setShowNotif(!showNotif)}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "12px",
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
                   >
                     <Bell size={18} color="var(--text-secondary)" />
-                    <span className="notification-badge">24</span>
                   </button>
+                  {/* Badge */}
+                  <span style={{
+                    position: "absolute",
+                    top: "-4px",
+                    right: "-4px",
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    background: "var(--red)",
+                    color: "#fff",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "2px solid var(--bg-primary)",
+                  }}>
+                    3
+                  </span>
 
-                  {/* Profile */}
-                  <div className="header-profile" onClick={() => router.push("/profile")}>
-                    <div className="header-profile-avatar">{adminInitials}</div>
-                    <div className="header-profile-info">
-                      <span className="header-profile-name">{adminName}</span>
-                      <span className="header-profile-role">Admin</span>
+                  {/* Dropdown */}
+                  {showNotif && (
+                    <div style={{
+                      position: "absolute",
+                      top: "48px",
+                      right: 0,
+                      width: "300px",
+                      background: "var(--bg-card-solid)",
+                      border: "1px solid var(--border-light)",
+                      borderRadius: "14px",
+                      padding: "16px",
+                      zIndex: 100,
+                      boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
+                      backdropFilter: "blur(16px)",
+                    }}>
+                      <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--text-primary)", marginBottom: "12px" }}>Notifications</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                          🚨 2 new burnout alerts flagged
+                        </div>
+                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                          📊 Weekly wellness report ready
+                        </div>
+                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                          ✅ Environment data updated
+                        </div>
+                      </div>
                     </div>
+                  )}
+                </div>
+
+                {/* Profile Avatar */}
+                <div
+                  onClick={() => router.push("/profile")}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    padding: "6px 12px 6px 6px",
+                    borderRadius: "14px",
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div style={{
+                    width: "34px",
+                    height: "34px",
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg, #a855f7, #7c3aed)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "#fff",
+                  }}>
+                    {adminInitials}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", lineHeight: "1.2" }}>{adminName}</span>
+                    <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Admin</span>
                   </div>
                 </div>
               </header>
-
-              {/* Notification Drawer */}
-              {drawerOpen && (
-                <div style={{
-                  position: "fixed",
-                  top: "70px",
-                  right: "60px",
-                  width: "320px",
-                  background: "var(--bg-card-solid)",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "20px",
-                  zIndex: 100,
-                  boxShadow: "var(--shadow-lg)",
-                  backdropFilter: "blur(16px)",
-                }}>
-                  <div style={{ fontWeight: 600, marginBottom: "12px", color: "var(--text-primary)" }}>Notifications</div>
-                  <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "8px" }}>🚨 You have 24 unread burnout alerts.</div>
-                  <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>Review flagged cohorts in the Users section.</p>
-                </div>
-              )}
 
               {children}
             </main>

@@ -129,7 +129,7 @@ export default function EnvironmentPage() {
                     <p className="page-subtitle">Monitor air quality, noise levels, temperature, and humidity across zones</p>
                 </div>
                 <button onClick={() => setShowModal(true)} style={{
-                    padding: "10px 20px", background: "var(--accent)", color: "#000", border: "none",
+                    padding: "10px 20px", background: "var(--accent)", color: "#fff", border: "none",
                     borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: "pointer",
                     display: "flex", alignItems: "center", gap: "8px"
                 }}>
@@ -153,7 +153,7 @@ export default function EnvironmentPage() {
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
                             <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }} />
                             <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-secondary)" }} />
-                            <Bar dataKey="stress" name="Stress Score" fill="var(--red)" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="stress" name="Stress Score" fill="#dc143c" radius={[4, 4, 0, 0]} />
                             <Bar dataKey="activity" name="Activity Level" fill="var(--accent)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -222,7 +222,7 @@ export default function EnvironmentPage() {
                                 <div><label style={labelStyle}>Humidity (%) *</label><input type="number" step="0.1" required value={form.humidity} onChange={(e) => setForm({ ...form, humidity: e.target.value })} style={inputStyle} placeholder="%" /></div>
                             </div>
                             <button type="submit" disabled={saving} style={{
-                                padding: "12px", background: "var(--accent)", color: "#000", border: "none",
+                                padding: "12px", background: "var(--accent)", color: "#fff", border: "none",
                                 borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: saving ? "not-allowed" : "pointer",
                                 opacity: saving ? 0.7 : 1, marginTop: "8px"
                             }}>
