@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
 import DataTable from "@/components/DataTable";
-import { nutritionByMeal } from "@/lib/mockData";
 import { Flame, Beef, Wheat, Droplet, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 
@@ -19,6 +18,13 @@ interface FoodItem {
     carbs: number;
     fats: number;
 }
+
+const MEAL_COLORS: Record<string, string> = {
+    Breakfast: "var(--accent)",
+    Lunch: "var(--blue)",
+    Dinner: "var(--orange)",
+    Snack: "var(--green)",
+};
 
 export default function NutritionPage() {
     const [mealFilter, setMealFilter] = useState("All");
@@ -76,7 +82,14 @@ export default function NutritionPage() {
     const avgFats = foodItems.length ? Math.round(foodItems.reduce((s, f) => s + f.fats, 0) / foodItems.length) : 0;
 
     const filtered = mealFilter === "All" ? foodItems : foodItems.filter((f) => f.meal === mealFilter);
-    const maxMealCal = nutritionByMeal.length ? Math.max(...nutritionByMeal.map((m) => m.avgCalories)) : 1;
+
+    // Compute real nutrition-by-meal chart from food items
+    const nutritionByMeal = meals.filter(m => m !== "All").map(meal => {
+        const items = foodItems.filter(f => f.meal === meal);
+        const avg = items.length ? Math.round(items.reduce((s, f) => s + f.calories, 0) / items.length) : 0;
+        return { meal, avgCalories: avg, color: MEAL_COLORS[meal] || "var(--accent)" };
+    });
+    const maxMealCal = nutritionByMeal.length ? Math.max(...nutritionByMeal.map((m) => m.avgCalories), 1) : 1;
 
     const columns = [
         {

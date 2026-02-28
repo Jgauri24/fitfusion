@@ -30,7 +30,7 @@ const navItems = [
 export default function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
-    const [adminProfile, setAdminProfile] = useState({ name: "Admin", initials: "A", role: "Super Admin" });
+    const [adminProfile, setAdminProfile] = useState({ name: "Admin", initials: "A", role: "Admin" });
 
     useEffect(() => {
         const userInfo = localStorage.getItem("userInfo");
@@ -58,10 +58,12 @@ export default function Sidebar() {
 
     return (
         <aside className="sidebar">
+            {/* Brand */}
             <div className="sidebar-brand">
                 <div className="sidebar-brand-icon">FF</div>
             </div>
 
+            {/* Navigation */}
             <nav className="sidebar-nav">
                 {navItems.map((item) => (
                     <Link
@@ -75,6 +77,7 @@ export default function Sidebar() {
                 ))}
             </nav>
 
+            {/* Footer */}
             <div className="sidebar-footer">
                 <Link href="/profile" style={{ textDecoration: "none", color: "inherit" }}>
                     <div className="admin-profile" data-tooltip={adminProfile.name}>

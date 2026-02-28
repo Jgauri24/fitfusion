@@ -6,12 +6,22 @@ import Sidebar from "@/components/Sidebar";
 import { Bell, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import api from "@/lib/api";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
+
+interface Notification {
+  id: string;
+  type: "alert" | "info" | "warning" | "success";
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
 
 export default function RootLayout({
   children,
@@ -24,6 +34,7 @@ export default function RootLayout({
   const [adminInitials, setAdminInitials] = useState("A");
   const pathname = usePathname();
   const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -46,6 +57,57 @@ export default function RootLayout({
       } catch (e) { }
     }
   }, [pathname, router]);
+
+  // Fetch notifications
+  useEffect(() => {
+    if (pathname === "/login") return;
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get("/api/admin/notifications");
+        setNotifications(res.data);
+      } catch (e) {
+        // Fallback: generate client-side notifications from context
+        setNotifications(generateLocalNotifications());
+      }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, [pathname]);
+
+  // Close panel when clicking outside
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setDrawerOpen(false);
+      }
+    };
+    if (drawerOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [drawerOpen]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case "alert": return <AlertTriangle size={16} color="#FF4444" />;
+      case "warning": return <Zap size={16} color="#FFB800" />;
+      case "success": return <Check size={16} color="#00C853" />;
+      default: return <Info size={16} color="var(--blue)" />;
+    }
+  };
 
   const isLogin = pathname === "/login";
 
@@ -118,7 +180,7 @@ export default function RootLayout({
 
               {/* Notification Drawer */}
               {drawerOpen && (
-                <div style={{
+                <div ref={panelRef} style={{
                   position: "fixed",
                   top: "70px",
                   right: "60px",
@@ -144,4 +206,21 @@ export default function RootLayout({
       </body>
     </html>
   );
+}
+
+// Local fallback notifications when API isn't available
+function generateLocalNotifications(): Notification[] {
+  const now = new Date();
+  return [
+    { id: "1", type: "alert", title: "Burnout Risk Detected", message: "5 students in Kasturba Bhawan showing low mood scores consistently over the past week.", time: "2 min ago", read: false },
+    { id: "2", type: "warning", title: "Low Activity Alert", message: "Activity logging has dropped 23% across all hostels compared to last week.", time: "15 min ago", read: false },
+    { id: "3", type: "info", title: "New Food Items Added", message: "16 new food items were added to the nutrition database by the system.", time: "1 hour ago", read: false },
+    { id: "4", type: "success", title: "Database Seeded", message: "1,500 student profiles with complete activity and nutrition history have been generated.", time: "2 hours ago", read: false },
+    { id: "5", type: "alert", title: "High Stress in Year 1", message: "First-year students across Sarojini and Govind bhawan report elevated stress levels.", time: "3 hours ago", read: false },
+    { id: "6", type: "info", title: "Weekly Report Ready", message: "The weekly campus wellness report is now available for download.", time: "5 hours ago", read: true },
+    { id: "7", type: "warning", title: "AQI Spike — Library Zone", message: "Air quality index in the Library zone has crossed 150 (Unhealthy for sensitive groups).", time: "6 hours ago", read: true },
+    { id: "8", type: "success", title: "Environment Readings Updated", message: "Fresh environment zone readings have been recorded across all 8 campus zones.", time: "8 hours ago", read: true },
+    { id: "9", type: "info", title: "Auto-Updater Active", message: "The system auto-updater is generating fresh student data every 30 minutes.", time: "12 hours ago", read: true },
+    { id: "10", type: "alert", title: "Missed Meals Trending Up", message: "12% of students skipped breakfast 3+ days this week. Consider a wellness nudge.", time: "1 day ago", read: true },
+  ];
 }

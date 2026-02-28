@@ -1,30 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatCard from "@/components/StatCard";
 import ChartCard from "@/components/ChartCard";
-import { activities } from "@/lib/mockData";
-import { Activity, Flame, Timer, Dumbbell, PersonStanding, Trophy, StretchHorizontal, BrainCircuit } from "lucide-react";
+import { Activity as ActivityIcon, Flame, Timer, Dumbbell, PersonStanding, Trophy, StretchHorizontal, BrainCircuit } from "lucide-react";
+import api from "@/lib/api";
+
+interface Activity {
+    id: string;
+    type: string;
+    participants: number;
+    avgDuration: number;
+    caloriesBurned: number;
+    trending: boolean;
+    category: string;
+}
 
 export default function ActivitiesPage() {
     const [categoryFilter, setCategoryFilter] = useState("All");
     const categories = ["All", "Strength", "Cardio", "Sports", "Flexibility", "Wellness"];
+    const [activities, setActivities] = useState<Activity[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchActivities = async () => {
+            try {
+                const res = await api.get('/api/admin/activities/stats');
+                setActivities(res.data);
+            } catch (error) {
+                console.error("Failed to fetch activity stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchActivities();
+    }, []);
 
     const totalParticipants = activities.reduce((s, a) => s + a.participants, 0);
     const trendingCount = activities.filter((a) => a.trending).length;
-    const avgDuration = Math.round(
-        activities.reduce((s, a) => s + a.avgDuration, 0) / activities.length
-    );
-    const avgCalBurned = Math.round(
-        activities.reduce((s, a) => s + a.caloriesBurned, 0) / activities.length
-    );
+    
+    // Protect against division by zero if activities is empty
+    const validActivitiesWithDuration = activities.filter(a => a.avgDuration > 0);
+    const validActivitiesWithCalories = activities.filter(a => a.caloriesBurned > 0);
+    
+    const avgDuration = validActivitiesWithDuration.length 
+        ? Math.round(validActivitiesWithDuration.reduce((s, a) => s + a.avgDuration, 0) / validActivitiesWithDuration.length)
+        : 0;
+        
+    const avgCalBurned = validActivitiesWithCalories.length
+        ? Math.round(validActivitiesWithCalories.reduce((s, a) => s + a.caloriesBurned, 0) / validActivitiesWithCalories.length)
+        : 0;
 
     const filtered =
         categoryFilter === "All"
             ? activities
             : activities.filter((a) => a.category === categoryFilter);
 
-    const maxParticipants = Math.max(...activities.map((a) => a.participants));
+    const maxParticipants = activities.length ? Math.max(...activities.map((a) => a.participants), 1) : 1;
 
     const getCategoryColor = (cat: string) => {
         switch (cat) {
@@ -37,6 +69,10 @@ export default function ActivitiesPage() {
         }
     };
 
+    if (loading) {
+        return <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>Loading activity data...</div>;
+    }
+
     return (
         <>
             <div className="page-header animate-fade-in-up">
@@ -48,10 +84,10 @@ export default function ActivitiesPage() {
 
             <div className="stats-grid">
                 <StatCard
-                    icon={<Activity size={20} />}
+                    icon={<ActivityIcon size={20} />}
                     label="Total Participants"
                     value={totalParticipants.toLocaleString()}
-                    trend={{ value: "15.3%", direction: "up" }}
+                    trend={{ value: "Real-time", direction: "up" }}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
@@ -80,7 +116,7 @@ export default function ActivitiesPage() {
             <div className="charts-grid">
                 <ChartCard
                     title="Participation by Activity"
-                    badge="All Time"
+                    badge="Last 30 Days"
                     className="animate-fade-in-up stagger-3"
                 >
                     <div className="bar-chart">
@@ -94,8 +130,8 @@ export default function ActivitiesPage() {
                                     }}
                                     title={`${a.participants} participants`}
                                 />
-                                <span className="bar-label" style={{ fontSize: "10px" }}>
-                                    {a.type.split(" ")[0]}
+                                <span className="bar-label" style={{ fontSize: "10px", transform: "rotate(-45deg)", whiteSpace: "nowrap", marginTop: "10px" }}>
+                                    {a.type}
                                 </span>
                             </div>
                         ))}
@@ -108,7 +144,7 @@ export default function ActivitiesPage() {
                     className="animate-fade-in-up stagger-4"
                 >
                     <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                        {activities
+                        {[...activities]
                             .sort((a, b) => b.caloriesBurned - a.caloriesBurned)
                             .slice(0, 6)
                             .map((a) => (
@@ -155,7 +191,7 @@ export default function ActivitiesPage() {
                                         <div
                                             className="progress-bar-fill"
                                             style={{
-                                                width: `${(a.caloriesBurned / 500) * 100}%`,
+                                                width: `${Math.min((a.caloriesBurned / 800) * 100, 100)}%`, // adjust denominator based on realistic max calorie burn average
                                                 background: getCategoryColor(a.category),
                                             }}
                                         />
@@ -217,7 +253,7 @@ export default function ActivitiesPage() {
                                 <span className="info-metric-value">{a.avgDuration} min</span>
                             </div>
                             <div className="info-metric">
-                                <span className="info-metric-label">Calories Burned</span>
+                                <span className="info-metric-label">Avg Calories Check</span>
                                 <span className="info-metric-value">{a.caloriesBurned} kcal</span>
                             </div>
                         </div>

@@ -1,40 +1,100 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ChartCard from "@/components/ChartCard";
+import api from "@/lib/api";
 
 export default function ProfilePage() {
-    const [name, setName] = useState("Gauri Admin");
-    const [email, setEmail] = useState("gauri@fitfusion.edu");
-    const [role, setRole] = useState("Super Admin (Restricted)");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [role, setRole] = useState("");
+    const [initials, setInitials] = useState("");
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const [currentPwd, setCurrentPwd] = useState("");
     const [newPwd, setNewPwd] = useState("");
     const [confirmPwd, setConfirmPwd] = useState("");
     const [pwdSaving, setPwdSaving] = useState(false);
+    const [pwdMsg, setPwdMsg] = useState({ text: "", type: "" });
 
-    const handleSaveProfile = (e: React.FormEvent) => {
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get("/api/auth/me");
+                const user = res.data;
+                setName(`${user.firstName} ${user.lastName}`.trim());
+                setEmail(user.email);
+                setRole(user.role === "ADMIN" ? "Super Admin (Restricted)" : user.role);
+                const fi = user.firstName?.charAt(0)?.toUpperCase() || "";
+                const li = user.lastName?.charAt(0)?.toUpperCase() || "";
+                setInitials(`${fi}${li}` || "U");
+            } catch (error) {
+                console.error("Failed to fetch profile:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
+    const handleSaveProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
-        setTimeout(() => {
-            setSaving(false);
+        try {
+            const parts = name.trim().split(/\s+/);
+            const firstName = parts[0] || "";
+            const lastName = parts.slice(1).join(" ") || "";
+
+            const res = await api.put("/api/auth/profile", { firstName, lastName, email });
+            const user = res.data.user;
+
+            // Update localStorage so sidebar reflects the change
+            const stored = localStorage.getItem("userInfo");
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                parsed.firstName = user.firstName;
+                parsed.lastName = user.lastName;
+                parsed.email = user.email;
+                localStorage.setItem("userInfo", JSON.stringify(parsed));
+            }
+
+            const fi = user.firstName?.charAt(0)?.toUpperCase() || "";
+            const li = user.lastName?.charAt(0)?.toUpperCase() || "";
+            setInitials(`${fi}${li}` || "U");
+
             setSuccess(true);
             setTimeout(() => setSuccess(false), 3000);
-        }, 1000);
+        } catch (error: any) {
+            alert(error.response?.data?.message || "Failed to update profile.");
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleChangePassword = (e: React.FormEvent) => {
+    const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         setPwdSaving(true);
-        setTimeout(() => {
-            setPwdSaving(false);
+        setPwdMsg({ text: "", type: "" });
+        try {
+            await api.put("/api/auth/change-password", {
+                currentPassword: currentPwd,
+                newPassword: newPwd
+            });
             setCurrentPwd("");
             setNewPwd("");
             setConfirmPwd("");
-            alert("Password successfully updated. You may need to log in again.");
-        }, 1000);
+            setPwdMsg({ text: "Password updated successfully!", type: "success" });
+            setTimeout(() => setPwdMsg({ text: "", type: "" }), 4000);
+        } catch (error: any) {
+            setPwdMsg({
+                text: error.response?.data?.message || "Failed to change password.",
+                type: "error"
+            });
+        } finally {
+            setPwdSaving(false);
+        }
     };
 
     const inputStyle = {
@@ -57,6 +117,14 @@ export default function ProfilePage() {
         color: "var(--text-secondary)",
         marginBottom: "8px"
     };
+
+    if (loading) {
+        return (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
+                <div className="pulse-dot" style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--accent)" }} />
+            </div>
+        );
+    }
 
     return (
         <>
@@ -85,7 +153,7 @@ export default function ProfilePage() {
                                 fontSize: "28px",
                                 fontWeight: 800
                             }}>
-                                GA
+                                {initials}
                             </div>
                             <button
                                 type="button"
@@ -220,6 +288,20 @@ export default function ProfilePage() {
                                 <span style={{ color: "var(--red)", fontSize: "12px", marginTop: "6px", display: "inline-block" }}>Passwords do not match</span>
                             )}
                         </div>
+
+                        {pwdMsg.text && (
+                            <div style={{
+                                padding: "10px 14px",
+                                borderRadius: "8px",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                background: pwdMsg.type === "success" ? "rgba(0, 230, 118, 0.1)" : "rgba(255, 107, 107, 0.1)",
+                                color: pwdMsg.type === "success" ? "var(--green)" : "var(--red)",
+                                border: `1px solid ${pwdMsg.type === "success" ? "rgba(0, 230, 118, 0.2)" : "rgba(255, 107, 107, 0.2)"}`
+                            }}>
+                                {pwdMsg.text}
+                            </div>
+                        )}
 
                         <div style={{ marginTop: "12px" }}>
                             <button

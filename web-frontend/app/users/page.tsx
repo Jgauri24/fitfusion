@@ -1,24 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "@/components/DataTable";
 import StatCard from "@/components/StatCard";
 import { Users, Sprout, Dumbbell, Trophy } from "lucide-react";
+import api from "@/lib/api";
 
-const cohorts = [
-    { id: 1, hostel: "Govind Bhawan", branch: "ME", year: "3", students: 45, wellness: 85, steps: 9200, diet: "61% Non-Veg", flags: 1, trend: "up" },
-    { id: 2, hostel: "Sarojini Bhawan", branch: "ECE", year: "1", students: 38, wellness: 74, steps: 7800, diet: "91% Veg", flags: 3, trend: "neutral" },
-    { id: 3, hostel: "Rajendra Bhawan", branch: "CSE", year: "2", students: 52, wellness: 79, steps: 8400, diet: "78% Veg", flags: 0, trend: "up" },
-    { id: 4, hostel: "Kasturba Bhawan", branch: "BT", year: "1", students: 29, wellness: 68, steps: 6900, diet: "88% Veg", flags: 5, trend: "down" },
-    { id: 5, hostel: "Cautley Bhawan", branch: "Civil", year: "3", students: 34, wellness: 77, steps: 8200, diet: "55% Veg", flags: 2, trend: "up" },
-    { id: 6, hostel: "Jawahar Bhawan", branch: "EE", year: "4", students: 41, wellness: 71, steps: 7500, diet: "67% Veg", flags: 4, trend: "down" }
-];
+interface Cohort {
+    id: number;
+    hostel: string;
+    branch: string;
+    year: string;
+    students: number;
+    wellness: number;
+    steps: number;
+    diet: string;
+    flags: number;
+    trend: string;
+}
 
 export default function UsersPage() {
     const [hostel, setHostel] = useState("All");
     const [branch, setBranch] = useState("All");
     const [year, setYear] = useState("All");
     const [fitness, setFitness] = useState("All");
+    const [loading, setLoading] = useState(true);
+
+    const [totalStudents, setTotalStudents] = useState(0);
+    const [beginners, setBeginners] = useState(0);
+    const [intermediate, setIntermediate] = useState(0);
+    const [advanced, setAdvanced] = useState(0);
+    const [cohorts, setCohorts] = useState<Cohort[]>([]);
+
+    useEffect(() => {
+        const fetchUserStats = async () => {
+            try {
+                const res = await api.get('/api/admin/users/stats');
+                setTotalStudents(res.data.totalStudents);
+                setBeginners(res.data.beginners);
+                setIntermediate(res.data.intermediate);
+                setAdvanced(res.data.advanced);
+                setCohorts(res.data.cohorts);
+            } catch (error) {
+                console.error("Failed to fetch user stats:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUserStats();
+    }, []);
 
     const filteredCohorts = cohorts.filter(c => {
         if (hostel !== "All" && c.hostel !== hostel) return false;
@@ -28,15 +58,15 @@ export default function UsersPage() {
         return true;
     });
 
-    const totalStudents = filteredCohorts.reduce((acc, c) => acc + c.students, 0);
-    const showSuppression = totalStudents < 10;
+    const filteredTotal = filteredCohorts.reduce((acc, c) => acc + c.students, 0);
+    const showSuppression = filteredTotal < 10;
     const finalCohorts = showSuppression ? [] : filteredCohorts;
 
     const columns = [
         {
             key: "cohort",
             label: "COHORT",
-            render: (c: typeof cohorts[0]) => (
+            render: (c: Cohort) => (
                 <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>
                     {c.hostel} · {c.branch} · Year {c.year}
                 </span>
@@ -46,7 +76,7 @@ export default function UsersPage() {
         {
             key: "wellness",
             label: "AVG WELLNESS",
-            render: (c: typeof cohorts[0]) => (
+            render: (c: Cohort) => (
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <div className="progress-bar" style={{ width: "60px" }}>
                         <div
@@ -71,7 +101,7 @@ export default function UsersPage() {
         {
             key: "flags",
             label: "BURNOUT FLAGS",
-            render: (c: typeof cohorts[0]) => {
+            render: (c: Cohort) => {
                 if (c.flags === 0) return <span style={{ color: "var(--green)", fontWeight: 600 }}>None</span>;
                 if (c.flags <= 2) return <span className="badge badge-purple">{c.flags} flags</span>;
                 if (c.flags <= 4) return <span className="badge badge-orange">{c.flags} flags</span>;
@@ -81,7 +111,7 @@ export default function UsersPage() {
         {
             key: "trend",
             label: "TREND",
-            render: (c: typeof cohorts[0]) => (
+            render: (c: Cohort) => (
                 <span style={{
                     color: c.trend === "up" ? "var(--green)" : c.trend === "down" ? "var(--red)" : "var(--text-secondary)",
                     fontWeight: 600
@@ -91,6 +121,10 @@ export default function UsersPage() {
             )
         }
     ];
+
+    if (loading) {
+        return <div style={{ padding: "60px", textAlign: "center", color: "var(--text-muted)" }}>Loading user data...</div>;
+    }
 
     return (
         <>
@@ -120,27 +154,27 @@ export default function UsersPage() {
                 <StatCard
                     icon={<Users size={20} />}
                     label="Total Students (Aggregated)"
-                    value={2847}
+                    value={totalStudents}
                     className="animate-fade-in-up stagger-1"
                 />
                 <StatCard
                     icon={<Sprout size={20} />}
                     label="Beginners"
-                    value={1040}
+                    value={beginners}
                     accentColor="var(--orange)"
                     className="animate-fade-in-up stagger-2"
                 />
                 <StatCard
                     icon={<Dumbbell size={20} />}
                     label="Intermediate"
-                    value={1255}
+                    value={intermediate}
                     accentColor="var(--blue)"
                     className="animate-fade-in-up stagger-3"
                 />
                 <StatCard
                     icon={<Trophy size={20} />}
                     label="Advanced"
-                    value={552}
+                    value={advanced}
                     accentColor="var(--green)"
                     className="animate-fade-in-up stagger-4"
                 />
