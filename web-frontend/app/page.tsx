@@ -98,22 +98,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh", color: "var(--text-muted)" }}>
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "12px"
-        }}>
-          <div style={{
-            width: "36px",
-            height: "36px",
-            border: "3px solid var(--border)",
-            borderTopColor: "var(--accent)",
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="loading-container">
+        <div className="loading-inner">
+          <div className="loading-spinner" />
           Loading dashboard data...
         </div>
       </div>
@@ -127,7 +114,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="page-title">Statistics</h1>
             <p className="page-subtitle">
-              Campus fitness & wellness overview — Real-time insights
+              Campus fitness &amp; wellness overview — Real-time insights
             </p>
           </div>
           <div className="period-toggle">
@@ -195,9 +182,9 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weeklyData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#a855f7" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#a855f7" stopOpacity={0.01} />
+                  <linearGradient id="accentGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#0070F3" stopOpacity={0.22} />
+                    <stop offset="100%" stopColor="#0070F3" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
@@ -209,17 +196,17 @@ export default function DashboardPage() {
                 />
                 <ReferenceLine
                   y={avgPercentage}
-                  stroke="var(--gold)"
+                  stroke="var(--amber)"
                   strokeDasharray="6 4"
                   strokeWidth={2}
-                  label={{ position: "right", value: "Avg", fill: "var(--gold)", fontSize: 11, fontWeight: 600 }}
+                  label={{ position: "right", value: "Avg", fill: "var(--amber)", fontSize: 11, fontWeight: 600 }}
                 />
                 <Area
                   type="monotone"
                   dataKey="percentage"
-                  stroke="#a855f7"
+                  stroke="#0070F3"
                   strokeWidth={2}
-                  fill="url(#purpleGradient)"
+                  fill="url(#accentGradient)"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -239,7 +226,7 @@ export default function DashboardPage() {
                     const percentage = totalMealCals > 0 ? (item.avgCalories / totalMealCals) * 100 : 0;
                     const strokeDasharray = `${(percentage / 100) * 376.99
                       } 376.99`;
-                    const mealColors = ["#8b5cf6", "#d4a054", "#6b8cce", "#c97088"];
+                    const mealColors = ["#0070F3", "#A1A1AA", "#60A5FA", "#F472B6"];
                     const element = (
                       <circle
                         key={i}
@@ -253,7 +240,7 @@ export default function DashboardPage() {
                         strokeDashoffset={`${-acc.offset}`}
                         strokeLinecap="round"
                         style={{
-                          transition: "all 1s cubic-bezier(0.4, 0, 0.2, 1)",
+                          transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}
                       />
                     );
@@ -273,7 +260,7 @@ export default function DashboardPage() {
             </div>
             <div className="donut-legend">
               {nutritionByMeal.map((item: any, i: number) => {
-                const mealColors = ["#8b5cf6", "#d4a054", "#6b8cce", "#c97088"];
+                const mealColors = ["#0070F3", "#A1A1AA", "#60A5FA", "#F472B6"];
                 return (
                   <div key={item.meal} className="donut-legend-item">
                     <div
@@ -303,7 +290,7 @@ export default function DashboardPage() {
         }
         className="animate-fade-in-up stagger-5"
       >
-        <div style={{ overflowX: "auto" }}>
+        <div className="table-overflow">
           <table>
             <thead>
               <tr>
@@ -327,13 +314,7 @@ export default function DashboardPage() {
                     <td>{h.avgSteps.toLocaleString()}</td>
                     <td>{h.avgCalories.toLocaleString()} kcal</td>
                     <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div className="progress-bar" style={{ width: "80px" }}>
                           <div
                             className="progress-bar-fill"

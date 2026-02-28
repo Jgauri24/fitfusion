@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, ReactNode } from "react";
+import { Search } from "lucide-react";
 
 interface Column {
     key: string;
@@ -41,7 +42,9 @@ export default function DataTable({
                 <span className="table-title">{title}</span>
                 {searchKey && (
                     <div className="table-search">
-                        <span className="table-search-icon">🔍</span>
+                        <span className="table-search-icon">
+                            <Search size={14} />
+                        </span>
                         <input
                             type="text"
                             placeholder={searchPlaceholder}
@@ -51,7 +54,7 @@ export default function DataTable({
                     </div>
                 )}
             </div>
-            <div style={{ overflowX: "auto" }}>
+            <div className="table-overflow">
                 <table>
                     <thead>
                         <tr>

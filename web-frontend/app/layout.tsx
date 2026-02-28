@@ -52,91 +52,43 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>FitFusion Admin — Campus Fitness & Wellness</title>
+        <title>VITA Admin — Campus Wellness Intelligence</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body className={`${inter.variable}`}>
+      <body className={`${inter.variable} bg-gray-100 text-gray-900 font-sans antialiased`}>
         {!isClient ? (
-          <main style={{ minHeight: "100vh", background: "var(--bg-primary)" }} />
+          <main className="loading-container" />
         ) : isLogin ? (
-          <main style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+          <main>
             {children}
           </main>
         ) : (
           <div className="admin-layout">
             <Sidebar />
             <main className="main-content">
-              {/* Clean Header — Notification + Profile */}
-              <header style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "16px",
-                padding: "16px 0 20px",
-                marginBottom: "4px",
-              }}>
+              {/* Header — Notification + Profile */}
+              <header className="top-header">
                 {/* Notification Bell */}
                 <div style={{ position: "relative" }}>
                   <button
                     onClick={() => setShowNotif(!showNotif)}
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "12px",
-                      background: "var(--bg-card)",
-                      border: "1px solid var(--border)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
+                    className="header-notification-btn"
                   >
-                    <Bell size={18} color="var(--text-secondary)" />
+                    <Bell size={18} />
                   </button>
-                  {/* Badge */}
-                  <span style={{
-                    position: "absolute",
-                    top: "-4px",
-                    right: "-4px",
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "50%",
-                    background: "var(--red)",
-                    color: "#fff",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "2px solid var(--bg-primary)",
-                  }}>
-                    3
-                  </span>
+                  <span className="header-notification-badge">3</span>
 
-                  {/* Dropdown */}
                   {showNotif && (
-                    <div style={{
-                      position: "absolute",
-                      top: "48px",
-                      right: 0,
-                      width: "300px",
-                      background: "var(--bg-card-solid)",
-                      border: "1px solid var(--border-light)",
-                      borderRadius: "14px",
-                      padding: "16px",
-                      zIndex: 100,
-                      boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
-                      backdropFilter: "blur(16px)",
-                    }}>
-                      <div style={{ fontWeight: 600, fontSize: "14px", color: "var(--text-primary)", marginBottom: "12px" }}>Notifications</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                    <div className="header-notification-dropdown">
+                      <div className="header-notification-title">Notifications</div>
+                      <div className="header-notification-list">
+                        <div className="header-notification-item">
                           🚨 2 new burnout alerts flagged
                         </div>
-                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                        <div className="header-notification-item">
                           📊 Weekly wellness report ready
                         </div>
-                        <div style={{ fontSize: "13px", color: "var(--text-secondary)", padding: "8px 10px", background: "var(--bg-elevated)", borderRadius: "8px" }}>
+                        <div className="header-notification-item">
                           ✅ Environment data updated
                         </div>
                       </div>
@@ -144,38 +96,17 @@ export default function RootLayout({
                   )}
                 </div>
 
-                {/* Profile Avatar */}
+                {/* Profile Chip */}
                 <div
                   onClick={() => router.push("/profile")}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    cursor: "pointer",
-                    padding: "6px 12px 6px 6px",
-                    borderRadius: "14px",
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    transition: "all 0.2s ease",
-                  }}
+                  className="header-profile-chip"
                 >
-                  <div style={{
-                    width: "34px",
-                    height: "34px",
-                    borderRadius: "10px",
-                    background: "linear-gradient(135deg, #a855f7, #7c3aed)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    color: "#fff",
-                  }}>
+                  <div className="header-profile-avatar">
                     {adminInitials}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", lineHeight: "1.2" }}>{adminName}</span>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Admin</span>
+                    <span className="header-profile-name">{adminName}</span>
+                    <span className="header-profile-role">Admin</span>
                   </div>
                 </div>
               </header>

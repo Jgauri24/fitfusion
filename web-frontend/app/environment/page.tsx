@@ -110,15 +110,8 @@ export default function EnvironmentPage() {
         }
     };
 
-    const inputStyle: React.CSSProperties = {
-        width: "100%", padding: "10px 12px", background: "var(--bg-elevated)",
-        border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)",
-        fontSize: "14px", boxSizing: "border-box", outline: "none"
-    };
-    const labelStyle: React.CSSProperties = { display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" };
-
     if (loading) {
-        return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh", color: "var(--text-muted)" }}>Loading environment data...</div>;
+        return <div className="loading-container">Loading environment data...</div>;
     }
 
     return (
@@ -128,11 +121,7 @@ export default function EnvironmentPage() {
                     <h1 className="page-title">Campus Environment</h1>
                     <p className="page-subtitle">Monitor air quality, noise levels, temperature, and humidity across zones</p>
                 </div>
-                <button onClick={() => setShowModal(true)} style={{
-                    padding: "10px 20px", background: "var(--accent)", color: "#fff", border: "none",
-                    borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: "pointer",
-                    display: "flex", alignItems: "center", gap: "8px"
-                }}>
+                <button onClick={() => setShowModal(true)} className="btn-primary">
                     <Plus size={16} /> Add Zone Reading
                 </button>
             </div>
@@ -153,7 +142,7 @@ export default function EnvironmentPage() {
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
                             <Tooltip contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }} />
                             <Legend wrapperStyle={{ fontSize: "12px", color: "var(--text-secondary)" }} />
-                            <Bar dataKey="stress" name="Stress Score" fill="#dc143c" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="stress" name="Stress Score" fill="#F87171" radius={[4, 4, 0, 0]} />
                             <Bar dataKey="activity" name="Activity Level" fill="var(--accent)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -184,7 +173,7 @@ export default function EnvironmentPage() {
 
             {/* Heatmap */}
             <ChartCard title="Zone Crowd Density Heatmap" badge="Simulated" className="animate-fade-in-up stagger-6">
-                <div style={{ overflowX: "auto", marginTop: "16px" }}>
+                <div className="table-overflow" style={{ marginTop: "16px" }}>
                     <table>
                         <thead>
                             <tr><th>Zone</th><th>Morning</th><th>Afternoon</th><th>Evening</th><th>Night</th></tr>
@@ -205,27 +194,21 @@ export default function EnvironmentPage() {
 
             {/* Add Zone Modal */}
             {showModal && (
-                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
-                    onClick={() => setShowModal(false)}>
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "440px", boxShadow: "var(--shadow-lg)" }}
-                        onClick={(e) => e.stopPropagation()} className="animate-fade-in-up">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)" }}>Add Zone Reading</h2>
-                            <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}><X size={20} /></button>
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" style={{ maxWidth: "440px" }} onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Add Zone Reading</h2>
+                            <button onClick={() => setShowModal(false)} className="modal-close"><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                            <div><label style={labelStyle}>Zone Name *</label><input required value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })} style={inputStyle} placeholder="e.g., Library Area" /></div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                                <div><label style={labelStyle}>AQI *</label><input type="number" required value={form.aqi} onChange={(e) => setForm({ ...form, aqi: e.target.value })} style={inputStyle} placeholder="0-500" /></div>
-                                <div><label style={labelStyle}>Noise (dB) *</label><input type="number" required value={form.noiseDb} onChange={(e) => setForm({ ...form, noiseDb: e.target.value })} style={inputStyle} placeholder="0-120" /></div>
-                                <div><label style={labelStyle}>Temperature (°C) *</label><input type="number" step="0.1" required value={form.temperature} onChange={(e) => setForm({ ...form, temperature: e.target.value })} style={inputStyle} placeholder="°C" /></div>
-                                <div><label style={labelStyle}>Humidity (%) *</label><input type="number" step="0.1" required value={form.humidity} onChange={(e) => setForm({ ...form, humidity: e.target.value })} style={inputStyle} placeholder="%" /></div>
+                        <form onSubmit={handleSubmit} className="modal-form">
+                            <div><label className="form-label">Zone Name *</label><input required value={form.zone} onChange={(e) => setForm({ ...form, zone: e.target.value })} className="form-input" placeholder="e.g., Library Area" /></div>
+                            <div className="modal-grid-2">
+                                <div><label className="form-label">AQI *</label><input type="number" required value={form.aqi} onChange={(e) => setForm({ ...form, aqi: e.target.value })} className="form-input" placeholder="0-500" /></div>
+                                <div><label className="form-label">Noise (dB) *</label><input type="number" required value={form.noiseDb} onChange={(e) => setForm({ ...form, noiseDb: e.target.value })} className="form-input" placeholder="0-120" /></div>
+                                <div><label className="form-label">Temperature (°C) *</label><input type="number" step="0.1" required value={form.temperature} onChange={(e) => setForm({ ...form, temperature: e.target.value })} className="form-input" placeholder="°C" /></div>
+                                <div><label className="form-label">Humidity (%) *</label><input type="number" step="0.1" required value={form.humidity} onChange={(e) => setForm({ ...form, humidity: e.target.value })} className="form-input" placeholder="%" /></div>
                             </div>
-                            <button type="submit" disabled={saving} style={{
-                                padding: "12px", background: "var(--accent)", color: "#fff", border: "none",
-                                borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: saving ? "not-allowed" : "pointer",
-                                opacity: saving ? 0.7 : 1, marginTop: "8px"
-                            }}>
+                            <button type="submit" disabled={saving} className="btn-primary" style={{ marginTop: "8px" }}>
                                 {saving ? "Adding..." : "Add Zone Reading"}
                             </button>
                         </form>
