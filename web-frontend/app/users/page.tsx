@@ -73,7 +73,7 @@ export default function UsersPage() {
             label: "BURNOUT FLAGS",
             render: (c: typeof cohorts[0]) => {
                 if (c.flags === 0) return <span style={{ color: "var(--green)", fontWeight: 600 }}>None</span>;
-                if (c.flags <= 2) return <span className="badge badge-cyan" style={{ background: "var(--accent-glow)", color: "var(--accent)" }}>{c.flags} flags</span>;
+                if (c.flags <= 2) return <span className="badge badge-purple">{c.flags} flags</span>;
                 if (c.flags <= 4) return <span className="badge badge-orange">{c.flags} flags</span>;
                 return <span className="badge badge-red">{c.flags} flags</span>;
             }
@@ -229,7 +229,7 @@ export default function UsersPage() {
                         </div>
                         <div style={{ display: "flex", gap: "8px" }}>
                             <button className="filter-btn" style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>Notify Warden</button>
-                            <button className="filter-btn" style={{ background: "var(--accent)", color: "#000", fontWeight: 600, borderColor: "var(--accent)" }}>Schedule Circle</button>
+                            <button className="filter-btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 600, borderColor: "var(--accent)" }}>Schedule Circle</button>
                             <button className="filter-btn" style={{ marginLeft: "auto" }}>Dismiss</button>
                         </div>
                     </div>
@@ -274,7 +274,7 @@ export default function UsersPage() {
                         </div>
                         <div style={{ display: "flex", gap: "8px" }}>
                             <button className="filter-btn" style={{ background: "var(--bg-elevated)", color: "var(--text-primary)" }}>Notify Warden</button>
-                            <button className="filter-btn" style={{ background: "var(--accent)", color: "#000", fontWeight: 600, borderColor: "var(--accent)" }}>Schedule Circle</button>
+                            <button className="filter-btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 600, borderColor: "var(--accent)" }}>Schedule Circle</button>
                             <button className="filter-btn" style={{ marginLeft: "auto" }}>Dismiss</button>
                         </div>
                     </div>

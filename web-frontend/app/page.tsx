@@ -13,12 +13,48 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  AreaChart,
+  Area,
 } from "recharts";
+
+function DateSelector() {
+  const days = [
+    { num: "01", day: "Sat" },
+    { num: "02", day: "Sun" },
+    { num: "03", day: "Mon" },
+    { num: "04", day: "Tue" },
+    { num: "05", day: "Wed" },
+    { num: "06", day: "Thu" },
+    { num: "07", day: "Fri" },
+    { num: "08", day: "Sat" },
+    { num: "09", day: "Sun" },
+    { num: "10", day: "Mon" },
+    { num: "11", day: "Tue" },
+    { num: "12", day: "Wed" },
+    { num: "13", day: "Thu" },
+  ];
+  const [active, setActive] = useState(9);
+  return (
+    <div className="date-selector">
+      {days.map((d, i) => (
+        <div
+          key={i}
+          className={`date-pill ${active === i ? "active" : ""}`}
+          onClick={() => setActive(i)}
+        >
+          <span className="date-pill-day">{d.num}</span>
+          <span className="date-pill-label">{d.day}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("Days");
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -64,7 +100,23 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh", color: "var(--text-muted)" }}>
-        Loading dashboard data...
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "12px"
+        }}>
+          <div style={{
+            width: "36px",
+            height: "36px",
+            border: "3px solid var(--border)",
+            borderTopColor: "var(--accent)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          Loading dashboard data...
+        </div>
       </div>
     );
   }
@@ -72,10 +124,30 @@ export default function DashboardPage() {
   return (
     <>
       <div className="page-header animate-fade-in-up">
-        <h1 className="page-title">Dashboard</h1>
-        <p className="page-subtitle">
-          Campus fitness & wellness overview — Real-time insights
-        </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1 className="page-title">Statistics</h1>
+            <p className="page-subtitle">
+              Campus fitness & wellness overview — Real-time insights
+            </p>
+          </div>
+          <div className="period-toggle">
+            {["Days", "Weeks", "Months"].map((p) => (
+              <button
+                key={p}
+                className={`period-btn ${period === p ? "active" : ""}`}
+                onClick={() => setPeriod(p)}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Date Selector */}
+      <div className="animate-fade-in-up stagger-1">
+        <DateSelector />
       </div>
 
       {/* KPI Stats */}
@@ -128,22 +200,35 @@ export default function DashboardPage() {
         >
           <div style={{ width: "100%", height: 220, marginTop: 16 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+              <AreaChart data={weeklyData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#a855f7" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#a855f7" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} dy={10} />
                 <YAxis domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
                 <Tooltip
-                  cursor={{ fill: "transparent" }}
-                  contentStyle={{ background: "var(--bg-elevated)", border: "none", borderRadius: "8px", color: "var(--text-primary)" }}
+                  cursor={{ stroke: "var(--accent)", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  contentStyle={{ background: "var(--bg-elevated)", border: "1px solid var(--border-light)", borderRadius: "12px", color: "var(--text-primary)", boxShadow: "var(--shadow-md)" }}
                   formatter={(val: any) => [`${val}%`, "Activity Level"]}
                 />
                 <ReferenceLine
                   y={avgPercentage}
-                  stroke="var(--text-muted)"
-                  strokeDasharray="3 3"
-                  label={{ position: "right", value: "Avg", fill: "var(--text-muted)", fontSize: 11 }}
+                  stroke="var(--gold)"
+                  strokeDasharray="6 4"
+                  strokeWidth={2}
+                  label={{ position: "right", value: "Avg", fill: "var(--gold)", fontSize: 11, fontWeight: 600 }}
                 />
-                <Bar dataKey="percentage" fill="var(--accent-dark)" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="percentage"
+                  stroke="#a855f7"
+                  strokeWidth={2.5}
+                  fill="url(#purpleGradient)"
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
@@ -161,6 +246,7 @@ export default function DashboardPage() {
                     const percentage = totalMealCals > 0 ? (item.avgCalories / totalMealCals) * 100 : 0;
                     const strokeDasharray = `${(percentage / 100) * 376.99
                       } 376.99`;
+                    const mealColors = ["#a855f7", "#f59e0b", "#5e9eff", "#ff6b9d"];
                     const element = (
                       <circle
                         key={i}
@@ -168,7 +254,7 @@ export default function DashboardPage() {
                         cy="80"
                         r="60"
                         fill="none"
-                        stroke={item.color}
+                        stroke={mealColors[i % mealColors.length]}
                         strokeWidth="20"
                         strokeDasharray={strokeDasharray}
                         strokeDashoffset={`${-acc.offset}`}
@@ -193,18 +279,21 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="donut-legend">
-              {nutritionByMeal.map((item: any) => (
-                <div key={item.meal} className="donut-legend-item">
-                  <div
-                    className="donut-legend-color"
-                    style={{ background: item.color }}
-                  />
-                  <span className="donut-legend-text">{item.meal}</span>
-                  <span className="donut-legend-value">
-                    {item.avgCalories} kcal
-                  </span>
-                </div>
-              ))}
+              {nutritionByMeal.map((item: any, i: number) => {
+                const mealColors = ["#a855f7", "#f59e0b", "#5e9eff", "#ff6b9d"];
+                return (
+                  <div key={item.meal} className="donut-legend-item">
+                    <div
+                      className="donut-legend-color"
+                      style={{ background: mealColors[i % mealColors.length] }}
+                    />
+                    <span className="donut-legend-text">{item.meal}</span>
+                    <span className="donut-legend-value">
+                      {item.avgCalories} kcal
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </ChartCard>
@@ -273,7 +362,7 @@ export default function DashboardPage() {
                       {flags === 0 ? (
                         <span style={{ color: "var(--green)", fontWeight: 600 }}>None</span>
                       ) : flags <= 2 ? (
-                        <span className="badge badge-cyan" style={{ background: "var(--accent-glow)", color: "var(--accent)" }}>
+                        <span className="badge badge-purple">
                           {flags} flags
                         </span>
                       ) : flags <= 4 ? (
@@ -289,6 +378,16 @@ export default function DashboardPage() {
           </table>
         </div>
       </ChartCard>
+
+      {/* Feature Card */}
+      <div style={{ marginTop: "28px" }} className="animate-fade-in-up stagger-6">
+        <div className="feature-card">
+          <div className="feature-card-value">
+            +{stats?.totalUsers?.toLocaleString() || "2,847"}
+          </div>
+          <div className="feature-card-label">Total Campus Users</div>
+        </div>
+      </div>
     </>
   );
 }
