@@ -12,7 +12,6 @@ import {
     TrendingUp,
     FileText,
     LogOut,
-    Settings,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -60,7 +59,12 @@ export default function Sidebar() {
         <aside className="sidebar">
             {/* Brand */}
             <div className="sidebar-brand">
-                <div className="sidebar-brand-icon">FF</div>
+                <div className="sidebar-brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 6 L16 26 L12 26 L6 6 Z" fill="#EDEDED" />
+                        <path d="M22 6 C22 12 18 15 12 15 C18 15 22 18 22 24 C22 18 26 15 32 15 C26 15 22 12 22 6 Z" fill="#0070F3" />
+                    </svg>
+                </div>
             </div>
 
             {/* Navigation */}
@@ -86,16 +90,8 @@ export default function Sidebar() {
                 </Link>
                 <button
                     onClick={handleLogout}
-                    className="nav-item"
+                    className="nav-item nav-item-logout"
                     data-tooltip="Sign Out"
-                    style={{
-                        border: "none",
-                        color: "var(--red)",
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,68,68,0.12)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
                 >
                     <span className="nav-icon"><LogOut size={20} /></span>
                 </button>

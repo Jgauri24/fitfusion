@@ -34,7 +34,6 @@ export default function NutritionPage() {
     const [showModal, setShowModal] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    // Form state
     const [form, setForm] = useState({
         name: "", category: "Vegetarian", meal: "Breakfast",
         portion: "1 plate", calories: "", protein: "", carbs: "", fats: ""
@@ -83,7 +82,6 @@ export default function NutritionPage() {
 
     const filtered = mealFilter === "All" ? foodItems : foodItems.filter((f) => f.meal === mealFilter);
 
-    // Compute real nutrition-by-meal chart from food items
     const nutritionByMeal = meals.filter(m => m !== "All").map(meal => {
         const items = foodItems.filter(f => f.meal === meal);
         const avg = items.length ? Math.round(items.reduce((s, f) => s + f.calories, 0) / items.length) : 0;
@@ -118,15 +116,8 @@ export default function NutritionPage() {
         { key: "fats", label: "Fats", render: (f: FoodItem) => <span>{f.fats}g</span> },
     ];
 
-    const inputStyle: React.CSSProperties = {
-        width: "100%", padding: "10px 12px", background: "var(--bg-elevated)",
-        border: "1px solid var(--border)", borderRadius: "8px", color: "var(--text-primary)",
-        fontSize: "14px", boxSizing: "border-box", outline: "none"
-    };
-    const labelStyle: React.CSSProperties = { display: "block", fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" };
-
     if (loading) {
-        return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh", color: "var(--text-muted)" }}>Loading nutrition data...</div>;
+        return <div className="loading-container">Loading nutrition data...</div>;
     }
 
     return (
@@ -136,11 +127,7 @@ export default function NutritionPage() {
                     <h1 className="page-title">Nutrition Management</h1>
                     <p className="page-subtitle">Manage mess menus, track food items, and monitor nutritional intake</p>
                 </div>
-                <button onClick={() => setShowModal(true)} style={{
-                    padding: "10px 20px", background: "var(--accent)", color: "#000", border: "none",
-                    borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: "pointer",
-                    display: "flex", alignItems: "center", gap: "8px"
-                }}>
+                <button onClick={() => setShowModal(true)} className="btn-primary">
                     <Plus size={16} /> Add Food Item
                 </button>
             </div>
@@ -199,48 +186,42 @@ export default function NutritionPage() {
 
             {/* Add Food Item Modal */}
             {showModal && (
-                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}
-                    onClick={() => setShowModal(false)}>
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "500px", boxShadow: "var(--shadow-lg)" }}
-                        onClick={(e) => e.stopPropagation()} className="animate-fade-in-up">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                            <h2 style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)" }}>Add Food Item</h2>
-                            <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}><X size={20} /></button>
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">Add Food Item</h2>
+                            <button onClick={() => setShowModal(false)} className="modal-close"><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <form onSubmit={handleSubmit} className="modal-form">
+                            <div className="modal-grid-2">
                                 <div>
-                                    <label style={labelStyle}>Name *</label>
-                                    <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inputStyle} placeholder="e.g., Dal Rice" />
+                                    <label className="form-label">Name *</label>
+                                    <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="form-input" placeholder="e.g., Dal Rice" />
                                 </div>
                                 <div>
-                                    <label style={labelStyle}>Category *</label>
-                                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
+                                    <label className="form-label">Category *</label>
+                                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="form-select">
                                         <option>Vegetarian</option><option>Non-Vegetarian</option><option>Beverage</option><option>Dessert</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={labelStyle}>Meal *</label>
-                                    <select value={form.meal} onChange={(e) => setForm({ ...form, meal: e.target.value })} style={inputStyle}>
+                                    <label className="form-label">Meal *</label>
+                                    <select value={form.meal} onChange={(e) => setForm({ ...form, meal: e.target.value })} className="form-select">
                                         <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={labelStyle}>Portion *</label>
-                                    <input required value={form.portion} onChange={(e) => setForm({ ...form, portion: e.target.value })} style={inputStyle} placeholder="e.g., 1 plate" />
+                                    <label className="form-label">Portion *</label>
+                                    <input required value={form.portion} onChange={(e) => setForm({ ...form, portion: e.target.value })} className="form-input" placeholder="e.g., 1 plate" />
                                 </div>
                             </div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "12px" }}>
-                                <div><label style={labelStyle}>Calories *</label><input type="number" required value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} style={inputStyle} placeholder="kcal" /></div>
-                                <div><label style={labelStyle}>Protein</label><input type="number" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} style={inputStyle} placeholder="g" /></div>
-                                <div><label style={labelStyle}>Carbs</label><input type="number" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} style={inputStyle} placeholder="g" /></div>
-                                <div><label style={labelStyle}>Fats</label><input type="number" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} style={inputStyle} placeholder="g" /></div>
+                            <div className="modal-grid-4">
+                                <div><label className="form-label">Calories *</label><input type="number" required value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} className="form-input" placeholder="kcal" /></div>
+                                <div><label className="form-label">Protein</label><input type="number" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} className="form-input" placeholder="g" /></div>
+                                <div><label className="form-label">Carbs</label><input type="number" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} className="form-input" placeholder="g" /></div>
+                                <div><label className="form-label">Fats</label><input type="number" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} className="form-input" placeholder="g" /></div>
                             </div>
-                            <button type="submit" disabled={saving} style={{
-                                padding: "12px", background: "var(--accent)", color: "#000", border: "none",
-                                borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: saving ? "not-allowed" : "pointer",
-                                opacity: saving ? 0.7 : 1, marginTop: "8px"
-                            }}>
+                            <button type="submit" disabled={saving} className="btn-primary" style={{ marginTop: "8px" }}>
                                 {saving ? "Adding..." : "Add Food Item"}
                             </button>
                         </form>
