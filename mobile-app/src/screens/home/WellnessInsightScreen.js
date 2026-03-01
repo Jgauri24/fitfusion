@@ -4,15 +4,18 @@ import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
 import { mockPWS, mockTrend } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
-const ProgressBar = ({ label, score }) => (
+const ProgressBar = ({ icon, label, score }) => (
     <View style={styles.progressRow}>
         <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>{label}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Feather name={icon} size={14} color={COLORS.textSecondary} />
+                <Text style={styles.progressLabel}>{label}</Text>
+            </View>
             <Text style={styles.progressScore}>{score}</Text>
         </View>
         <View style={styles.track}>
@@ -22,119 +25,70 @@ const ProgressBar = ({ label, score }) => (
 );
 
 export default function WellnessInsightScreen({ navigation }) {
-    // Mocking 30 day data by repeating trend for visual density
     const thirtyDayData = [...mockTrend, ...mockTrend, ...mockTrend, ...mockTrend, mockTrend[0], mockTrend[1]];
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={styles.scroll}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Feather name="arrow-left" size={24} color={COLORS.white} />
+                    <Feather name="arrow-left" size={22} color={COLORS.white} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Wellness Insights</Text>
-                <View style={{ width: 24 }} />
+                <View style={{ width: 22 }} />
             </View>
 
             <Text style={globalStyles.sectionLabel}>30-DAY TREND</Text>
-            <LineChart
-                data={{
-                    labels: ["1", "5", "10", "15", "20", "25", "30"],
-                    datasets: [{ data: thirtyDayData }]
-                }}
-                width={screenWidth - 40}
-                height={220}
-                chartConfig={{
-                    backgroundColor: COLORS.bg,
-                    backgroundGradientFrom: COLORS.bg,
-                    backgroundGradientTo: COLORS.bg,
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(200, 255, 87, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(136, 136, 136, ${opacity})`,
-                    style: { borderRadius: 16 },
-                    propsForDots: { r: "0" }, // Hide dots for dense chart
-                    propsForBackgroundLines: { stroke: COLORS.cardBorder }
-                }}
-                bezier
-                style={styles.chart}
-            />
+            <GlassCard noPad style={{ marginBottom: 20 }}>
+                <LineChart
+                    data={{
+                        labels: ["1", "5", "10", "15", "20", "25", "30"],
+                        datasets: [{ data: thirtyDayData }],
+                    }}
+                    width={screenWidth - 56}
+                    height={210}
+                    chartConfig={{
+                        backgroundColor: 'transparent',
+                        backgroundGradientFrom: COLORS.cardSolid,
+                        backgroundGradientTo: COLORS.cardSolid,
+                        decimalPlaces: 0,
+                        color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
+                        labelColor: () => COLORS.textMuted,
+                        style: { borderRadius: 20 },
+                        propsForDots: { r: '0' },
+                        propsForBackgroundLines: { stroke: COLORS.border },
+                    }}
+                    bezier
+                    style={{ borderRadius: 20, padding: 8 }}
+                />
+            </GlassCard>
 
             <Text style={globalStyles.sectionLabel}>DIMENSIONS</Text>
-            <Card style={styles.breakdownCard}>
-                <ProgressBar label="🥗 Nutrition" score={mockPWS.nutrition} />
-                <ProgressBar label="⚡ Activity" score={mockPWS.activity} />
-                <ProgressBar label="😊 Mood" score={mockPWS.mood} />
-                <ProgressBar label="🌿 Environment" score={mockPWS.environment} />
-            </Card>
+            <GlassCard style={{ marginBottom: 20 }}>
+                <ProgressBar icon="heart" label="Nutrition" score={mockPWS.nutrition} />
+                <ProgressBar icon="zap" label="Activity" score={mockPWS.activity} />
+                <ProgressBar icon="smile" label="Mood" score={mockPWS.mood} />
+                <ProgressBar icon="wind" label="Environment" score={mockPWS.environment} />
+            </GlassCard>
 
             <Text style={globalStyles.sectionLabel}>SUMMARY</Text>
-            <Card>
+            <GlassCard>
                 <Text style={styles.summaryText}>
-                    Your mood has been stable this week. Activity needs attention — you&apos;ve missed 3 sessions.
+                    Your mood has been stable this week. Activity needs attention — you've missed 3 sessions.
                 </Text>
-            </Card>
-
+            </GlassCard>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 50,
-        paddingBottom: 40,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 30,
-    },
-    title: {
-        ...globalStyles.heading,
-        fontSize: 20,
-    },
-    chart: {
-        marginVertical: 10,
-        borderRadius: 16,
-        marginLeft: -10, // Adjust chart kit default padding
-    },
-    breakdownCard: {
-        marginBottom: 20,
-    },
-    progressRow: {
-        marginBottom: 15,
-    },
-    progressHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    progressLabel: {
-        color: COLORS.white,
-        fontSize: 14,
-    },
-    progressScore: {
-        color: COLORS.accent,
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    track: {
-        height: 8,
-        backgroundColor: COLORS.bg,
-        borderRadius: 4,
-        overflow: 'hidden',
-    },
-    fill: {
-        height: '100%',
-        backgroundColor: COLORS.accent,
-        borderRadius: 4,
-    },
-    summaryText: {
-        color: COLORS.white,
-        fontSize: 15,
-        lineHeight: 22,
-    }
+    scroll: { paddingHorizontal: 20, paddingTop: 50, paddingBottom: 40 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
+    title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
+    progressRow: { marginBottom: 16 },
+    progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 7 },
+    progressLabel: { color: COLORS.white, fontSize: 14, fontWeight: '500' },
+    progressScore: { color: COLORS.accent, fontWeight: '700', fontSize: 14 },
+    track: { height: 5, backgroundColor: COLORS.border, borderRadius: 3 },
+    fill: { height: '100%', backgroundColor: COLORS.accent, borderRadius: 3 },
+    summaryText: { color: COLORS.textSecondary, fontSize: 15, lineHeight: 23 },
 });

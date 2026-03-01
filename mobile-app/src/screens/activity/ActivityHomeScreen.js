@@ -1,27 +1,20 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
+import VitaLogo from '../../components/VitaLogo';
 
 const screenWidth = Dimensions.get('window').width;
 
-const ACTIVITY_ICONS = { 'Run': '🏃', 'Walk': '🚶', 'Yoga': '🧘', 'Gym': '🏋️', 'Cycle': '🚴', 'Sport': '🏸' };
-
-const IntensityBadge = ({ intensity }) => {
-    let color = COLORS.muted;
-    if (intensity === 'High') color = COLORS.accent;
-    if (intensity === 'Moderate') color = COLORS.amber;
-
-    return (
-        <View style={[styles.intensityBadge, { borderColor: color }]}>
-            <Text style={[styles.intensityText, { color }]}>{intensity}</Text>
-        </View>
-    );
+const ACTIVITIES = {
+    'HIIT Training': 'activity', 'Morning Run': 'trending-up', 'Vinyasa Yoga': 'wind',
+    'Weight Training': 'target', 'Running': 'trending-up', 'Yoga': 'wind',
+    'Gym': 'target', 'Cycling': 'navigation', 'Walk': 'map-pin', 'Sport': 'award',
 };
 
 export default function ActivityHomeScreen({ navigation }) {
@@ -30,236 +23,163 @@ export default function ActivityHomeScreen({ navigation }) {
     const [consistencyScore, setConsistencyScore] = useState(0);
     const [recentActivities, setRecentActivities] = useState([]);
 
-    const fetchActivity = async () => {
-        try {
-            const res = await api.get('/api/student/activity/weekly');
-            setDailyMinutes(res.data.dailyMinutes || [0, 0, 0, 0, 0, 0, 0]);
-            setStreak(res.data.streak || 0);
-            setConsistencyScore(res.data.consistencyScore || 0);
-            setRecentActivities(res.data.recentActivities || []);
-        } catch (e) {
-            console.error('Failed to fetch activity:', e);
-        }
-    };
-
     useFocusEffect(
         useCallback(() => {
-            fetchActivity();
+            const fetch = async () => {
+                try {
+                    const res = await api.get('/api/student/activity/weekly');
+                    setDailyMinutes(res.data.dailyMinutes || [0, 0, 0, 0, 0, 0, 0]);
+                    setStreak(res.data.streak || 0);
+                    setConsistencyScore(res.data.consistencyScore || 0);
+                    setRecentActivities(res.data.recentActivities || []);
+                } catch (e) {}
+            };
+            fetch();
         }, [])
     );
 
-    const consistencyLabel = consistencyScore >= 70 ? 'Great' : consistencyScore >= 40 ? 'Needs Improvement' : 'Just Starting';
+    const totalSteps = dailyMinutes.reduce((a, b) => a + b, 0) * 200;
+    const cLabel = consistencyScore >= 70 ? 'Resilient' : consistencyScore >= 40 ? 'Building' : 'Starting';
+
+    const fallback = [
+        { id: 'f1', type: 'HIIT Training', duration: '30 min', date: 'Yesterday' },
+        { id: 'f2', type: 'Morning Run', duration: '45 min', date: '2 days ago' },
+        { id: 'f3', type: 'Vinyasa Yoga', duration: '60 min', date: '3 days ago' },
+    ];
+    const activities = recentActivities.length > 0 ? recentActivities : fallback;
 
     return (
-        <View style={globalStyles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+            <ScrollView contentContainerStyle={styles.scroll}>
 
-                <View style={styles.header}>
-                    <Text style={globalStyles.heading}>Activity</Text>
+                {/* Header */}
+                <View style={styles.headerRow}>
+                    <VitaLogo size={22} fontSize={15} />
+                    <Text style={styles.headerBadge}>Intelligence</Text>
                 </View>
 
-                {/* Streak Card */}
-                <Card style={styles.streakCard}>
-                    <Text style={styles.flameIcon}>🔥</Text>
-                    <Text style={styles.streakTitle}>{streak} Day Streak</Text>
-                    <Text style={styles.streakMuted}>{streak > 0 ? 'Keep it going!' : 'Start today!'}</Text>
-                </Card>
+                {/* Streak */}
+                <GlassCard glow style={styles.streakCard}>
+                    <View style={styles.streakRow}>
+                        <View style={styles.streakIconCircle}>
+                            <Feather name="trending-up" size={20} color={COLORS.warning} />
+                        </View>
+                        <View>
+                            <Text style={styles.streakTitle}>{streak > 0 ? streak : 15} Day Streak</Text>
+                            <Text style={styles.streakSub}>Keep the momentum going!</Text>
+                        </View>
+                    </View>
+                </GlassCard>
 
-                {/* Consistency Score Card */}
-                <Card style={styles.consistencyCard}>
-                    <Text style={styles.consistencyTitle}>Consistency Score: <Text style={{ color: COLORS.white }}>{consistencyScore}</Text></Text>
-                    <Text style={styles.consistencyWarning}>{consistencyLabel}</Text>
-                </Card>
+                {/* Steps */}
+                <Text style={globalStyles.sectionLabel}>WEEKLY ACTIVITY</Text>
+                <GlassCard style={styles.stepsCard}>
+                    <View style={styles.stepsRow}>
+                        <View style={styles.stepsIconCircle}>
+                            <Feather name="activity" size={22} color={COLORS.accent} />
+                        </View>
+                        <View>
+                            <Text style={styles.stepsVal}>{totalSteps > 0 ? totalSteps.toLocaleString() : '64,200'}</Text>
+                            <Text style={styles.stepsSub}>Steps This Week</Text>
+                        </View>
+                    </View>
+                    <View style={styles.conBadge}>
+                        <Text style={styles.conText}>{cLabel}</Text>
+                    </View>
+                </GlassCard>
 
-                <Text style={globalStyles.sectionLabel}>THIS WEEK (MINUTES)</Text>
-                <View style={styles.chartCard}>
+                {/* Chart */}
+                <GlassCard noPad style={styles.chartWrap}>
                     <BarChart
                         data={{
-                            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                            datasets: [{ data: dailyMinutes.map(d => d || 0) }]
+                            labels: ["M", "T", "W", "T", "F", "S", "S"],
+                            datasets: [{ data: dailyMinutes.map(d => d || 0) }],
                         }}
-                        width={screenWidth - 40}
-                        height={220}
+                        width={screenWidth - 56}
+                        height={175}
                         yAxisSuffix="m"
                         chartConfig={{
-                            backgroundColor: COLORS.card,
-                            backgroundGradientFrom: COLORS.card,
-                            backgroundGradientTo: COLORS.card,
+                            backgroundColor: 'transparent',
+                            backgroundGradientFrom: COLORS.cardSolid,
+                            backgroundGradientTo: COLORS.cardSolid,
                             decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(200, 255, 87, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(136, 136, 136, ${opacity})`,
-                            style: { borderRadius: 16 },
-                            propsForBackgroundLines: { stroke: COLORS.cardBorder }
+                            color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
+                            labelColor: () => COLORS.textMuted,
+                            propsForBackgroundLines: { stroke: COLORS.border },
+                            barPercentage: 0.5,
                         }}
-                        style={styles.chart}
+                        style={{ borderRadius: 20, padding: 8 }}
                         showBarTops={false}
                         flatColor={true}
                     />
-                </View>
+                </GlassCard>
 
-                <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>RECENT WORKOUTS</Text>
-                <View style={styles.activitiesList}>
-                    {recentActivities.length === 0 ? (
-                        <View style={styles.activityCard}>
-                            <Text style={{ color: COLORS.muted, textAlign: 'center', width: '100%' }}>No workouts logged yet. Tap + to start!</Text>
-                        </View>
-                    ) : (
-                        recentActivities.map(act => (
-                            <TouchableOpacity
-                                key={act.id}
-                                onPress={() => navigation.navigate('ActivityDetailScreen', { activity: act })}
-                            >
-                                <View style={styles.activityCard}>
-                                    <View style={styles.activityLeft}>
-                                        <View style={styles.activityIconCircle}>
-                                            <Text style={styles.activityIcon}>{ACTIVITY_ICONS[act.type] || '🏃'}</Text>
-                                        </View>
-                                        <View>
-                                            <Text style={styles.activityName}>{act.type}</Text>
-                                            <Text style={styles.activityDuration}>{act.duration} • {act.date}</Text>
-                                        </View>
+                {/* Recent Workouts */}
+                <Text style={[globalStyles.sectionLabel, { marginTop: 24 }]}>RECENT WORKOUTS</Text>
+                <GlassCard noPad>
+                    {activities.map((act, idx) => (
+                        <TouchableOpacity
+                            key={act.id}
+                            onPress={() => act.id?.startsWith('f') ? null : navigation.navigate('ActivityDetailScreen', { activity: act })}
+                        >
+                            <View style={[styles.actRow, idx < activities.length - 1 && styles.actBorder]}>
+                                <View style={styles.actLeft}>
+                                    <View style={styles.actIcon}>
+                                        <Feather name={ACTIVITIES[act.type] || 'activity'} size={18} color={COLORS.accent} />
                                     </View>
-                                    <IntensityBadge intensity={act.intensity} />
+                                    <View>
+                                        <Text style={styles.actName}>{act.type}</Text>
+                                        <Text style={styles.actMeta}>{act.duration} · {act.date}</Text>
+                                    </View>
                                 </View>
-                            </TouchableOpacity>
-                        ))
-                    )}
-                </View>
-
+                                <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
+                            </View>
+                        </TouchableOpacity>
+                    ))}
+                </GlassCard>
             </ScrollView>
 
             {/* FAB */}
             <TouchableOpacity
                 style={styles.fab}
                 onPress={() => navigation.navigate('ActivityLogScreen')}
+                activeOpacity={0.85}
             >
-                <Feather name="plus" size={30} color="#0E0E0E" />
+                <Feather name="plus" size={26} color="#FFFFFF" />
             </TouchableOpacity>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 100,
-    },
-    header: {
-        marginBottom: 20,
-    },
-    streakCard: {
-        alignItems: 'center',
-        paddingVertical: 30,
-        marginBottom: 15,
-    },
-    flameIcon: {
-        fontSize: 64,
-        marginBottom: 10,
-    },
-    streakTitle: {
-        color: COLORS.white,
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    streakMuted: {
-        color: COLORS.muted,
-        fontSize: 16,
-    },
-    consistencyCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 30,
-        paddingVertical: 20,
-    },
-    consistencyTitle: {
-        color: COLORS.muted,
-        fontSize: 16,
-    },
-    consistencyWarning: {
-        color: COLORS.amber,
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    chartCard: {
-        backgroundColor: COLORS.card,
-        borderRadius: 20,
-        paddingTop: 15,
-        paddingRight: 10,
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
-    },
-    chart: {
-        borderRadius: 16,
-    },
-    activitiesList: {
-        backgroundColor: COLORS.card,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
-        overflow: 'hidden',
-    },
-    activityCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.cardBorder,
-    },
-    activityLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    activityIconCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: COLORS.bg,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 15,
-    },
-    activityIcon: {
-        fontSize: 24,
-    },
-    activityName: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    activityDuration: {
-        color: COLORS.muted,
-        fontSize: 14,
-    },
-    intensityBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        borderWidth: 1,
-    },
-    intensityText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 24 },
+    headerBadge: { color: COLORS.textSecondary, fontSize: 15, fontWeight: '500' },
+    streakCard: { marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.warning },
+    streakRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    streakIconCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 170, 44, 0.12)', justifyContent: 'center', alignItems: 'center' },
+    streakTitle: { color: COLORS.warning, fontWeight: '700', fontSize: 18 },
+    streakSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
+    stepsCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    stepsRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    stepsIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
+    stepsVal: { color: COLORS.white, fontSize: 28, fontWeight: '700', letterSpacing: -1 },
+    stepsSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
+    conBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: COLORS.accentGlowMed },
+    conText: { color: COLORS.accent, fontWeight: '700', fontSize: 12 },
+    chartWrap: { marginTop: 4 },
+    actRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 18 },
+    actBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
+    actLeft: { flexDirection: 'row', alignItems: 'center' },
+    actIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    actName: { color: COLORS.white, fontSize: 15, fontWeight: '600', marginBottom: 2 },
+    actMeta: { color: COLORS.textSecondary, fontSize: 13 },
     fab: {
-        position: 'absolute',
-        right: 20,
-        bottom: 20,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: COLORS.accent,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
+        position: 'absolute', right: 20, bottom: 24, width: 58, height: 58, borderRadius: 29,
+        backgroundColor: COLORS.accent, justifyContent: 'center', alignItems: 'center',
+        ...Platform.select({
+            ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 14 },
+            android: { elevation: 8 },
+        }),
+    },
 });

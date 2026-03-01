@@ -2,41 +2,32 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { GlassCard } from '../../components/GlassCard';
 
 export default function JournalViewScreen({ route, navigation }) {
     const journal = route?.params?.journal || {
-        id: 1, title: 'Sample Journal', date: 'Today', full: 'No content loaded.'
+        id: 1, title: 'Sample Journal', date: 'Today', full: 'No content loaded.',
     };
 
     const handleDelete = () => {
-        Alert.alert(
-            "Delete Journal",
-            "Are you sure you want to delete this encrypted entry? This cannot be undone.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () => navigation.goBack()
-                }
-            ]
-        );
+        Alert.alert('Delete Journal', 'Delete this encrypted entry? This cannot be undone.', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Delete', style: 'destructive', onPress: () => navigation.goBack() },
+        ]);
     };
 
     return (
-        <View style={styles.container}>
+        <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Feather name="arrow-left" size={24} color={COLORS.white} />
+                    <Feather name="arrow-left" size={22} color={COLORS.white} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleDelete}>
-                    <Text style={styles.deleteText}>Delete</Text>
+                    <Text style={styles.deleteLink}>Delete</Text>
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-
+            <ScrollView contentContainerStyle={styles.scroll}>
                 <View style={styles.metaRow}>
                     <View style={styles.lockBadge}>
                         <Feather name="lock" size={12} color={COLORS.accent} />
@@ -45,65 +36,22 @@ export default function JournalViewScreen({ route, navigation }) {
                 </View>
 
                 <Text style={styles.titleText}>{journal.title}</Text>
-
                 <Text style={styles.bodyText}>{journal.full}</Text>
-
             </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 20,
-        backgroundColor: COLORS.bg,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
     },
-    deleteText: {
-        color: COLORS.danger,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    scrollArea: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 10,
-        paddingBottom: 40,
-    },
-    metaRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    lockBadge: {
-        backgroundColor: 'rgba(200, 255, 87, 0.1)',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        marginRight: 10,
-    },
-    dateText: {
-        color: COLORS.muted,
-        fontSize: 14,
-    },
-    titleText: {
-        ...globalStyles.heading,
-        fontSize: 28,
-        marginBottom: 30,
-        lineHeight: 36,
-    },
-    bodyText: {
-        color: COLORS.mutedLight,
-        fontSize: 18,
-        lineHeight: 28,
-    }
+    deleteLink: { color: COLORS.danger, fontSize: 15, fontWeight: '700' },
+    scroll: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 },
+    metaRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+    lockBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, marginRight: 10 },
+    dateText: { color: COLORS.textSecondary, fontSize: 14 },
+    titleText: { color: COLORS.white, fontSize: 28, fontWeight: '700', marginBottom: 28, lineHeight: 36, letterSpacing: -0.5 },
+    bodyText: { color: COLORS.textSecondary, fontSize: 17, lineHeight: 28 },
 });
