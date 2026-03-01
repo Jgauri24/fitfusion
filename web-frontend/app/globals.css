@@ -518,7 +518,7 @@ body {
    ============================================================ */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px;
   margin-bottom: 32px;
 }
@@ -1313,7 +1313,8 @@ tbody tr:hover {
 
 .login-card-simple {
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
+  /* Increased from 360px */
 }
 
 .login-brand {
@@ -1417,7 +1418,8 @@ tbody tr:hover {
 }
 
 .login-image-side {
-  flex: 1.2;
+  flex: 1;
+  /* Changed from 1.2 to 1 for equal split */
   position: relative;
   display: none;
   border-left: 1px solid var(--border);
@@ -1436,6 +1438,8 @@ tbody tr:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  /* Added object-position */
   opacity: 0.85;
   mix-blend-mode: screen;
 }
@@ -1444,7 +1448,8 @@ tbody tr:hover {
   content: '';
   position: absolute;
   inset: 0;
-  box-shadow: inset 160px 0 100px -20px var(--bg-primary);
+  box-shadow: inset 160px 0 100px -20px var(--bg-primary), inset -40px 0 80px -20px var(--bg-primary);
+  /* Added right shadow */
 }
 
 /* ============================================================
@@ -1452,7 +1457,7 @@ tbody tr:hover {
    ============================================================ */
 .report-builder-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 40px;
 }
