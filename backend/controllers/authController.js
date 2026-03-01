@@ -46,7 +46,16 @@ const login = async (req, res) => {
                 email: user.email,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                role: user.role
+                role: user.role,
+                age: user.age,
+                weight: user.weight,
+                height: user.height,
+                gender: user.gender,
+                branch: user.branch,
+                hostel: user.hostel,
+                fitnessLevel: user.fitnessLevel,
+                dietaryPref: user.dietaryPref,
+                academicYear: user.academicYear
             }
         });
 

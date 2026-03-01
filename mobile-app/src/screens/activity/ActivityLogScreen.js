@@ -9,12 +9,17 @@ import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 
 const ACTIVITY_TYPES = [
-    { id: '1', name: 'Run', icon: 'trending-up' },
-    { id: '2', name: 'Walk', icon: 'map-pin' },
+    { id: '1', name: 'Running', icon: 'trending-up' },
+    { id: '2', name: 'Walking', icon: 'map-pin' },
     { id: '3', name: 'Yoga', icon: 'wind' },
     { id: '4', name: 'Gym', icon: 'target' },
-    { id: '5', name: 'Cycle', icon: 'navigation' },
-    { id: '6', name: 'Sport', icon: 'award' },
+    { id: '5', name: 'Cycling', icon: 'navigation' },
+    { id: '6', name: 'Cricket', icon: 'dribbble' },
+    { id: '7', name: 'Football', icon: 'dribbble' },
+    { id: '8', name: 'Badminton', icon: 'award' },
+    { id: '9', name: 'Swimming', icon: 'droplet' },
+    { id: '10', name: 'Hiking', icon: 'map' },
+    { id: '11', name: 'Custom', icon: 'edit-2' },
 ];
 
 export default function ActivityLogScreen({ navigation }) {
@@ -22,15 +27,23 @@ export default function ActivityLogScreen({ navigation }) {
     const [duration, setDuration] = useState(30);
     const [intensity, setIntensity] = useState('Moderate');
     const [notes, setNotes] = useState('');
+    const [sets, setSets] = useState('');
+    const [reps, setReps] = useState('');
+    const [load, setLoad] = useState('');
+    const [customName, setCustomName] = useState('');
 
     const handleSave = async () => {
         const sel = ACTIVITY_TYPES.find(t => t.id === selectedType);
+        const finalActivityName = sel?.name === 'Custom' ? (customName || 'Custom Workout') : (sel?.name || 'Unknown');
         const cal = intensity === 'High' ? duration * 10 : intensity === 'Moderate' ? duration * 7 : duration * 4;
         try {
             await api.post('/api/student/activity/log', {
-                activityType: sel?.name || 'Unknown',
+                activityType: finalActivityName,
                 durationMins: duration,
                 caloriesBurned: cal,
+                ...(sel?.name === 'Gym' && sets && { sets: parseInt(sets) }),
+                ...(sel?.name === 'Gym' && reps && { reps: parseInt(reps) }),
+                ...(sel?.name === 'Gym' && load && { load: parseFloat(load) }),
             });
             Toast.show({ type: 'success', text1: 'Workout Saved', text2: 'Your activity streak is building!', position: 'bottom', bottomOffset: 100 });
             navigation.goBack();
@@ -71,6 +84,18 @@ export default function ActivityLogScreen({ navigation }) {
                     })}
                 </ScrollView>
 
+                {ACTIVITY_TYPES.find(t => t.id === selectedType)?.name === 'Custom' && (
+                    <View style={[styles.inputWrap, { marginTop: 24 }]}>
+                        <TextInput
+                            style={styles.notesInput}
+                            placeholder="Enter Custom Workout Name"
+                            placeholderTextColor={COLORS.textMuted}
+                            value={customName}
+                            onChangeText={setCustomName}
+                        />
+                    </View>
+                )}
+
                 <Text style={[globalStyles.sectionLabel, { marginTop: 36 }]}>DURATION</Text>
                 <View style={styles.sliderWrap}>
                     <Text style={styles.durationBig}>{duration} <Text style={styles.durationUnit}>min</Text></Text>
@@ -107,6 +132,44 @@ export default function ActivityLogScreen({ navigation }) {
                         );
                     })}
                 </View>
+
+                {ACTIVITY_TYPES.find(t => t.id === selectedType)?.name === 'Gym' && (
+                    <>
+                        <Text style={[globalStyles.sectionLabel, { marginTop: 36 }]}>GYM DETAILS</Text>
+                        <View style={{ flexDirection: 'row', gap: 12 }}>
+                            <View style={[styles.inputWrap, { flex: 1 }]}>
+                                <TextInput
+                                    style={styles.notesInput}
+                                    placeholder="Sets (e.g. 3)"
+                                    placeholderTextColor={COLORS.textMuted}
+                                    value={sets}
+                                    onChangeText={setSets}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                            <View style={[styles.inputWrap, { flex: 1 }]}>
+                                <TextInput
+                                    style={styles.notesInput}
+                                    placeholder="Reps (e.g. 10)"
+                                    placeholderTextColor={COLORS.textMuted}
+                                    value={reps}
+                                    onChangeText={setReps}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                            <View style={[styles.inputWrap, { flex: 1 }]}>
+                                <TextInput
+                                    style={styles.notesInput}
+                                    placeholder="Load (kg)"
+                                    placeholderTextColor={COLORS.textMuted}
+                                    value={load}
+                                    onChangeText={setLoad}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+                        </View>
+                    </>
+                )}
 
                 <Text style={[globalStyles.sectionLabel, { marginTop: 36 }]}>DATE</Text>
                 <View style={styles.dateChip}>

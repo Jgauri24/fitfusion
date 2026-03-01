@@ -19,8 +19,14 @@ import JournalEntryScreen from '../screens/mood/JournalEntryScreen';
 import JournalViewScreen from '../screens/mood/JournalViewScreen';
 // Profile Stack
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import ProfileSetupScreen from '../screens/auth/ProfileSetupScreen';
 import NotificationSettingsScreen from '../screens/profile/NotificationSettingsScreen';
 import AboutScreen from '../screens/profile/AboutScreen';
+
+import EnvironmentHubScreen from '../screens/home/EnvironmentHubScreen';
+import WellnessEventsScreen from '../screens/home/WellnessEventsScreen';
+// Chat
+import ChatScreen from '../screens/chat/ChatScreen';
 
 const Stack = createStackNavigator();
 
@@ -28,9 +34,12 @@ export const HomeStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="HomeScreen" component={HomeScreen} />
         <Stack.Screen name="WellnessInsightScreen" component={WellnessInsightScreen} />
+        <Stack.Screen name="EnvironmentHubScreen" component={EnvironmentHubScreen} />
+        <Stack.Screen name="WellnessEventsScreen" component={WellnessEventsScreen} />
         <Stack.Screen name="MealLogScreen" component={MealLogScreen} />
         <Stack.Screen name="ActivityLogScreen" component={ActivityLogScreen} />
         <Stack.Screen name="MoodCheckInScreen" component={MoodCheckInScreen} />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} />
     </Stack.Navigator>
 );
 
@@ -62,6 +71,7 @@ export const MoodStack = () => (
 export const ProfileStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+        <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
         <Stack.Screen name="NotificationSettingsScreen" component={NotificationSettingsScreen} />
         <Stack.Screen name="AboutScreen" component={AboutScreen} />
     </Stack.Navigator>

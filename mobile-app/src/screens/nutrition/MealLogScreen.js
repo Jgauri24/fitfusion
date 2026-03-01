@@ -1,25 +1,67 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
 import { mockCanteenItems } from '../../constants/mockData';
 
-export default function MealLogScreen({ navigation }) {
-    const [mealType, setMealType] = useState('Dinner');
+const MealTypeBtn = ({ label, active, onPress }) => (
+    <TouchableOpacity
+        onPress={onPress}
+        style={[styles.mealTypeBtn, active && styles.mealTypeBtnActive]}
+        activeOpacity={0.7}
+    >
+        <Text style={[styles.mealTypeTxt, active && styles.mealTypeTxtActive]}>{label}</Text>
+    </TouchableOpacity>
+);
+
+export default function MealLogScreen({ navigation, route }) {
+    const [mealType, setMealType] = useState(route?.params?.mealType || 'Breakfast');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedItems, setSelectedItems] = useState([]);
     const [customName, setCustomName] = useState('');
     const [customKcal, setCustomKcal] = useState('');
     const [nextCustomId, setNextCustomId] = useState(1000);
 
-    const filteredItems = mockCanteenItems.filter(item =>
+    // API search state
+    const [apiResults, setApiResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchTimer = useRef(null);
+
+    // Debounced API search
+    const handleSearchChange = (text) => {
+        setSearchQuery(text);
+        if (searchTimer.current) clearTimeout(searchTimer.current);
+
+        if (text.trim().length < 2) {
+            setApiResults([]);
+            setIsSearching(false);
+            return;
+        }
+
+        setIsSearching(true);
+        searchTimer.current = setTimeout(async () => {
+            try {
+                const res = await api.get(`/api/student/nutrition/search?q=${encodeURIComponent(text.trim())}`);
+                setApiResults(res.data.items || []);
+            } catch (e) {
+                setApiResults([]);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 600);
+    };
+
+    // Combine mock canteen items with API results
+    const filteredCanteen = mockCanteenItems.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    const displayItems = searchQuery.trim().length >= 2
+        ? [...filteredCanteen, ...apiResults]
+        : mockCanteenItems;
 
     const addItem = (item) => {
         const existing = selectedItems.find(i => i.id === item.id);
@@ -34,7 +76,17 @@ export default function MealLogScreen({ navigation }) {
 
     const addCustomItem = () => {
         if (!customName.trim() || !customKcal.trim()) return;
-        const newItem = { id: nextCustomId, name: customName.trim(), kcal: parseInt(customKcal), icon: 'custom', quantity: 1 };
+        const kcal = parseInt(customKcal);
+        const estProtein = Math.round((kcal * 0.20) / 4);
+        const estCarbs = Math.round((kcal * 0.50) / 4);
+        const estFats = Math.round((kcal * 0.30) / 9);
+
+        const newItem = {
+            id: nextCustomId,
+            name: customName.trim(),
+            kcal, protein: estProtein, carbs: estCarbs, fats: estFats,
+            icon: '✏️', quantity: 1
+        };
         setSelectedItems([...selectedItems, newItem]);
         setNextCustomId(nextCustomId + 1);
         setCustomName('');
@@ -47,7 +99,10 @@ export default function MealLogScreen({ navigation }) {
         ).filter(i => i.quantity > 0));
     };
 
-    const totalKcal = selectedItems.reduce((sum, item) => sum + (item.kcal * item.quantity), 0);
+    const totalKcal = selectedItems.reduce((sum, item) => sum + ((item.kcal || 0) * item.quantity), 0);
+    const totalProtein = selectedItems.reduce((sum, item) => sum + ((item.protein || 0) * item.quantity), 0);
+    const totalCarbs = selectedItems.reduce((sum, item) => sum + ((item.carbs || 0) * item.quantity), 0);
+    const totalFats = selectedItems.reduce((sum, item) => sum + ((item.fats || 0) * item.quantity), 0);
 
     const handleLogMeal = async () => {
         if (totalKcal === 0) return;
@@ -56,11 +111,14 @@ export default function MealLogScreen({ navigation }) {
                 mealType,
                 foodItems: selectedItems.map(i => i.name),
                 calories: totalKcal,
+                protein: totalProtein,
+                carbs: totalCarbs,
+                fats: totalFats
             });
             Toast.show({
                 type: 'success',
                 text1: 'Meal Logged 🎉',
-                text2: `Successfully added ${totalKcal} kcal to ${mealType}`,
+                text2: `${totalKcal} kcal added to ${mealType}`,
                 position: 'bottom',
                 bottomOffset: 100,
             });
@@ -69,7 +127,7 @@ export default function MealLogScreen({ navigation }) {
             Toast.show({
                 type: 'error',
                 text1: 'Error',
-                text2: 'Failed to log meal. Please try again.',
+                text2: 'Failed to log meal.',
                 position: 'bottom',
             });
         }
@@ -87,44 +145,100 @@ export default function MealLogScreen({ navigation }) {
 
             <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
 
-                <View style={styles.pickerContainer}>
-                    <Picker
-                        selectedValue={mealType}
-                        onValueChange={setMealType}
-                        dropdownIconColor={COLORS.white}
-                    >
-                        <Picker.Item label="Breakfast" value="Breakfast" color={COLORS.bg} />
-                        <Picker.Item label="Lunch" value="Lunch" color={COLORS.bg} />
-                        <Picker.Item label="Snacks" value="Snacks" color={COLORS.bg} />
-                        <Picker.Item label="Dinner" value="Dinner" color={COLORS.bg} />
-                    </Picker>
+                {/* Meal Type Selector */}
+                <View style={styles.mealTypeRow}>
+                    {['Breakfast', 'Lunch', 'Snacks', 'Dinner'].map(type => (
+                        <MealTypeBtn
+                            key={type}
+                            label={type}
+                            active={mealType === type}
+                            onPress={() => setMealType(type)}
+                        />
+                    ))}
                 </View>
 
+                {/* Search */}
                 <View style={styles.searchContainer}>
-                    <Feather name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
+                    <Feather name="search" size={18} color={COLORS.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Search campus food..."
-                        placeholderTextColor={COLORS.textSecondary}
+                        placeholder="Search any food (e.g. paneer tikka)..."
+                        placeholderTextColor={COLORS.textMuted}
                         value={searchQuery}
-                        onChangeText={setSearchQuery}
+                        onChangeText={handleSearchChange}
                     />
+                    {isSearching && <ActivityIndicator size="small" color={COLORS.accent} style={{ marginRight: 10 }} />}
                 </View>
 
+                {searchQuery.trim().length >= 2 && apiResults.length > 0 && (
+                    <View style={styles.apiBadge}>
+                        <Feather name="globe" size={12} color={COLORS.accent} />
+                        <Text style={styles.apiBadgeText}>Live nutrition data from CalorieNinjas</Text>
+                    </View>
+                )}
+
+                {/* Food Results */}
+                <GlassCard noPad style={{ marginBottom: 16 }}>
+                    {displayItems.length === 0 ? (
+                        <View style={{ padding: 24, alignItems: 'center' }}>
+                            <Feather name="search" size={24} color={COLORS.textMuted} />
+                            <Text style={{ color: COLORS.textSecondary, marginTop: 8, textAlign: 'center', fontSize: 14 }}>
+                                No results found. Try a different search or add a custom food below.
+                            </Text>
+                        </View>
+                    ) : (
+                        displayItems.map((item, idx) => {
+                            const inCart = selectedItems.find(i => i.id === item.id);
+                            return (
+                                <TouchableOpacity key={item.id} onPress={() => addItem(item)} activeOpacity={0.7}>
+                                    <View style={[styles.foodRow, idx < displayItems.length - 1 && styles.foodBorder]}>
+                                        <View style={{ flex: 1 }}>
+                                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                                <Text style={styles.foodIcon}>{item.icon || '🍽️'}</Text>
+                                                <Text style={styles.foodName}>{item.name}</Text>
+                                                {item.source === 'api' && (
+                                                    <View style={styles.liveTag}>
+                                                        <Text style={styles.liveTagText}>API</Text>
+                                                    </View>
+                                                )}
+                                            </View>
+                                            <Text style={styles.foodMacro}>
+                                                {item.kcal} kcal • P:{item.protein}g C:{item.carbs}g F:{item.fats}g
+                                            </Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                            {inCart && (
+                                                <TouchableOpacity onPress={() => removeItem(item.id)} style={styles.qtyBtn}>
+                                                    <Feather name="minus" size={14} color={COLORS.danger} />
+                                                </TouchableOpacity>
+                                            )}
+                                            {inCart && <Text style={styles.qtyText}>{inCart.quantity}</Text>}
+                                            <TouchableOpacity onPress={() => addItem(item)} style={[styles.qtyBtn, { backgroundColor: COLORS.accentGlow }]}>
+                                                <Feather name="plus" size={14} color={COLORS.accent} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })
+                    )}
+                </GlassCard>
+
+                {/* Custom Food */}
                 <Text style={globalStyles.sectionLabel}>ADD CUSTOM FOOD</Text>
-                <Card style={styles.customEntryCard}>
-                    <View style={styles.customInputRow}>
+                <GlassCard style={{ marginBottom: 16 }}>
+                    <View style={styles.customRow}>
                         <TextInput
                             style={[styles.customInput, { flex: 2 }]}
                             placeholder="Food name"
-                            placeholderTextColor={COLORS.textSecondary}
+                            placeholderTextColor={COLORS.textMuted}
                             value={customName}
                             onChangeText={setCustomName}
                         />
                         <TextInput
                             style={[styles.customInput, { flex: 1 }]}
                             placeholder="kcal"
-                            placeholderTextColor={COLORS.textSecondary}
+                            placeholderTextColor={COLORS.textMuted}
                             value={customKcal}
                             onChangeText={setCustomKcal}
                             keyboardType="numeric"
@@ -134,239 +248,142 @@ export default function MealLogScreen({ navigation }) {
                             onPress={addCustomItem}
                             disabled={!customName.trim() || !customKcal.trim()}
                         >
-                            <Feather name="plus" size={20} color="#FFFFFF" />
+                            <Feather name="plus" size={18} color="#FFF" />
                         </TouchableOpacity>
                     </View>
-                </Card>
+                </GlassCard>
 
-                <Text style={globalStyles.sectionLabel}>MENU</Text>
-                {filteredItems.map(item => (
-                    <TouchableOpacity key={`menu-${item.id}`} onPress={() => addItem(item)}>
-                        <Card style={styles.menuItem}>
-                            <View style={styles.menuLeft}>
-                                <Text style={styles.menuIcon}>{item.icon}</Text>
-                                <View>
-                                    <Text style={styles.menuName}>{item.name}</Text>
-                                    <Text style={styles.menuKcal}>{item.kcal} kcal</Text>
-                                </View>
-                            </View>
-                            <Feather name="plus-circle" size={24} color={COLORS.accent} />
-                        </Card>
-                    </TouchableOpacity>
-                ))}
-
+                {/* Selected Items Summary */}
                 {selectedItems.length > 0 && (
                     <>
-                        <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>SELECTED ITEMS</Text>
-                        {selectedItems.map(item => (
-                            <View key={`selected-${item.id}`} style={styles.selectedItemRow}>
-                                <Text style={styles.selectedName}>{item.name}</Text>
-                                <View style={styles.stepperContainer}>
-                                    <TouchableOpacity style={styles.stepperBtn} onPress={() => removeItem(item.id)}>
-                                        <Feather name="minus" size={16} color={COLORS.white} />
-                                    </TouchableOpacity>
-                                    <Text style={styles.stepperQty}>{item.quantity}</Text>
-                                    <TouchableOpacity style={styles.stepperBtn} onPress={() => addItem(item)}>
-                                        <Feather name="plus" size={16} color={COLORS.white} />
+                        <Text style={globalStyles.sectionLabel}>YOUR MEAL</Text>
+                        <GlassCard noPad style={{ marginBottom: 16 }}>
+                            {selectedItems.map((item, idx) => (
+                                <View key={item.id} style={[styles.summaryRow, idx < selectedItems.length - 1 && styles.foodBorder]}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.foodName}>{item.name} × {item.quantity}</Text>
+                                        <Text style={styles.foodMacro}>{(item.kcal * item.quantity)} kcal</Text>
+                                    </View>
+                                    <TouchableOpacity onPress={() => removeItem(item.id)}>
+                                        <Feather name="x" size={18} color={COLORS.danger} />
                                     </TouchableOpacity>
                                 </View>
-                                <Text style={styles.selectedKcal}>{item.kcal * item.quantity} kcal</Text>
+                            ))}
+                            <View style={styles.totalRow}>
+                                <Text style={styles.totalLabel}>Total</Text>
+                                <Text style={styles.totalValue}>{totalKcal} kcal</Text>
                             </View>
-                        ))}
+                            <View style={styles.macroSummary}>
+                                <Text style={styles.macroChip}>P: {Math.round(totalProtein)}g</Text>
+                                <Text style={styles.macroChip}>C: {Math.round(totalCarbs)}g</Text>
+                                <Text style={styles.macroChip}>F: {Math.round(totalFats)}g</Text>
+                            </View>
+                        </GlassCard>
                     </>
                 )}
 
-            </ScrollView>
-
-            {/* Bottom Floating Bar */}
-            <View style={styles.bottomBar}>
-                <View style={styles.totalContainer}>
-                    <Text style={styles.totalLabel}>Total</Text>
-                    <Text style={styles.totalValue}>{totalKcal} <Text style={{ fontSize: 14 }}>kcal</Text></Text>
-                </View>
+                {/* Log Button */}
                 <TouchableOpacity
-                    style={[styles.logButton, totalKcal === 0 && styles.disabledButton]}
+                    style={[styles.logBtn, totalKcal === 0 && styles.logBtnDisabled]}
                     onPress={handleLogMeal}
                     disabled={totalKcal === 0}
+                    activeOpacity={0.85}
                 >
-                    <Text style={globalStyles.buttonText}>Log Meal</Text>
+                    <Feather name="check-circle" size={18} color={totalKcal === 0 ? COLORS.textMuted : '#FFF'} />
+                    <Text style={[styles.logBtnText, totalKcal === 0 && { color: COLORS.textMuted }]}>
+                        Log {mealType} • {totalKcal} kcal
+                    </Text>
                 </TouchableOpacity>
-            </View>
+
+            </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
+    container: { flex: 1, backgroundColor: COLORS.bg },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 20,
-        backgroundColor: COLORS.bg,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16,
     },
-    title: {
-        ...globalStyles.heading,
-        fontSize: 20,
+    title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
+    scrollArea: { flex: 1 },
+    scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
+
+    mealTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    mealTypeBtn: {
+        flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
+        borderWidth: 1, borderColor: COLORS.glassBorder, backgroundColor: COLORS.card,
     },
-    scrollArea: {
-        flex: 1,
+    mealTypeBtnActive: {
+        borderColor: COLORS.accent, backgroundColor: COLORS.accentGlow,
     },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 40,
-    },
-    pickerContainer: {
-        backgroundColor: COLORS.card,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: COLORS.glassBorder,
-        marginBottom: 15,
-        overflow: 'hidden',
-    },
+    mealTypeTxt: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
+    mealTypeTxtActive: { color: COLORS.accent, fontWeight: '700' },
+
     searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.card,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: COLORS.glassBorder,
-        paddingHorizontal: 15,
-        marginBottom: 20,
+        flexDirection: 'row', alignItems: 'center',
+        backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder,
+        borderRadius: 14, marginBottom: 12, paddingHorizontal: 14,
     },
-    searchIcon: {
-        marginRight: 10,
+    searchIcon: { marginRight: 10 },
+    searchInput: { flex: 1, color: COLORS.white, paddingVertical: 14, fontSize: 15 },
+
+    apiBadge: {
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+        marginBottom: 10, paddingLeft: 4,
     },
-    searchInput: {
-        flex: 1,
-        color: COLORS.white,
-        paddingVertical: 15,
-        fontSize: 16,
+    apiBadgeText: { color: COLORS.accent, fontSize: 11, fontWeight: '600' },
+
+    foodRow: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 12, paddingHorizontal: 16,
     },
-    menuItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
-        padding: 15,
+    foodBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
+    foodIcon: { fontSize: 16 },
+    foodName: { color: COLORS.white, fontSize: 15, fontWeight: '600' },
+    foodMacro: { color: COLORS.textSecondary, fontSize: 12, marginTop: 3 },
+
+    liveTag: {
+        backgroundColor: COLORS.accent + '20', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2,
     },
-    menuLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    liveTagText: { color: COLORS.accent, fontSize: 9, fontWeight: '800' },
+
+    qtyBtn: {
+        width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center',
+        borderWidth: 1, borderColor: COLORS.glassBorder, backgroundColor: COLORS.surface,
     },
-    menuIcon: {
-        fontSize: 24,
-        marginRight: 15,
-    },
-    menuName: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    menuKcal: {
-        color: COLORS.textSecondary,
-        fontSize: 14,
-        marginTop: 2,
-    },
-    selectedItemRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: COLORS.card,
-        padding: 15,
-        borderRadius: 12,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: COLORS.glassBorder,
-    },
-    selectedName: {
-        color: COLORS.white,
-        fontSize: 16,
-        flex: 1,
-    },
-    stepperContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.bg,
-        borderRadius: 20,
-        paddingHorizontal: 5,
-        paddingVertical: 5,
-        marginHorizontal: 15,
-    },
-    stepperBtn: {
-        padding: 5,
-    },
-    stepperQty: {
-        color: COLORS.white,
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginHorizontal: 10,
-    },
-    selectedKcal: {
-        color: COLORS.accent,
-        fontWeight: 'bold',
-        width: 60,
-        textAlign: 'right',
-    },
-    bottomBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        backgroundColor: COLORS.surface,
-        borderTopWidth: 1,
-        borderTopColor: COLORS.glassBorder,
-    },
-    totalContainer: {
-        flex: 1,
-    },
-    totalLabel: {
-        color: COLORS.textSecondary,
-        fontSize: 14,
-        textTransform: 'uppercase',
-    },
-    totalValue: {
-        color: COLORS.white,
-        fontSize: 28,
-        fontWeight: 'bold',
-    },
-    logButton: {
-        ...globalStyles.pillButton,
-        paddingHorizontal: 40,
-    },
-    disabledButton: {
-        backgroundColor: COLORS.border,
-        opacity: 0.5,
-    },
-    customEntryCard: {
-        marginBottom: 20,
-        padding: 12,
-    },
-    customInputRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
+    qtyText: { color: COLORS.white, fontWeight: '700', fontSize: 14 },
+
+    customRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     customInput: {
-        backgroundColor: COLORS.bg,
-        color: COLORS.white,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        borderRadius: 10,
-        fontSize: 15,
-        borderWidth: 1,
-        borderColor: COLORS.glassBorder,
+        backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.divider,
+        borderRadius: 10, color: COLORS.white, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14,
     },
     customAddBtn: {
+        width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center',
         backgroundColor: COLORS.accent,
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        alignItems: 'center',
-        justifyContent: 'center',
-    }
+    },
+
+    summaryRow: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 12, paddingHorizontal: 16,
+    },
+    totalRow: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 14, paddingHorizontal: 16, borderTopWidth: 1, borderTopColor: COLORS.divider,
+    },
+    totalLabel: { color: COLORS.textSecondary, fontSize: 14, fontWeight: '600' },
+    totalValue: { color: COLORS.accent, fontSize: 18, fontWeight: '800' },
+    macroSummary: {
+        flexDirection: 'row', justifyContent: 'center', gap: 16, paddingBottom: 14,
+    },
+    macroChip: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
+
+    logBtn: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+        backgroundColor: COLORS.accent, paddingVertical: 16, borderRadius: 14, marginTop: 8,
+    },
+    logBtnDisabled: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glassBorder },
+    logBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
 });

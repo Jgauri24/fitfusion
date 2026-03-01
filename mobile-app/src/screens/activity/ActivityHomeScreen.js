@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, Platform, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
@@ -25,18 +25,41 @@ export default function ActivityHomeScreen({ navigation }) {
 
     useFocusEffect(
         useCallback(() => {
-            const fetch = async () => {
-                try {
-                    const res = await api.get('/api/student/activity/weekly');
-                    setDailyMinutes(res.data.dailyMinutes || [0, 0, 0, 0, 0, 0, 0]);
-                    setStreak(res.data.streak || 0);
-                    setConsistencyScore(res.data.consistencyScore || 0);
-                    setRecentActivities(res.data.recentActivities || []);
-                } catch (e) {}
-            };
-            fetch();
+            fetchData();
         }, [])
     );
+
+    const fetchData = async () => {
+        try {
+            const res = await api.get('/api/student/activity/weekly');
+            setDailyMinutes(res.data.dailyMinutes || [0, 0, 0, 0, 0, 0, 0]);
+            setStreak(res.data.streak || 0);
+            setConsistencyScore(res.data.consistencyScore || 0);
+            setRecentActivities(res.data.recentActivities || []);
+        } catch (e) { }
+    };
+
+    const handleDeleteActivity = (activity) => {
+        if (activity.id?.toString().startsWith('f')) return; // skip fallback items
+        Alert.alert(
+            'Delete Workout',
+            `Remove "${activity.type}" from your history?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete', style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await api.delete(`/api/student/activity/${activity.id}`);
+                            fetchData(); // refresh list
+                        } catch (e) {
+                            Alert.alert('Error', 'Failed to delete activity.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     const totalSteps = dailyMinutes.reduce((a, b) => a + b, 0) * 200;
     const cLabel = consistencyScore >= 70 ? 'Resilient' : consistencyScore >= 40 ? 'Building' : 'Starting';
@@ -120,7 +143,8 @@ export default function ActivityHomeScreen({ navigation }) {
                     {activities.map((act, idx) => (
                         <TouchableOpacity
                             key={act.id}
-                            onPress={() => act.id?.startsWith('f') ? null : navigation.navigate('ActivityDetailScreen', { activity: act })}
+                            onPress={() => act.id?.toString().startsWith('f') ? null : navigation.navigate('ActivityDetailScreen', { activity: act })}
+                            onLongPress={() => handleDeleteActivity(act)}
                         >
                             <View style={[styles.actRow, idx < activities.length - 1 && styles.actBorder]}>
                                 <View style={styles.actLeft}>

@@ -37,6 +37,9 @@ const CALORIE_GOAL = 2000;
 
 export default function NutritionHomeScreen({ navigation }) {
     const [totalCalories, setTotalCalories] = useState(0);
+    const [totalProtein, setTotalProtein] = useState(0);
+    const [totalCarbs, setTotalCarbs] = useState(0);
+    const [totalFats, setTotalFats] = useState(0);
     const [meals, setMeals] = useState([]);
 
     useFocusEffect(
@@ -45,15 +48,18 @@ export default function NutritionHomeScreen({ navigation }) {
                 try {
                     const res = await api.get('/api/student/nutrition/today');
                     setTotalCalories(res.data.totalCalories || 0);
+                    setTotalProtein(res.data.totalProtein || 0);
+                    setTotalCarbs(res.data.totalCarbs || 0);
+                    setTotalFats(res.data.totalFats || 0);
                     setMeals(res.data.meals || []);
-                } catch (e) {}
+                } catch (e) { }
             };
             fetch();
         }, [])
     );
 
     const getMealData = (type) => {
-        const found = meals.find(m => m.mealType === type);
+        const found = meals.find(m => m?.mealType?.trim().toLowerCase() === type.trim().toLowerCase());
         return found ? { sub: `${Math.round(found.calories)} kcal logged`, kcal: Math.round(found.calories), done: true } : null;
     };
 
@@ -88,9 +94,9 @@ export default function NutritionHomeScreen({ navigation }) {
                 </AnimatedCircularProgress>
 
                 <View style={styles.macros}>
-                    <MacroBar label="Protein" icon="droplet" current={Math.round(totalCalories * 0.03)} max={60} />
-                    <MacroBar label="Carbs" icon="layers" current={Math.round(totalCalories * 0.12)} max={250} />
-                    <MacroBar label="Fats" icon="disc" current={Math.round(totalCalories * 0.03)} max={65} />
+                    <MacroBar label="Protein" icon="droplet" current={Math.round(totalProtein)} max={60} />
+                    <MacroBar label="Carbs" icon="layers" current={Math.round(totalCarbs)} max={250} />
+                    <MacroBar label="Fats" icon="disc" current={Math.round(totalFats)} max={65} />
                 </View>
             </GlassCard>
 
@@ -118,7 +124,7 @@ export default function NutritionHomeScreen({ navigation }) {
                             ) : (
                                 <TouchableOpacity
                                     style={styles.addBtn}
-                                    onPress={() => navigation.navigate('MealLogScreen')}
+                                    onPress={() => navigation.navigate('MealLogScreen', { mealType: key })}
                                     activeOpacity={0.75}
                                 >
                                     <Feather name="plus" size={14} color={COLORS.accent} />

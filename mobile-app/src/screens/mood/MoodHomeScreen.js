@@ -8,7 +8,7 @@ import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 import VitaLogo from '../../components/VitaLogo';
-import { mockMoodTrend, mockJournals } from '../../constants/mockData';
+import { mockMoodTrend } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -23,17 +23,17 @@ const MOODS = [
 export default function MoodHomeScreen({ navigation }) {
     const [todayMood, setTodayMood] = useState(null);
     const [moodTrend, setMoodTrend] = useState(mockMoodTrend);
-    const [journals, setJournals] = useState(mockJournals);
+    const [journals, setJournals] = useState([]);
 
     useFocusEffect(
         useCallback(() => {
             const fetchMood = async () => {
                 try {
                     const res = await api.get('/api/student/mood/dashboard');
-                    if (res.data.todayMood) setTodayMood(res.data.todayMood);
+                    if (res.data.todayMood !== undefined) setTodayMood(res.data.todayMood);
                     if (res.data.weeklyTrend?.length) setMoodTrend(res.data.weeklyTrend);
-                    if (res.data.journals?.length) setJournals(res.data.journals);
-                } catch (e) {}
+                    setJournals(res.data.journals || []);
+                } catch (e) { }
             };
             fetchMood();
         }, [])
@@ -112,27 +112,42 @@ export default function MoodHomeScreen({ navigation }) {
             </GlassCard>
 
             {/* Recent Journals */}
-            <Text style={globalStyles.sectionLabel}>RECENT JOURNALS</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={globalStyles.sectionLabel}>RECENT JOURNALS</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('JournalEntryScreen')} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Feather name="plus" size={14} color={COLORS.accent} />
+                    <Text style={{ color: COLORS.accent, fontWeight: '700', fontSize: 13 }}>New</Text>
+                </TouchableOpacity>
+            </View>
             <GlassCard noPad>
-                {journals.map((j, idx) => (
-                    <TouchableOpacity
-                        key={j.id}
-                        onPress={() => navigation.navigate('JournalViewScreen', { journal: j })}
-                    >
-                        <View style={[styles.journalRow, idx < journals.length - 1 && styles.journalBorder]}>
-                            <View style={styles.journalLeft}>
-                                <View style={styles.journalIcon}>
-                                    <Feather name="book-open" size={16} color={COLORS.accent} />
+                {journals.length === 0 ? (
+                    <View style={{ padding: 24, alignItems: 'center' }}>
+                        <Feather name="book-open" size={28} color={COLORS.textMuted} />
+                        <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginTop: 10, textAlign: 'center' }}>
+                            No journal entries yet.{'\n'}Tap "New" to start writing.
+                        </Text>
+                    </View>
+                ) : (
+                    journals.map((j, idx) => (
+                        <TouchableOpacity
+                            key={j.id}
+                            onPress={() => navigation.navigate('JournalViewScreen', { journal: j })}
+                        >
+                            <View style={[styles.journalRow, idx < journals.length - 1 && styles.journalBorder]}>
+                                <View style={styles.journalLeft}>
+                                    <View style={styles.journalIcon}>
+                                        <Feather name="book-open" size={16} color={COLORS.accent} />
+                                    </View>
+                                    <View>
+                                        <Text style={styles.journalTitle}>{j.title}</Text>
+                                        <Text style={styles.journalDate}>{j.date}</Text>
+                                    </View>
                                 </View>
-                                <View>
-                                    <Text style={styles.journalTitle}>{j.title}</Text>
-                                    <Text style={styles.journalDate}>{j.date}</Text>
-                                </View>
+                                <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
                             </View>
-                            <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
-                        </View>
-                    </TouchableOpacity>
-                ))}
+                        </TouchableOpacity>
+                    ))
+                )}
             </GlassCard>
 
             <TouchableOpacity onPress={() => navigation.navigate('MoodCheckInScreen')} style={styles.linkRow}>

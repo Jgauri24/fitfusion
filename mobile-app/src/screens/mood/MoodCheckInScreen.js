@@ -21,7 +21,7 @@ export default function MoodCheckInScreen({ navigation }) {
 
     const handleSave = async () => {
         try {
-            await api.post('/api/student/mood/checkin', { moodScore: selectedMood, note });
+            await api.post('/api/student/mood/checkin', { moodScore: selectedMood + 1, note });
             Toast.show({
                 type: 'success',
                 text1: 'Mood Saved',
