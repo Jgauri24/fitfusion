@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
 import { mockPWS, mockTrend } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
-const DimensionCard = ({ icon, label, score, color }) => (
-    <View style={styles.dimensionCard}>
-        <Text style={styles.dimensionIcon}>{icon}</Text>
-        <Text style={styles.dimensionLabel}>{label}</Text>
-        <View style={[styles.badge, { backgroundColor: color }]}>
-            <Text style={styles.badgeText}>{score}</Text>
+const FocusCard = ({ icon, label, score, color }) => (
+    <View style={styles.focusCard}>
+        <View style={[styles.focusIconCircle, { backgroundColor: color + '18' }]}>
+            <Feather name={icon} size={18} color={color} />
         </View>
+        <Text style={styles.focusLabel}>{label}</Text>
+        <Text style={[styles.focusScore, { color }]}>{score}</Text>
     </View>
 );
 
@@ -27,272 +28,166 @@ export default function HomeScreen({ navigation }) {
     useEffect(() => {
         const loadUser = async () => {
             try {
-                const userInfoStr = await AsyncStorage.getItem('userInfo');
-                if (userInfoStr) {
-                    setUser(JSON.parse(userInfoStr));
-                }
-            } catch (error) {
-                console.error("Failed to load user info", error);
-            }
+                const s = await AsyncStorage.getItem('userInfo');
+                if (s) setUser(JSON.parse(s));
+            } catch (e) {}
         };
         loadUser();
     }, []);
 
-    const greetingName = user?.firstName || 'User';
+    const name = user?.firstName || 'User';
     const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
+    const scoreLabel = mockPWS.score >= 70 ? 'Steady Growth' : mockPWS.score >= 50 ? 'Building Up' : 'Getting Started';
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
 
-            {/* Header Row */}
+            {/* ── Header ── */}
             <View style={styles.headerRow}>
                 <View>
-                    <Text style={styles.greeting}>Hey, {greetingName} 👋</Text>
-                    <Text style={globalStyles.subtitle}>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</Text>
+                    <Text style={styles.greeting}>Hey, {name} <Text style={{ fontSize: 20 }}>👋</Text></Text>
+                    <Text style={styles.dateSub}>
+                        {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </Text>
                 </View>
                 <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{initials}</Text>
                 </View>
             </View>
 
-            {/* PWS Hero Card */}
-            <Card style={styles.heroCard}>
-                <Text style={globalStyles.sectionLabel}>Personal Wellness Score</Text>
-                <View style={styles.ringContainer}>
+            {/* ── Wellness Score Card ── */}
+            <GlassCard glow style={styles.heroCard}>
+                <View style={styles.heroRow}>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.heroLabel}>WELLNESS SCORE</Text>
+                        <Text style={styles.heroTitle}>{scoreLabel}</Text>
+                    </View>
                     <AnimatedCircularProgress
-                        size={160}
-                        width={12}
+                        size={78}
+                        width={6}
                         fill={mockPWS.score}
                         tintColor={COLORS.accent}
-                        backgroundColor={COLORS.bg}
+                        backgroundColor={COLORS.border}
                         rotation={270}
                         lineCap="round"
                     >
-                        {() => (
-                            <View style={styles.ringInner}>
-                                <Text style={styles.ringScore}>{mockPWS.score}</Text>
-                                <Text style={styles.ringMax}>/ 100</Text>
-                            </View>
-                        )}
+                        {() => <Text style={styles.ringVal}>{mockPWS.score}</Text>}
                     </AnimatedCircularProgress>
                 </View>
-                <Text style={styles.statusText}>Good</Text>
-            </Card>
+            </GlassCard>
 
-            {/* Dimension Row */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dimensionScroll}>
-                <DimensionCard icon="🥗" label="Nutrition" score={mockPWS.nutrition} color={COLORS.accent} />
-                <DimensionCard icon="⚡" label="Activity" score={mockPWS.activity} color={COLORS.amber} />
-                <DimensionCard icon="😊" label="Mood" score={mockPWS.mood} color={COLORS.accent} />
-                <DimensionCard icon="🌿" label="Environment" score={mockPWS.environment} color={COLORS.accent} />
-            </ScrollView>
+            {/* ── Focus Areas ── */}
+            <Text style={globalStyles.sectionLabel}>FOCUS AREAS</Text>
+            <View style={styles.focusRow}>
+                <FocusCard icon="heart" label="Nutrition" score={mockPWS.nutrition} color={COLORS.success} />
+                <FocusCard icon="zap" label="Activity" score={mockPWS.activity} color={COLORS.warning} />
+                <FocusCard icon="smile" label="Mood" score={mockPWS.mood} color={COLORS.accent} />
+            </View>
 
-            {/* Smart Nudge Card */}
-            <Card style={[styles.nudgeCard, styles.limeBorderLeft]}>
-                <Text style={styles.nudgeText}>⚡ You haven&apos;t logged lunch yet. Stay fueled!</Text>
-            </Card>
-
-            {/* Burnout Alert */}
-            <Card style={[styles.nudgeCard, styles.dangerBorderLeft, { marginTop: 15 }]}>
-                <View style={styles.alertHeader}>
-                    <Text style={styles.alertText}>
-                        <Feather name="alert-triangle" color={COLORS.danger} size={16} /> Moderate burnout risk detected — low activity for 5 days.
-                    </Text>
-                    <Feather name="x" color={COLORS.muted} size={20} />
+            {/* ── Smart Nudge ── */}
+            <GlassCard style={styles.nudgeCard}>
+                <View style={styles.nudgeRow}>
+                    <View style={styles.nudgeIcon}>
+                        <Feather name="zap" size={16} color={COLORS.accent} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.nudgeTitle}>Smart Nudge</Text>
+                        <Text style={styles.nudgeText}>
+                            You're close to your daily Protein target. A quick bite from the mess could help.
+                        </Text>
+                    </View>
                 </View>
-            </Card>
+            </GlassCard>
 
-            {/* Quick Log Row */}
-            <View style={styles.quickLogRow}>
-                <TouchableOpacity style={styles.quickLogBtn} onPress={() => navigation.navigate('Nutrition', { screen: 'MealLogScreen' })}>
-                    <Text style={styles.quickLogText}>+ Meal</Text>
+            {/* ── Quick Log ── */}
+            <View style={styles.quickRow}>
+                <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
+                    onPress={() => navigation.navigate('Nutrition', { screen: 'MealLogScreen' })}>
+                    <LinearGradient colors={[COLORS.accent, COLORS.accentDark]} style={styles.quickBtn}>
+                        <Feather name="plus" size={16} color="#FFF" />
+                        <Text style={styles.quickText}>Log Meal</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.quickLogBtn} onPress={() => navigation.navigate('Activity', { screen: 'ActivityLogScreen' })}>
-                    <Text style={styles.quickLogText}>+ Workout</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.quickLogBtn} onPress={() => navigation.navigate('Mood', { screen: 'MoodCheckInScreen' })}>
-                    <Text style={styles.quickLogText}>+ Mood</Text>
+                <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
+                    onPress={() => navigation.navigate('Activity', { screen: 'ActivityLogScreen' })}>
+                    <LinearGradient colors={[COLORS.accent, COLORS.accentDark]} style={styles.quickBtn}>
+                        <Feather name="plus" size={16} color="#FFF" />
+                        <Text style={styles.quickText}>Log Workout</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
             </View>
 
-            {/* 7-Day Trend */}
-            <Text style={globalStyles.sectionLabel}>This Week</Text>
-            <LineChart
-                data={{
-                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                    datasets: [{ data: mockTrend }]
-                }}
-                width={screenWidth - 40}
-                height={220}
-                chartConfig={{
-                    backgroundColor: COLORS.bg,
-                    backgroundGradientFrom: COLORS.bg,
-                    backgroundGradientTo: COLORS.bg,
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(200, 255, 87, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(136, 136, 136, ${opacity})`,
-                    style: { borderRadius: 16 },
-                    propsForDots: { r: "4", strokeWidth: "2", stroke: COLORS.accent },
-                    propsForBackgroundLines: { stroke: COLORS.cardBorder }
-                }}
-                bezier
-                style={styles.chart}
-                withInnerLines={true}
-                withOuterLines={false}
-            />
+            {/* ── 7-Day Trend ── */}
+            <Text style={globalStyles.sectionLabel}>7-DAY TREND</Text>
+            <GlassCard noPad style={styles.chartWrap}>
+                <LineChart
+                    data={{
+                        labels: ["M", "T", "W", "T", "F", "S", "S"],
+                        datasets: [{ data: mockTrend }],
+                    }}
+                    width={screenWidth - 56}
+                    height={195}
+                    chartConfig={{
+                        backgroundColor: 'transparent',
+                        backgroundGradientFrom: COLORS.cardSolid,
+                        backgroundGradientTo: COLORS.cardSolid,
+                        decimalPlaces: 0,
+                        color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
+                        labelColor: () => COLORS.textMuted,
+                        style: { borderRadius: 20 },
+                        propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
+                        propsForBackgroundLines: { stroke: COLORS.border },
+                    }}
+                    bezier
+                    style={{ borderRadius: 20, padding: 8 }}
+                    withInnerLines={true}
+                    withOuterLines={false}
+                />
+            </GlassCard>
 
-            <TouchableOpacity onPress={() => navigation.navigate('WellnessInsightScreen')}>
-                <Text style={styles.viewFullText}>View Full Insights →</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('WellnessInsightScreen')} style={styles.linkRow}>
+                <Text style={styles.linkText}>View Full Insights</Text>
+                <Feather name="arrow-right" size={15} color={COLORS.accent} />
             </TouchableOpacity>
-
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 40,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    greeting: {
-        ...globalStyles.heading,
-    },
+    container: { flex: 1, backgroundColor: COLORS.bg },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
+    greeting: { color: COLORS.white, fontWeight: '700', fontSize: 24, letterSpacing: -0.5 },
+    dateSub: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
     avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        width: 46, height: 46, borderRadius: 23,
         backgroundColor: COLORS.accent,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center', alignItems: 'center',
+        ...Platform.select({ ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 } }),
     },
-    avatarText: {
-        color: '#0E0E0E',
-        fontWeight: 'bold',
-        fontSize: 18,
+    avatarText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+    heroCard: { marginBottom: 0 },
+    heroRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    heroLabel: { color: COLORS.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 2, marginBottom: 6 },
+    heroTitle: { color: COLORS.white, fontSize: 26, fontWeight: '700', letterSpacing: -0.5 },
+    ringVal: { fontSize: 22, fontWeight: '700', color: COLORS.white },
+    focusRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+    focusCard: {
+        flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 14,
+        alignItems: 'center', borderWidth: 1, borderColor: COLORS.glassBorder,
     },
-    heroCard: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    ringContainer: {
-        marginVertical: 15,
-    },
-    ringInner: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    ringScore: {
-        fontSize: 42,
-        fontWeight: 'bold',
-        color: COLORS.white,
-    },
-    ringMax: {
-        fontSize: 16,
-        color: COLORS.muted,
-    },
-    statusText: {
-        color: COLORS.accent,
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 5,
-    },
-    dimensionScroll: {
-        marginBottom: 20,
-    },
-    dimensionCard: {
-        backgroundColor: COLORS.card,
-        borderRadius: 16,
-        padding: 15,
-        marginRight: 10,
-        alignItems: 'center',
-        minWidth: 90,
-    },
-    dimensionIcon: {
-        fontSize: 24,
-        marginBottom: 8,
-    },
-    dimensionLabel: {
-        color: COLORS.muted,
-        fontSize: 12,
-        marginBottom: 8,
-    },
-    badge: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 8,
-    },
-    badgeText: {
-        color: '#0E0E0E',
-        fontWeight: 'bold',
-        fontSize: 12,
-    },
-    nudgeCard: {
-        padding: 15,
-    },
-    limeBorderLeft: {
-        borderLeftWidth: 4,
-        borderLeftColor: COLORS.accent,
-    },
-    dangerBorderLeft: {
-        borderLeftWidth: 4,
-        borderLeftColor: COLORS.danger,
-    },
-    nudgeText: {
-        color: COLORS.white,
-        fontSize: 14,
-        lineHeight: 20,
-    },
-    alertHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-    alertText: {
-        color: COLORS.danger,
-        fontSize: 14,
-        flex: 1,
-        marginRight: 10,
-        lineHeight: 20,
-    },
-    quickLogRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 25,
-        marginBottom: 25,
-    },
-    quickLogBtn: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: COLORS.accent,
-        borderRadius: 50,
-        paddingVertical: 10,
-        marginHorizontal: 4,
-        alignItems: 'center',
-    },
-    quickLogText: {
-        color: COLORS.accent,
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    chart: {
-        marginVertical: 10,
-        borderRadius: 16,
-    },
-    viewFullText: {
-        color: COLORS.accent,
-        fontWeight: 'bold',
-        fontSize: 16,
-        marginTop: 10,
-        textAlign: 'center',
-    }
+    focusIconCircle: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+    focusLabel: { color: COLORS.textSecondary, fontSize: 12, marginBottom: 6 },
+    focusScore: { fontWeight: '700', fontSize: 18 },
+    nudgeCard: { marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.accent },
+    nudgeRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+    nudgeIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
+    nudgeTitle: { color: COLORS.white, fontWeight: '700', fontSize: 14, marginBottom: 4 },
+    nudgeText: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
+    quickRow: { flexDirection: 'row', gap: 12, marginBottom: 0 },
+    quickBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 15 },
+    quickText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14, letterSpacing: 0.3 },
+    chartWrap: { marginTop: 4 },
+    linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 16, marginBottom: 10 },
+    linkText: { color: COLORS.accent, fontWeight: '700', fontSize: 15 },
 });

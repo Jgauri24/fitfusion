@@ -1,28 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
-import { mockUser } from '../../constants/mockData';
+import { GlassCard } from '../../components/GlassCard';
 
-const StatCard = ({ value, label }) => (
-    <View style={styles.statCard}>
-        <Text style={styles.statValue}>{value}</Text>
-        <Text style={styles.statLabel}>{label}</Text>
-    </View>
-);
-
-const MenuListItem = ({ icon, label, onPress, danger }) => (
-    <TouchableOpacity onPress={onPress}>
-        <Card style={styles.menuItem}>
+const MenuItem = ({ icon, label, onPress, color }) => (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+        <View style={styles.menuItem}>
             <View style={styles.menuLeft}>
-                <Text style={styles.menuIcon}>{icon}</Text>
-                <Text style={[styles.menuLabel, danger && { color: COLORS.danger }]}>{label}</Text>
+                <View style={[styles.menuIcon, { backgroundColor: (color || COLORS.accent) + '15' }]}>
+                    <Feather name={icon} size={18} color={color || COLORS.accent} />
+                </View>
+                <Text style={styles.menuLabel}>{label}</Text>
             </View>
-            <Feather name="chevron-right" size={20} color={danger ? COLORS.danger : COLORS.muted} />
-        </Card>
+            <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
+        </View>
     </TouchableOpacity>
 );
 
@@ -30,186 +23,88 @@ export default function ProfileScreen({ navigation }) {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const loadUser = async () => {
+        const load = async () => {
             try {
-                const userInfoStr = await AsyncStorage.getItem('userInfo');
-                if (userInfoStr) {
-                    setUser(JSON.parse(userInfoStr));
-                }
-            } catch (error) {
-                console.error("Failed to load user info", error);
-            }
+                const s = await AsyncStorage.getItem('userInfo');
+                if (s) setUser(JSON.parse(s));
+            } catch (e) {}
         };
-        loadUser();
+        load();
     }, []);
 
     const handleLogout = async () => {
-        Alert.alert(
-            "Log Out",
-            "Are you sure you want to log out of VITA?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Log Out",
-                    style: "destructive",
-                    onPress: async () => {
-                        await AsyncStorage.clear();
-                        navigation.replace('LoginScreen');
-                    }
-                }
-            ]
-        );
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('userInfo');
+        navigation.replace('LoginScreen');
     };
 
-    const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'User' : 'User';
+    const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'User';
     const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
-    const email = user?.email || 'Student';
+    const email = user?.email || 'user@university.edu';
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={styles.scroll}>
+            <Text style={styles.pageTitle}>Profile</Text>
 
-            <View style={styles.header}>
+            {/* Avatar + Info */}
+            <View style={styles.profileCenter}>
                 <View style={styles.avatarLarge}>
-                    <Text style={styles.avatarTextLarge}>{initials}</Text>
+                    <Text style={styles.avatarText}>{initials}</Text>
                 </View>
-                <Text style={styles.userName}>{fullName}</Text>
-                <Text style={styles.userDetails}>{email}</Text>
+                <Text style={styles.userName}>{name}</Text>
+                <Text style={styles.userEmail}>{email}</Text>
             </View>
 
-            <View style={styles.statsRow}>
-                <StatCard value="34" label="Meals" />
-                <StatCard value="12" label="Workouts" />
-                <StatCard value="7" label="Journals" />
-            </View>
+            {/* Menu */}
+            <GlassCard noPad style={styles.menuCard}>
+                <MenuItem icon="heart" label="Health Insights" color={COLORS.danger}
+                    onPress={() => navigation.navigate('Home', { screen: 'WellnessInsightScreen' })} />
+                <MenuItem icon="calendar" label="Wellness Calendar" color={COLORS.accent}
+                    onPress={() => {}} />
+                <MenuItem icon="bell" label="Smart Reminders" color={COLORS.warning}
+                    onPress={() => navigation.navigate('NotificationSettingsScreen')} />
+                <MenuItem icon="shield" label="Privacy & Security" color={COLORS.success}
+                    onPress={() => navigation.navigate('AboutScreen')} />
+            </GlassCard>
 
-            <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>SETTINGS</Text>
-            <View style={styles.menuList}>
-                <MenuListItem
-                    icon="🔔"
-                    label="Notification Preferences"
-                    onPress={() => navigation.navigate('NotificationSettingsScreen')}
-                />
-                <MenuListItem
-                    icon="🔒"
-                    label="Privacy & Data"
-                    onPress={() => Alert.alert('Privacy Info', 'Static screen placeholder.')}
-                />
-                <MenuListItem
-                    icon="ℹ️"
-                    label="About VITA"
-                    onPress={() => navigation.navigate('AboutScreen')}
-                />
-            </View>
-
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-                    <Text style={styles.logoutText}>Log Out</Text>
-                </TouchableOpacity>
-            </View>
-
+            {/* Logout */}
+            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.8}>
+                <Feather name="log-out" size={16} color={COLORS.danger} />
+                <Text style={styles.logoutText}>Log Out</Text>
+            </TouchableOpacity>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 80,
-        paddingBottom: 40,
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    pageTitle: { color: COLORS.white, fontSize: 24, fontWeight: '700', marginBottom: 32, letterSpacing: -0.5 },
+    profileCenter: { alignItems: 'center', marginBottom: 36 },
     avatarLarge: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: COLORS.accent,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 15,
+        width: 96, height: 96, borderRadius: 48,
+        backgroundColor: COLORS.accent, justifyContent: 'center', alignItems: 'center',
+        marginBottom: 16,
+        ...Platform.select({
+            ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.35, shadowRadius: 16 },
+            android: { elevation: 10 },
+        }),
     },
-    avatarTextLarge: {
-        fontSize: 40,
-        fontWeight: 'bold',
-        color: '#0E0E0E',
-    },
-    userName: {
-        ...globalStyles.heading,
-        fontSize: 24,
-        marginBottom: 5,
-    },
-    userDetails: {
-        color: COLORS.muted,
-        fontSize: 16,
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    statCard: {
-        flex: 1,
-        backgroundColor: COLORS.card,
-        borderRadius: 16,
-        paddingVertical: 20,
-        alignItems: 'center',
-        marginHorizontal: 5,
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
-    },
-    statValue: {
-        color: COLORS.accent,
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    statLabel: {
-        color: COLORS.muted,
-        fontSize: 12,
-        textTransform: 'uppercase',
-    },
-    menuList: {
-        marginTop: 10,
-    },
+    avatarText: { fontSize: 36, fontWeight: '700', color: '#FFFFFF' },
+    userName: { color: COLORS.white, fontSize: 22, fontWeight: '700', marginBottom: 4 },
+    userEmail: { color: COLORS.textSecondary, fontSize: 14 },
+    menuCard: { marginBottom: 28 },
     menuItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 20,
-        marginBottom: 15,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 16, paddingHorizontal: 18,
+        borderBottomWidth: 1, borderBottomColor: COLORS.divider,
     },
-    menuLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    menuIcon: {
-        fontSize: 20,
-        marginRight: 15,
-    },
-    menuLabel: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    footer: {
-        marginTop: 40,
-        marginBottom: 20,
-    },
+    menuLeft: { flexDirection: 'row', alignItems: 'center' },
+    menuIcon: { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    menuLabel: { color: COLORS.white, fontSize: 16, fontWeight: '600' },
     logoutBtn: {
-        paddingVertical: 15,
-        borderRadius: 50,
-        borderWidth: 1,
-        borderColor: COLORS.danger,
-        alignItems: 'center',
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+        borderWidth: 1, borderColor: COLORS.danger + '40', borderRadius: 14, paddingVertical: 15,
+        backgroundColor: COLORS.danger + '08',
     },
-    logoutText: {
-        color: COLORS.danger,
-        fontSize: 16,
-        fontWeight: 'bold',
-    }
+    logoutText: { color: COLORS.danger, fontWeight: '700', fontSize: 16 },
 });

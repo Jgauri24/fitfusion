@@ -51,7 +51,7 @@ export default function JournalEntryScreen({ navigation }) {
                     <TextInput
                         style={styles.titleInput}
                         placeholder="Title"
-                        placeholderTextColor={COLORS.muted}
+                        placeholderTextColor={COLORS.textMuted}
                         value={title}
                         onChangeText={setTitle}
                     />
@@ -59,7 +59,7 @@ export default function JournalEntryScreen({ navigation }) {
                     <TextInput
                         style={styles.bodyInput}
                         placeholder="Write your thoughts..."
-                        placeholderTextColor={COLORS.cardBorder}
+                        placeholderTextColor={COLORS.textMuted}
                         multiline
                         value={body}
                         onChangeText={setBody}
@@ -67,7 +67,7 @@ export default function JournalEntryScreen({ navigation }) {
                     />
 
                     <View style={styles.lockContainer}>
-                        <Feather name="lock" size={12} color={COLORS.muted} />
+                        <Feather name="lock" size={12} color={COLORS.textMuted} />
                         <Text style={styles.lockText}>Encrypted & Private</Text>
                     </View>
 
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.cardBorder,
+        borderBottomColor: COLORS.glassBorder,
     },
     bodyInput: {
         color: COLORS.white,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     lockText: {
-        color: COLORS.muted,
+        color: COLORS.textMuted,
         fontSize: 12,
         marginLeft: 6,
         textTransform: 'uppercase',
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
         ...globalStyles.pillButton,
     },
     disabledButton: {
-        backgroundColor: COLORS.cardBorder,
+        backgroundColor: COLORS.border,
         opacity: 0.5,
     }
 });

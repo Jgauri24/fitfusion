@@ -2,284 +2,175 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
-import Toast from 'react-native-toast-message';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
+import VitaLogo from '../../components/VitaLogo';
+import { mockMoodTrend, mockJournals } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
-const MOODS = ['😔', '😟', '😐', '🙂', '😄'];
+const MOODS = [
+    { icon: 'frown', label: 'Low', color: COLORS.danger },
+    { icon: 'meh', label: 'Meh', color: COLORS.warning },
+    { icon: 'minus-circle', label: 'OK', color: COLORS.textSecondary },
+    { icon: 'smile', label: 'Good', color: COLORS.info },
+    { icon: 'sun', label: 'Great', color: COLORS.success },
+];
 
 export default function MoodHomeScreen({ navigation }) {
-    const [selectedMood, setSelectedMood] = useState(null);
-    const [isLogged, setIsLogged] = useState(false);
-    const [moodTrend, setMoodTrend] = useState([2, 2, 2, 2, 2, 2, 2]);
-    const [journals, setJournals] = useState([]);
-
-    const fetchMoodData = async () => {
-        try {
-            const [moodRes, journalRes] = await Promise.all([
-                api.get('/api/student/mood/weekly'),
-                api.get('/api/student/mood/journals'),
-            ]);
-            setMoodTrend(moodRes.data.moodTrend || [2, 2, 2, 2, 2, 2, 2]);
-            setJournals(journalRes.data.journals || []);
-        } catch (e) {
-            console.error('Failed to fetch mood data:', e);
-        }
-    };
+    const [todayMood, setTodayMood] = useState(null);
+    const [moodTrend, setMoodTrend] = useState(mockMoodTrend);
+    const [journals, setJournals] = useState(mockJournals);
 
     useFocusEffect(
         useCallback(() => {
-            fetchMoodData();
-            setIsLogged(false);
-            setSelectedMood(null);
+            const fetchMood = async () => {
+                try {
+                    const res = await api.get('/api/student/mood/dashboard');
+                    if (res.data.todayMood) setTodayMood(res.data.todayMood);
+                    if (res.data.weeklyTrend?.length) setMoodTrend(res.data.weeklyTrend);
+                    if (res.data.journals?.length) setJournals(res.data.journals);
+                } catch (e) {}
+            };
+            fetchMood();
         }, [])
     );
 
-    const handleSaveMood = async () => {
-        if (selectedMood === null) return;
-        try {
-            await api.post('/api/student/mood/checkin', { moodScore: selectedMood });
-            setIsLogged(true);
-            Toast.show({
-                type: 'success',
-                text1: 'Mood Checked-In 🌿',
-                text2: 'Thanks for taking a moment for yourself.',
-                position: 'bottom',
-                bottomOffset: 100,
-            });
-            fetchMoodData();
-        } catch (e) {
-            Toast.show({ type: 'error', text1: 'Error', text2: 'Failed to save mood.', position: 'bottom' });
-        }
-    };
-
-    // Calculate mood variance
-    const avg = moodTrend.reduce((a, b) => a + b, 0) / moodTrend.length;
-    const variance = moodTrend.reduce((sum, m) => sum + Math.pow(m - avg, 2), 0) / moodTrend.length;
-    const varianceLabel = variance < 0.5 ? '😌 Low Variance — Mood Stable' : variance < 1.5 ? '😐 Moderate Variance' : '😟 High Variance — Mood Fluctuating';
-
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={styles.scroll}>
 
+            {/* Header */}
             <View style={styles.header}>
-                <Text style={globalStyles.heading}>Mind & Mood</Text>
+                <VitaLogo size={22} fontSize={15} />
             </View>
 
-            {/* Today's Check-in Card */}
-            <Card style={styles.checkinCard}>
-                <Text style={styles.checkinSub}>How are you feeling today?</Text>
+            <Text style={styles.heroTitle}>How are you feeling?</Text>
+            <Text style={styles.heroSub}>Share your daily campus wellness pulse.</Text>
 
-                <View style={styles.emojiRow}>
-                    {MOODS.map((emoji, index) => {
-                        const isSelected = selectedMood === index;
-                        return (
-                            <TouchableOpacity
-                                key={index}
-                                style={[
-                                    styles.emojiBtn,
-                                    isSelected && styles.emojiBtnSelected
-                                ]}
-                                onPress={() => !isLogged && setSelectedMood(index)}
-                                disabled={isLogged}
-                            >
-                                <Text style={styles.emojiText}>{emoji}</Text>
-                            </TouchableOpacity>
-                        )
-                    })}
-                </View>
-
-                {!isLogged ? (
-                    <TouchableOpacity
-                        style={[styles.saveBtn, selectedMood === null && { opacity: 0.5 }]}
-                        onPress={handleSaveMood}
-                        disabled={selectedMood === null}
-                    >
-                        <Text style={globalStyles.buttonText}>Save Check-in</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <Text style={styles.loggedText}>Logged at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                )}
-            </Card>
-
-            <Text style={globalStyles.sectionLabel}>MOOD TREND</Text>
-            <LineChart
-                data={{
-                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                    datasets: [{ data: moodTrend }]
-                }}
-                width={screenWidth - 40}
-                height={220}
-                chartConfig={{
-                    backgroundColor: COLORS.bg,
-                    backgroundGradientFrom: COLORS.bg,
-                    backgroundGradientTo: COLORS.bg,
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(200, 255, 87, ${opacity})`,
-                    labelColor: (opacity = 1) => `rgba(136, 136, 136, ${opacity})`,
-                    style: { borderRadius: 16 },
-                    propsForDots: { r: "4", strokeWidth: "2", stroke: COLORS.accent },
-                    propsForBackgroundLines: { stroke: COLORS.cardBorder }
-                }}
-                bezier
-                style={styles.chart}
-                withInnerLines={true}
-                withOuterLines={false}
-            />
-
-            {/* Variance Badge Card */}
-            <Card style={styles.varianceCard}>
-                <Text style={styles.varianceText}>{varianceLabel}</Text>
-            </Card>
-
-            <Text style={[globalStyles.sectionLabel, { marginTop: 30 }]}>RECENT JOURNALS</Text>
-
-            <View style={styles.journalList}>
-                {journals.length === 0 ? (
-                    <View style={styles.journalCard}>
-                        <Text style={{ color: COLORS.muted, textAlign: 'center' }}>No journals yet. Start writing!</Text>
-                    </View>
-                ) : (
-                    journals.map((journal) => (
+            {/* Mood Selector */}
+            <View style={styles.moodRow}>
+                {MOODS.map((m, i) => {
+                    const selected = todayMood === (i + 1);
+                    return (
                         <TouchableOpacity
-                            key={journal.id}
-                            onPress={() => navigation.navigate('JournalViewScreen', { journal })}
+                            key={m.label}
+                            style={[styles.moodCircle, selected && styles.moodSelected]}
+                            onPress={() => navigation.navigate('MoodCheckInScreen', { preSelectedMood: i + 1 })}
+                            activeOpacity={0.75}
                         >
-                            <View style={styles.journalCard}>
-                                <View style={styles.journalHeader}>
-                                    <View style={styles.dateChip}>
-                                        <Text style={styles.dateChipText}>{journal.date}</Text>
-                                    </View>
-                                    <Feather name="chevron-right" size={20} color={COLORS.muted} />
-                                </View>
-                                <Text style={styles.journalTitle}>{journal.title}</Text>
-                                <Text style={styles.journalPreview}>{journal.preview}</Text>
-                            </View>
+                            <Feather name={m.icon} size={24} color={selected ? COLORS.accent : COLORS.textSecondary} />
                         </TouchableOpacity>
-                    ))
-                )}
+                    );
+                })}
             </View>
 
-            <TouchableOpacity
-                style={globalStyles.pillButton}
-                onPress={() => navigation.navigate('JournalEntryScreen')}
-            >
-                <Text style={globalStyles.buttonText}>+ New Journal</Text>
-            </TouchableOpacity>
+            {/* Mood Legend */}
+            <Text style={globalStyles.sectionLabel}>MOODS</Text>
+            <GlassCard noPad style={styles.moodList}>
+                {MOODS.map((m, i) => (
+                    <View key={m.label} style={[styles.moodItem, i < MOODS.length - 1 && styles.moodItemBorder]}>
+                        <View style={[styles.moodItemIcon, { backgroundColor: m.color + '15' }]}>
+                            <Feather name={m.icon} size={16} color={m.color} />
+                        </View>
+                        <Text style={styles.moodItemLabel}>{m.label}</Text>
+                        <Text style={styles.moodItemDesc}>
+                            {['Feeling down', 'Neutral', 'Alright', 'Feeling good', 'Feeling great'][i]}
+                        </Text>
+                    </View>
+                ))}
+            </GlassCard>
 
+            {/* Trend Chart */}
+            <Text style={globalStyles.sectionLabel}>7-DAY MOOD TREND</Text>
+            <GlassCard noPad style={{ marginBottom: 16 }}>
+                <LineChart
+                    data={{
+                        labels: ["M", "T", "W", "T", "F", "S", "S"],
+                        datasets: [{ data: moodTrend }],
+                    }}
+                    width={screenWidth - 56}
+                    height={180}
+                    chartConfig={{
+                        backgroundColor: 'transparent',
+                        backgroundGradientFrom: COLORS.cardSolid,
+                        backgroundGradientTo: COLORS.cardSolid,
+                        decimalPlaces: 0,
+                        color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
+                        labelColor: () => COLORS.textMuted,
+                        style: { borderRadius: 20 },
+                        propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
+                        propsForBackgroundLines: { stroke: COLORS.border },
+                    }}
+                    bezier
+                    style={{ borderRadius: 20, padding: 8 }}
+                    withInnerLines={true}
+                    withOuterLines={false}
+                />
+            </GlassCard>
+
+            {/* Recent Journals */}
+            <Text style={globalStyles.sectionLabel}>RECENT JOURNALS</Text>
+            <GlassCard noPad>
+                {journals.map((j, idx) => (
+                    <TouchableOpacity
+                        key={j.id}
+                        onPress={() => navigation.navigate('JournalViewScreen', { journal: j })}
+                    >
+                        <View style={[styles.journalRow, idx < journals.length - 1 && styles.journalBorder]}>
+                            <View style={styles.journalLeft}>
+                                <View style={styles.journalIcon}>
+                                    <Feather name="book-open" size={16} color={COLORS.accent} />
+                                </View>
+                                <View>
+                                    <Text style={styles.journalTitle}>{j.title}</Text>
+                                    <Text style={styles.journalDate}>{j.date}</Text>
+                                </View>
+                            </View>
+                            <Feather name="chevron-right" size={16} color={COLORS.textMuted} />
+                        </View>
+                    </TouchableOpacity>
+                ))}
+            </GlassCard>
+
+            <TouchableOpacity onPress={() => navigation.navigate('MoodCheckInScreen')} style={styles.linkRow}>
+                <Text style={styles.linkText}>Full Mood Check-In</Text>
+                <Feather name="arrow-right" size={15} color={COLORS.accent} />
+            </TouchableOpacity>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 40,
-    },
-    header: {
-        marginBottom: 20,
-    },
-    checkinCard: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    checkinSub: {
-        color: COLORS.muted,
-        fontSize: 16,
-        marginBottom: 20,
-    },
-    emojiRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 20,
-    },
-    emojiBtn: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: COLORS.bg,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: 'transparent',
-    },
-    emojiBtnSelected: {
-        borderColor: COLORS.accent,
-        transform: [{ scale: 1.1 }],
-    },
-    emojiText: {
-        fontSize: 28,
-    },
-    saveBtn: {
-        ...globalStyles.pillButton,
-        width: '100%',
-    },
-    loggedText: {
-        color: COLORS.accent,
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    chart: {
-        marginVertical: 10,
-        borderRadius: 16,
-    },
-    varianceCard: {
-        backgroundColor: 'rgba(200, 255, 87, 0.1)',
-        borderColor: COLORS.accent,
-        marginTop: 10,
-        alignItems: 'center',
-        padding: 15,
-    },
-    varianceText: {
-        color: COLORS.accent,
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    journalList: {
-        marginBottom: 20,
-    },
-    journalCard: {
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    header: { marginBottom: 24 },
+    heroTitle: { color: COLORS.white, fontSize: 24, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5 },
+    heroSub: { color: COLORS.textSecondary, fontSize: 14, marginBottom: 24 },
+    moodRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, gap: 8 },
+    moodCircle: {
+        flex: 1, height: 60, borderRadius: 18,
+        borderWidth: 1.5, borderColor: COLORS.glassBorder,
         backgroundColor: COLORS.card,
-        borderRadius: 16,
-        padding: 15,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: COLORS.cardBorder,
+        justifyContent: 'center', alignItems: 'center',
     },
-    journalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 10,
+    moodSelected: {
+        borderColor: COLORS.accent,
+        backgroundColor: COLORS.accentGlow,
     },
-    dateChip: {
-        backgroundColor: COLORS.bg,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    dateChipText: {
-        color: COLORS.mutedLight,
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    journalTitle: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    journalPreview: {
-        color: COLORS.muted,
-        fontSize: 14,
-    }
+    moodList: { marginBottom: 20 },
+    moodItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+    moodItemBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
+    moodItemIcon: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+    moodItemLabel: { color: COLORS.white, fontWeight: '600', fontSize: 14, width: 50 },
+    moodItemDesc: { color: COLORS.textSecondary, fontSize: 13 },
+    journalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 18 },
+    journalBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
+    journalLeft: { flexDirection: 'row', alignItems: 'center' },
+    journalIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+    journalTitle: { color: COLORS.white, fontSize: 14, fontWeight: '600', marginBottom: 2 },
+    journalDate: { color: COLORS.textSecondary, fontSize: 12 },
+    linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 16, marginBottom: 10 },
+    linkText: { color: COLORS.accent, fontWeight: '700', fontSize: 15 },
 });

@@ -3,22 +3,24 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { globalStyles } from '../../constants/styles';
-import { Card } from '../../components/Card';
+import { GlassCard } from '../../components/GlassCard';
 
-const ToggleRow = ({ icon, label, value, onValueChange }) => (
-    <Card style={styles.toggleRow}>
+const ToggleRow = ({ iconName, iconColor, label, value, onValueChange, isLast }) => (
+    <View style={[styles.toggleRow, !isLast && styles.toggleBorder]}>
         <View style={styles.toggleLeft}>
-            <Text style={styles.toggleIcon}>{icon}</Text>
+            <View style={[styles.toggleIcon, { backgroundColor: (iconColor || COLORS.accent) + '15' }]}>
+                <Feather name={iconName} size={16} color={iconColor || COLORS.accent} />
+            </View>
             <Text style={styles.toggleLabel}>{label}</Text>
         </View>
         <Switch
-            trackColor={{ false: COLORS.cardBorder, true: 'rgba(200, 255, 87, 0.3)' }}
-            thumbColor={value ? COLORS.accent : COLORS.muted}
-            ios_backgroundColor={COLORS.cardBorder}
+            trackColor={{ false: COLORS.border, true: COLORS.accentGlowStrong }}
+            thumbColor={value ? COLORS.accent : COLORS.textMuted}
+            ios_backgroundColor={COLORS.border}
             onValueChange={onValueChange}
             value={value}
         />
-    </Card>
+    </View>
 );
 
 export default function NotificationSettingsScreen({ navigation }) {
@@ -28,87 +30,41 @@ export default function NotificationSettingsScreen({ navigation }) {
     const [environment, setEnvironment] = useState(false);
 
     return (
-        <View style={styles.container}>
+        <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Feather name="arrow-left" size={24} color={COLORS.white} />
+                    <Feather name="arrow-left" size={22} color={COLORS.white} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Preferences</Text>
-                <View style={{ width: 24 }} />
+                <View style={{ width: 22 }} />
             </View>
 
             <View style={styles.content}>
                 <Text style={globalStyles.sectionLabel}>NOTIFICATIONS</Text>
-
-                <ToggleRow
-                    icon="🍽️"
-                    label="Meal Reminders"
-                    value={meals}
-                    onValueChange={setMeals}
-                />
-                <ToggleRow
-                    icon="⚡"
-                    label="Activity Nudges"
-                    value={activity}
-                    onValueChange={setActivity}
-                />
-                <ToggleRow
-                    icon="🚨"
-                    label="Burnout Alerts"
-                    value={burnout}
-                    onValueChange={setBurnout}
-                />
-                <ToggleRow
-                    icon="🌿"
-                    label="Environmental Alerts"
-                    value={environment}
-                    onValueChange={setEnvironment}
-                />
-
+                <GlassCard noPad>
+                    <ToggleRow iconName="clock" iconColor={COLORS.accent} label="Meal Reminders" value={meals} onValueChange={setMeals} />
+                    <ToggleRow iconName="zap" iconColor={COLORS.warning} label="Activity Nudges" value={activity} onValueChange={setActivity} />
+                    <ToggleRow iconName="alert-triangle" iconColor={COLORS.danger} label="Burnout Alerts" value={burnout} onValueChange={setBurnout} />
+                    <ToggleRow iconName="wind" iconColor={COLORS.success} label="Environmental Alerts" value={environment} onValueChange={setEnvironment} isLast />
+                </GlassCard>
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        ...globalStyles.container,
-    },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 20,
-        backgroundColor: COLORS.bg,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
     },
-    title: {
-        ...globalStyles.heading,
-        fontSize: 20,
-    },
-    content: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-    },
+    title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
+    content: { paddingHorizontal: 20, paddingTop: 10 },
     toggleRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 15,
-        marginBottom: 15,
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+        paddingVertical: 14, paddingHorizontal: 18,
     },
-    toggleLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    toggleIcon: {
-        fontSize: 20,
-        marginRight: 15,
-    },
-    toggleLabel: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: '500',
-    }
+    toggleBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
+    toggleLeft: { flexDirection: 'row', alignItems: 'center' },
+    toggleIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    toggleLabel: { color: COLORS.white, fontSize: 15, fontWeight: '600' },
 });

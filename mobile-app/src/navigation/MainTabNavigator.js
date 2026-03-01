@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
+import { Platform, StyleSheet } from 'react-native';
 import { COLORS } from '../constants/theme';
 
 import { HomeStack, NutritionStack, ActivityStack, MoodStack, ProfileStack } from './NestedStacks';
@@ -14,23 +15,36 @@ export default function MainTabNavigator() {
                 headerShown: false,
                 tabBarStyle: {
                     backgroundColor: COLORS.surface,
-                    borderTopColor: COLORS.cardBorder,
-                    paddingBottom: 5,
-                    paddingTop: 5,
-                    height: 60,
+                    borderTopColor: COLORS.glassBorder,
+                    borderTopWidth: 1,
+                    paddingBottom: 6,
+                    paddingTop: 6,
+                    height: 64,
+                    ...Platform.select({
+                        ios: {
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: -4 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 12,
+                        },
+                    }),
                 },
                 tabBarActiveTintColor: COLORS.accent,
-                tabBarInactiveTintColor: COLORS.muted,
+                tabBarInactiveTintColor: COLORS.textMuted,
+                tabBarLabelStyle: {
+                    fontSize: 10,
+                    fontWeight: '600',
+                    letterSpacing: 0.3,
+                },
                 tabBarIcon: ({ color, size }) => {
                     let iconName;
-
                     if (route.name === 'Home') iconName = 'home';
-                    else if (route.name === 'Nutrition') iconName = 'coffee';
+                    else if (route.name === 'Nutrition') iconName = 'heart';
                     else if (route.name === 'Activity') iconName = 'zap';
-                    else if (route.name === 'Mood') iconName = 'sun';
+                    else if (route.name === 'Mood') iconName = 'smile';
                     else if (route.name === 'Profile') iconName = 'user';
 
-                    return <Feather name={iconName} size={size} color={color} />;
+                    return <Feather name={iconName} size={22} color={color} />;
                 },
             })}
         >

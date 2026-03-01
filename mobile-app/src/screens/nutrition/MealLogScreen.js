@@ -34,7 +34,7 @@ export default function MealLogScreen({ navigation }) {
 
     const addCustomItem = () => {
         if (!customName.trim() || !customKcal.trim()) return;
-        const newItem = { id: nextCustomId, name: customName.trim(), kcal: parseInt(customKcal), icon: '🍽️', quantity: 1 };
+        const newItem = { id: nextCustomId, name: customName.trim(), kcal: parseInt(customKcal), icon: 'custom', quantity: 1 };
         setSelectedItems([...selectedItems, newItem]);
         setNextCustomId(nextCustomId + 1);
         setCustomName('');
@@ -101,11 +101,11 @@ export default function MealLogScreen({ navigation }) {
                 </View>
 
                 <View style={styles.searchContainer}>
-                    <Feather name="search" size={20} color={COLORS.muted} style={styles.searchIcon} />
+                    <Feather name="search" size={20} color={COLORS.textSecondary} style={styles.searchIcon} />
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search campus food..."
-                        placeholderTextColor={COLORS.muted}
+                        placeholderTextColor={COLORS.textSecondary}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
@@ -117,14 +117,14 @@ export default function MealLogScreen({ navigation }) {
                         <TextInput
                             style={[styles.customInput, { flex: 2 }]}
                             placeholder="Food name"
-                            placeholderTextColor={COLORS.muted}
+                            placeholderTextColor={COLORS.textSecondary}
                             value={customName}
                             onChangeText={setCustomName}
                         />
                         <TextInput
                             style={[styles.customInput, { flex: 1 }]}
                             placeholder="kcal"
-                            placeholderTextColor={COLORS.muted}
+                            placeholderTextColor={COLORS.textSecondary}
                             value={customKcal}
                             onChangeText={setCustomKcal}
                             keyboardType="numeric"
@@ -134,7 +134,7 @@ export default function MealLogScreen({ navigation }) {
                             onPress={addCustomItem}
                             disabled={!customName.trim() || !customKcal.trim()}
                         >
-                            <Feather name="plus" size={20} color="#000" />
+                            <Feather name="plus" size={20} color="#FFFFFF" />
                         </TouchableOpacity>
                     </View>
                 </Card>
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.card,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: COLORS.cardBorder,
+        borderColor: COLORS.glassBorder,
         marginBottom: 15,
         overflow: 'hidden',
     },
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.card,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: COLORS.cardBorder,
+        borderColor: COLORS.glassBorder,
         paddingHorizontal: 15,
         marginBottom: 20,
     },
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     menuKcal: {
-        color: COLORS.muted,
+        color: COLORS.textSecondary,
         fontSize: 14,
         marginTop: 2,
     },
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginBottom: 10,
         borderWidth: 1,
-        borderColor: COLORS.cardBorder,
+        borderColor: COLORS.glassBorder,
     },
     selectedName: {
         color: COLORS.white,
@@ -319,13 +319,13 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: COLORS.surface,
         borderTopWidth: 1,
-        borderTopColor: COLORS.cardBorder,
+        borderTopColor: COLORS.glassBorder,
     },
     totalContainer: {
         flex: 1,
     },
     totalLabel: {
-        color: COLORS.muted,
+        color: COLORS.textSecondary,
         fontSize: 14,
         textTransform: 'uppercase',
     },
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 40,
     },
     disabledButton: {
-        backgroundColor: COLORS.cardBorder,
+        backgroundColor: COLORS.border,
         opacity: 0.5,
     },
     customEntryCard: {
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         fontSize: 15,
         borderWidth: 1,
-        borderColor: COLORS.cardBorder,
+        borderColor: COLORS.glassBorder,
     },
     customAddBtn: {
         backgroundColor: COLORS.accent,
