@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { COLORS } from '../../constants/theme';
 import { GlassCard } from '../../components/GlassCard';
 
@@ -22,15 +23,17 @@ const MenuItem = ({ icon, label, onPress, color }) => (
 export default function ProfileScreen({ navigation }) {
     const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const s = await AsyncStorage.getItem('userInfo');
-                if (s) setUser(JSON.parse(s));
-            } catch (e) {}
-        };
-        load();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            const load = async () => {
+                try {
+                    const s = await AsyncStorage.getItem('userInfo');
+                    if (s) setUser(JSON.parse(s));
+                } catch (e) { }
+            };
+            load();
+        }, [])
+    );
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('userToken');
@@ -41,6 +44,24 @@ export default function ProfileScreen({ navigation }) {
     const name = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'User';
     const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
     const email = user?.email || 'user@university.edu';
+
+    // BMI Calculation
+    let bmiValue = '--';
+    let bmiLabel = 'Calculate in Setup';
+    let bmiColor = COLORS.textMuted;
+
+    if (user?.weight && user?.height) {
+        const h = Number(user.height) / 100; // cm to m
+        const w = Number(user.weight);
+        if (h > 0 && w > 0) {
+            const bmi = w / (h * h);
+            bmiValue = bmi.toFixed(1);
+            if (bmi < 18.5) { bmiLabel = 'Underweight'; bmiColor = COLORS.warning; }
+            else if (bmi < 25) { bmiLabel = 'Normal Weight'; bmiColor = COLORS.success; }
+            else if (bmi < 30) { bmiLabel = 'Overweight'; bmiColor = COLORS.warning; }
+            else { bmiLabel = 'Obese'; bmiColor = COLORS.danger; }
+        }
+    }
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: COLORS.bg }} contentContainerStyle={styles.scroll}>
@@ -53,14 +74,66 @@ export default function ProfileScreen({ navigation }) {
                 </View>
                 <Text style={styles.userName}>{name}</Text>
                 <Text style={styles.userEmail}>{email}</Text>
+                <Text style={styles.userSub}>{user?.branch || 'Department'} • {user?.hostel || 'Hostel'}</Text>
+            </View>
+
+            {/* BMI Calculator Card */}
+            <GlassCard glow style={styles.bmiCard}>
+                <View style={styles.bmiHeader}>
+                    <View style={styles.bmiIconBox}>
+                        <Feather name="activity" size={18} color={COLORS.accent} />
+                    </View>
+                    <Text style={styles.bmiTitle}>Body Mass Index (BMI)</Text>
+                </View>
+                <View style={styles.bmiRow}>
+                    <View style={styles.bmiScoreBox}>
+                        <Text style={styles.bmiScore}>{bmiValue}</Text>
+                        <Text style={[styles.bmiLabel, { color: bmiColor }]}>{bmiLabel}</Text>
+                    </View>
+                    <View style={styles.bmiStats}>
+                        <View style={styles.statItem}>
+                            <Text style={styles.statVal}>{user?.weight || '--'}<Text style={styles.statUnit}>kg</Text></Text>
+                            <Text style={styles.statName}>Weight</Text>
+                        </View>
+                        <View style={styles.statDivider} />
+                        <View style={styles.statItem}>
+                            <Text style={styles.statVal}>{user?.height || '--'}<Text style={styles.statUnit}>cm</Text></Text>
+                            <Text style={styles.statName}>Height</Text>
+                        </View>
+                    </View>
+                </View>
+            </GlassCard>
+
+            {/* Demographics */}
+            <View style={styles.demoGrid}>
+                <GlassCard style={styles.demoBox} noPad>
+                    <View style={{ padding: 16, alignItems: 'center' }}>
+                        <Text style={styles.demoTitle}>Age</Text>
+                        <Text style={styles.demoVal}>{user?.age || '--'}</Text>
+                    </View>
+                </GlassCard>
+                <GlassCard style={styles.demoBox} noPad>
+                    <View style={{ padding: 16, alignItems: 'center' }}>
+                        <Text style={styles.demoTitle}>Gender</Text>
+                        <Text style={styles.demoVal}>{user?.gender || '--'}</Text>
+                    </View>
+                </GlassCard>
+                <GlassCard style={styles.demoBox} noPad>
+                    <View style={{ padding: 16, alignItems: 'center' }}>
+                        <Text style={styles.demoTitle}>Level</Text>
+                        <Text style={[styles.demoVal, { fontSize: 13, marginTop: 4 }]}>{user?.fitnessLevel || '--'}</Text>
+                    </View>
+                </GlassCard>
             </View>
 
             {/* Menu */}
             <GlassCard noPad style={styles.menuCard}>
-                <MenuItem icon="heart" label="Health Insights" color={COLORS.danger}
+                <MenuItem icon="edit-3" label="Edit Profile" color={COLORS.success}
+                    onPress={() => navigation.navigate('ProfileSetup', { isEditMode: true })} />
+                <MenuItem icon="heart" label="Wellness Insights" color={COLORS.danger}
                     onPress={() => navigation.navigate('Home', { screen: 'WellnessInsightScreen' })} />
-                <MenuItem icon="calendar" label="Wellness Calendar" color={COLORS.accent}
-                    onPress={() => {}} />
+                <MenuItem icon="calendar" label="Mood Tracker" color={COLORS.accent}
+                    onPress={() => navigation.navigate('Mood', { screen: 'MoodHomeScreen' })} />
                 <MenuItem icon="bell" label="Smart Reminders" color={COLORS.warning}
                     onPress={() => navigation.navigate('NotificationSettingsScreen')} />
                 <MenuItem icon="shield" label="Privacy & Security" color={COLORS.success}
@@ -107,4 +180,26 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.danger + '08',
     },
     logoutText: { color: COLORS.danger, fontWeight: '700', fontSize: 16 },
+
+    userSub: { color: COLORS.accent, fontSize: 13, fontWeight: '600', marginTop: 8, textTransform: 'uppercase' },
+
+    bmiCard: { marginBottom: 20, padding: 20 },
+    bmiHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, gap: 12 },
+    bmiIconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: COLORS.accent + '15', justifyContent: 'center', alignItems: 'center' },
+    bmiTitle: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
+    bmiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    bmiScoreBox: { flex: 1 },
+    bmiScore: { color: COLORS.white, fontSize: 38, fontWeight: '800', letterSpacing: -1 },
+    bmiLabel: { fontSize: 14, fontWeight: '600', marginTop: 4 },
+    bmiStats: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: COLORS.glassBorder },
+    statItem: { alignItems: 'center', minWidth: 50 },
+    statVal: { color: COLORS.white, fontSize: 16, fontWeight: '700' },
+    statUnit: { fontSize: 11, color: COLORS.textMuted, fontWeight: 'normal' },
+    statName: { color: COLORS.textMuted, fontSize: 12, marginTop: 4 },
+    statDivider: { width: 1, height: 30, backgroundColor: COLORS.glassBorder, marginHorizontal: 12 },
+
+    demoGrid: { flexDirection: 'row', gap: 12, marginBottom: 28 },
+    demoBox: { flex: 1 },
+    demoTitle: { color: COLORS.textMuted, fontSize: 12, fontWeight: '600', textTransform: 'uppercase', marginBottom: 8 },
+    demoVal: { color: COLORS.white, fontSize: 18, fontWeight: '700' },
 });

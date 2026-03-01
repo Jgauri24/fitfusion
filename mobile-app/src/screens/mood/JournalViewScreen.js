@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'rea
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { GlassCard } from '../../components/GlassCard';
+import api from '../../utils/api';
 
 export default function JournalViewScreen({ route, navigation }) {
     const journal = route?.params?.journal || {
@@ -12,7 +13,19 @@ export default function JournalViewScreen({ route, navigation }) {
     const handleDelete = () => {
         Alert.alert('Delete Journal', 'Delete this encrypted entry? This cannot be undone.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => navigation.goBack() },
+            {
+                text: 'Delete', style: 'destructive',
+                onPress: async () => {
+                    try {
+                        if (journal.id) {
+                            await api.delete(`/api/student/mood/journal/${journal.id}`);
+                        }
+                        navigation.goBack();
+                    } catch (e) {
+                        Alert.alert('Error', 'Failed to delete journal entry.');
+                    }
+                }
+            },
         ]);
     };
 

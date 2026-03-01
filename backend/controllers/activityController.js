@@ -94,4 +94,25 @@ const getWeeklyActivity = async (req, res) => {
     }
 };
 
-module.exports = { logActivity, getWeeklyActivity };
+/**
+ * Delete an activity log for the authenticated user.
+ */
+const deleteActivity = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { id } = req.params;
+
+        const log = await prisma.activityLog.findUnique({ where: { id } });
+        if (!log || log.userId !== userId) {
+            return res.status(404).json({ message: 'Activity not found.' });
+        }
+
+        await prisma.activityLog.delete({ where: { id } });
+        res.json({ message: 'Activity deleted successfully.' });
+    } catch (error) {
+        console.error('deleteActivity error:', error);
+        res.status(500).json({ message: 'Failed to delete activity.' });
+    }
+};
+
+module.exports = { logActivity, getWeeklyActivity, deleteActivity };

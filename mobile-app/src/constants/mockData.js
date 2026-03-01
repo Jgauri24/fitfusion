@@ -3,12 +3,12 @@ export const mockTrend = [65, 68, 70, 66, 72, 71, 72];
 export const mockWeekly = [30, 0, 45, 30, 0, 0, 20];
 
 export const mockCanteenItems = [
-    { id: 1, name: "Poha", kcal: 180, icon: "🍚" },
-    { id: 2, name: "Dal Rice", kcal: 420, icon: "🍛" },
-    { id: 3, name: "Roti Sabzi", kcal: 350, icon: "🫓" },
-    { id: 4, name: "Chole Bhature", kcal: 520, icon: "🥙" },
-    { id: 5, name: "Fruit Bowl", kcal: 120, icon: "🍎" },
-    { id: 6, name: "Paneer Wrap", kcal: 390, icon: "🌯" },
+    { id: 1, name: "Poha", kcal: 180, protein: 4, carbs: 35, fats: 2, icon: "🍚" },
+    { id: 2, name: "Dal Rice", kcal: 420, protein: 12, carbs: 80, fats: 5, icon: "🍛" },
+    { id: 3, name: "Roti Sabzi", kcal: 350, protein: 8, carbs: 55, fats: 10, icon: "🫓" },
+    { id: 4, name: "Chole Bhature", kcal: 520, protein: 15, carbs: 65, fats: 22, icon: "🥙" },
+    { id: 5, name: "Fruit Bowl", kcal: 120, protein: 2, carbs: 28, fats: 0, icon: "🍎" },
+    { id: 6, name: "Paneer Wrap", kcal: 390, protein: 18, carbs: 45, fats: 16, icon: "🌯" },
 ];
 
 export const mockActivities = [

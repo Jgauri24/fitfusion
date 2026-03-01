@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }) {
             try {
                 const s = await AsyncStorage.getItem('userInfo');
                 if (s) setUser(JSON.parse(s));
-            } catch (e) {}
+            } catch (e) { }
         };
         loadUser();
     }, []);
@@ -99,20 +99,19 @@ export default function HomeScreen({ navigation }) {
                 </View>
             </GlassCard>
 
-            {/* ── Quick Log ── */}
             <View style={styles.quickRow}>
                 <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
-                    onPress={() => navigation.navigate('Nutrition', { screen: 'MealLogScreen' })}>
-                    <LinearGradient colors={[COLORS.accent, COLORS.accentDark]} style={styles.quickBtn}>
-                        <Feather name="plus" size={16} color="#FFF" />
-                        <Text style={styles.quickText}>Log Meal</Text>
+                    onPress={() => navigation.navigate('Home', { screen: 'EnvironmentHubScreen' })}>
+                    <LinearGradient colors={[COLORS.accentGlow, COLORS.accent]} style={styles.quickBtn}>
+                        <Feather name="map" size={16} color="#FFF" />
+                        <Text style={styles.quickText}>Campus Zones</Text>
                     </LinearGradient>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
-                    onPress={() => navigation.navigate('Activity', { screen: 'ActivityLogScreen' })}>
-                    <LinearGradient colors={[COLORS.accent, COLORS.accentDark]} style={styles.quickBtn}>
-                        <Feather name="plus" size={16} color="#FFF" />
-                        <Text style={styles.quickText}>Log Workout</Text>
+                    onPress={() => navigation.navigate('Home', { screen: 'WellnessEventsScreen' })}>
+                    <LinearGradient colors={[COLORS.success + '80', COLORS.success]} style={styles.quickBtn}>
+                        <Feather name="users" size={16} color="#FFF" />
+                        <Text style={styles.quickText}>Wellness Events</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>

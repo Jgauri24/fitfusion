@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
 import { GlassCard } from '../../components/GlassCard';
+import api from '../../utils/api';
 
 const ICONS = { 'Running': 'trending-up', 'Run': 'trending-up', 'Walk': 'map-pin', 'Yoga': 'wind', 'Gym': 'target', 'Cycle': 'navigation', 'Sport': 'award' };
 
@@ -26,7 +27,19 @@ export default function ActivityDetailScreen({ route, navigation }) {
     const handleDelete = () => {
         Alert.alert('Delete Activity', 'Remove this log? This will update your weekly score.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => navigation.goBack() },
+            {
+                text: 'Delete', style: 'destructive',
+                onPress: async () => {
+                    try {
+                        if (activity.id) {
+                            await api.delete(`/api/student/activity/${activity.id}`);
+                        }
+                        navigation.goBack();
+                    } catch (e) {
+                        Alert.alert('Error', 'Failed to delete activity.');
+                    }
+                }
+            },
         ]);
     };
 

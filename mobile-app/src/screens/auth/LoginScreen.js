@@ -24,7 +24,12 @@ export default function LoginScreen({ navigation }) {
             const { token, user } = response.data;
             await AsyncStorage.setItem('userToken', token);
             await AsyncStorage.setItem('userInfo', JSON.stringify(user));
-            navigation.replace('MainApp');
+
+            if (user.age && user.weight && user.height) {
+                navigation.replace('MainApp');
+            } else {
+                navigation.replace('ProfileSetup');
+            }
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to login. Check credentials.';
             Alert.alert('Login Failed', message);
