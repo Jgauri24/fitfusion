@@ -127,15 +127,15 @@ export default function HomeScreen({ navigation }) {
                     width={screenWidth - 56}
                     height={195}
                     chartConfig={{
-                        backgroundColor: 'transparent',
-                        backgroundGradientFrom: COLORS.cardSolid,
-                        backgroundGradientTo: COLORS.cardSolid,
-                        decimalPlaces: 0,
-                        color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
-                        labelColor: () => COLORS.textMuted,
-                        style: { borderRadius: 20 },
-                        propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
-                        propsForBackgroundLines: { stroke: COLORS.border },
+                    backgroundColor: 'transparent',
+                    backgroundGradientFrom: COLORS.cardSolid,
+                    backgroundGradientTo: COLORS.cardSolid,
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
+                    labelColor: () => COLORS.textMuted,
+                    style: { borderRadius: 20 },
+                    propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
+                    propsForBackgroundLines: { stroke: COLORS.border },
                     }}
                     bezier
                     style={{ borderRadius: 20, padding: 8 }}

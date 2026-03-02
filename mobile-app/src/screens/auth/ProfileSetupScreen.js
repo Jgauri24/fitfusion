@@ -141,7 +141,7 @@ export default function ProfileSetupScreen({ navigation, route }) {
     };
 
     return (
-        <LinearGradient colors={['#060B18', '#0B1530']} style={styles.container}>
+        <LinearGradient colors={['#050608', '#020308']} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scroll}>
                 {/* Back button in edit mode */}
                 {isEditMode && (

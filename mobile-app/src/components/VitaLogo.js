@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { COLORS } from '../constants/theme';
 
 /**
- * VitaLogo — Premium brand mark with glowing electric blue star.
+ * VitaLogo — Neon brand mark with lime accent, matching app theme.
  */
 export default function VitaLogo({
     size = 32,

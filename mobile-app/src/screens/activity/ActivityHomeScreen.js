@@ -126,7 +126,7 @@ export default function ActivityHomeScreen({ navigation }) {
                             backgroundGradientFrom: COLORS.cardSolid,
                             backgroundGradientTo: COLORS.cardSolid,
                             decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(45, 127, 249, ${opacity})`,
+                            color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
                             labelColor: () => COLORS.textMuted,
                             propsForBackgroundLines: { stroke: COLORS.border },
                             barPercentage: 0.5,

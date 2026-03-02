@@ -14,7 +14,7 @@ export default function SplashScreen({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#060B18', '#0A1530', '#060B18']}
+            colors={['#050608', '#020308', '#050608']}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.container}
