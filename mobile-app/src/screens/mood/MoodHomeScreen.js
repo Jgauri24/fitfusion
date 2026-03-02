@@ -100,12 +100,12 @@ export default function MoodHomeScreen({ navigation }) {
                         decimalPlaces: 0,
                         color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
                         labelColor: () => COLORS.textMuted,
-                        style: { borderRadius: 20 },
+                        style: { borderRadius: 24 },
                         propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
                         propsForBackgroundLines: { stroke: COLORS.border },
                     }}
                     bezier
-                    style={{ borderRadius: 20, padding: 8 }}
+                    style={{ borderRadius: 24, padding: 8 }}
                     withInnerLines={true}
                     withOuterLines={false}
                 />
@@ -159,13 +159,13 @@ export default function MoodHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
     header: { marginBottom: 24 },
     heroTitle: { color: COLORS.white, fontSize: 24, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5 },
     heroSub: { color: COLORS.textSecondary, fontSize: 14, marginBottom: 24 },
     moodRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, gap: 8 },
     moodCircle: {
-        flex: 1, height: 60, borderRadius: 18,
+        flex: 1, height: 62, borderRadius: 20,
         borderWidth: 1.5, borderColor: COLORS.glassBorder,
         backgroundColor: COLORS.card,
         justifyContent: 'center', alignItems: 'center',
@@ -177,13 +177,13 @@ const styles = StyleSheet.create({
     moodList: { marginBottom: 20 },
     moodItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
     moodItemBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
-    moodItemIcon: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+    moodItemIcon: { width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
     moodItemLabel: { color: COLORS.white, fontWeight: '600', fontSize: 14, width: 50 },
     moodItemDesc: { color: COLORS.textSecondary, fontSize: 13 },
     journalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 18 },
     journalBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
     journalLeft: { flexDirection: 'row', alignItems: 'center' },
-    journalIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+    journalIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
     journalTitle: { color: COLORS.white, fontSize: 14, fontWeight: '600', marginBottom: 2 },
     journalDate: { color: COLORS.textSecondary, fontSize: 12 },
     linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 16, marginBottom: 10 },

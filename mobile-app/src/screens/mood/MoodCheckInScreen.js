@@ -92,7 +92,7 @@ export default function MoodCheckInScreen({ navigation }) {
                 <TouchableOpacity
                     onPress={handleSave}
                     activeOpacity={0.85}
-                    style={{ borderRadius: 14, overflow: 'hidden', marginTop: 36 }}
+                    style={{ borderRadius: 16, overflow: 'hidden', marginTop: 36 }}
                 >
                     <LinearGradient
                         colors={[COLORS.accent, COLORS.accentDark]}
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     prompt: { color: COLORS.white, fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 36, letterSpacing: -0.5 },
     moodRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
     moodBtn: {
-        flex: 1, alignItems: 'center', paddingVertical: 16, borderRadius: 16,
+        flex: 1, alignItems: 'center', paddingVertical: 16, borderRadius: 18,
         borderWidth: 1.5, borderColor: COLORS.glassBorder, backgroundColor: COLORS.card,
     },
     moodBtnSelected: {
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     },
     moodLabel: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600', marginTop: 6, letterSpacing: 0.3 },
     inputWrap: {
-        backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder, borderRadius: 16, overflow: 'hidden',
+        backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder, borderRadius: 18, overflow: 'hidden',
     },
     notesInput: {
         padding: 16, color: COLORS.white, fontSize: 15, minHeight: 120, textAlignVertical: 'top',

@@ -50,7 +50,7 @@ export default function OnboardingScreen({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#050608', '#020308', '#050608']}
+            colors={['#080C06', '#0A1208', '#060A04']}
             style={styles.container}
         >
             <View style={styles.topBar}>
@@ -134,11 +134,11 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     iconCircle: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
+        width: 96,
+        height: 96,
+        borderRadius: 48,
         backgroundColor: COLORS.accentGlow,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: COLORS.accentGlowMed,
         justifyContent: 'center',
         alignItems: 'center',
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         width: 6,
     },
     ctaButton: {
-        borderRadius: 14,
+        borderRadius: 16,
         overflow: 'hidden',
     },
     ctaGradient: {

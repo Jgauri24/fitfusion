@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
@@ -7,7 +7,7 @@ import VitaLogo from '../../components/VitaLogo';
 
 export default function AboutScreen({ navigation }) {
     return (
-        <LinearGradient colors={['#050608', '#020308', '#050608']} style={styles.screen}>
+        <LinearGradient colors={['#080C06', '#0A1208', '#060A04']} style={styles.screen}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="arrow-left" size={22} color={COLORS.white} />
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     body: { flex: 1, paddingHorizontal: 30, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
-    glow: { position: 'absolute', width: 250, height: 250, borderRadius: 125, backgroundColor: COLORS.accentGlow },
+    glow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: COLORS.accentGlowMed },
     version: { color: COLORS.textSecondary, fontSize: 15, marginTop: 14, marginBottom: 40 },
     desc: { color: COLORS.textSecondary, fontSize: 16, lineHeight: 26, textAlign: 'center', marginBottom: 40 },
     credits: { color: COLORS.textMuted, fontSize: 13, fontStyle: 'italic' },

@@ -53,12 +53,12 @@ export default function WellnessInsightScreen({ navigation }) {
                         decimalPlaces: 0,
                         color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
                         labelColor: () => COLORS.textMuted,
-                        style: { borderRadius: 20 },
+                        style: { borderRadius: 24 },
                         propsForDots: { r: '0' },
                         propsForBackgroundLines: { stroke: COLORS.border },
                     }}
                     bezier
-                    style={{ borderRadius: 20, padding: 8 }}
+                    style={{ borderRadius: 24, padding: 8 }}
                 />
             </GlassCard>
 

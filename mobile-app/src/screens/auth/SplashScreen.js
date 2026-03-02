@@ -14,7 +14,7 @@ export default function SplashScreen({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#050608', '#020308', '#050608']}
+            colors={['#080C06', '#0A1208', '#060A04']}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={styles.container}
@@ -36,11 +36,11 @@ const styles = StyleSheet.create({
     },
     ambientGlow: {
         position: 'absolute',
-        width: 300,
-        height: 300,
-        borderRadius: 150,
-        backgroundColor: COLORS.accentGlow,
-        top: '35%',
+        width: 320,
+        height: 320,
+        borderRadius: 160,
+        backgroundColor: COLORS.accentGlowMed,
+        top: '33%',
         alignSelf: 'center',
     },
     tagline: {

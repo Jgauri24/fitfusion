@@ -48,7 +48,7 @@ export default function EnvironmentHubScreen({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#050608', '#020308', '#050608']} style={{ flex: 1 }}>
+        <LinearGradient colors={['#080C06', '#0A1208', '#060A04']} style={{ flex: 1 }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Feather name="arrow-left" size={24} color={COLORS.white} />
@@ -128,10 +128,10 @@ const styles = StyleSheet.create({
     zoneCard: { padding: 20, marginBottom: 16 },
     zoneHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
     zoneName: { color: COLORS.white, fontSize: 18, fontWeight: '700', flex: 1, marginRight: 12 },
-    statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 },
+    statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14 },
     statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 6 },
     statusText: { fontSize: 12, fontWeight: '600' },
-    metricsRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 12 },
+    metricsRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 16 },
     metric: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     metricVal: { color: COLORS.white, fontSize: 13, fontWeight: '500' },
     updateTime: { color: COLORS.textMuted, fontSize: 11, textAlign: 'right', marginTop: 12 }

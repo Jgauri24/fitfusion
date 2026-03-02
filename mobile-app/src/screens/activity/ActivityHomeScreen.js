@@ -131,7 +131,7 @@ export default function ActivityHomeScreen({ navigation }) {
                             propsForBackgroundLines: { stroke: COLORS.border },
                             barPercentage: 0.5,
                         }}
-                        style={{ borderRadius: 20, padding: 8 }}
+                        style={{ borderRadius: 24, padding: 8 }}
                         showBarTops={false}
                         flatColor={true}
                     />
@@ -176,34 +176,35 @@ export default function ActivityHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 120 },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 24 },
     headerBadge: { color: COLORS.textSecondary, fontSize: 15, fontWeight: '500' },
     streakCard: { marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.warning },
     streakRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    streakIconCircle: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 170, 44, 0.12)', justifyContent: 'center', alignItems: 'center' },
+    streakIconCircle: { width: 46, height: 46, borderRadius: 23, backgroundColor: 'rgba(250, 204, 21, 0.14)', justifyContent: 'center', alignItems: 'center' },
     streakTitle: { color: COLORS.warning, fontWeight: '700', fontSize: 18 },
     streakSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
     stepsCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
     stepsRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    stepsIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
+    stepsIconCircle: { width: 50, height: 50, borderRadius: 25, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
     stepsVal: { color: COLORS.white, fontSize: 28, fontWeight: '700', letterSpacing: -1 },
     stepsSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
-    conBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: COLORS.accentGlowMed },
+    conBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 22, borderWidth: 1, borderColor: COLORS.accentGlowMed },
     conText: { color: COLORS.accent, fontWeight: '700', fontSize: 12 },
     chartWrap: { marginTop: 4 },
     actRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 18 },
     actBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
     actLeft: { flexDirection: 'row', alignItems: 'center' },
-    actIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    actIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
     actName: { color: COLORS.white, fontSize: 15, fontWeight: '600', marginBottom: 2 },
     actMeta: { color: COLORS.textSecondary, fontSize: 13 },
     fab: {
-        position: 'absolute', right: 20, bottom: 24, width: 58, height: 58, borderRadius: 29,
+        position: 'absolute', right: 20, bottom: 100, width: 60, height: 60, borderRadius: 30,
         backgroundColor: COLORS.accent, justifyContent: 'center', alignItems: 'center',
+        borderWidth: 2, borderColor: COLORS.accentGlowMed,
         ...Platform.select({
-            ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 14 },
-            android: { elevation: 8 },
+            ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.45, shadowRadius: 18 },
+            android: { elevation: 10 },
         }),
     },
 });

@@ -195,7 +195,7 @@ export default function ActivityLogScreen({ navigation }) {
                 <TouchableOpacity
                     onPress={handleSave}
                     activeOpacity={0.85}
-                    style={{ borderRadius: 14, overflow: 'hidden', marginTop: 36, marginBottom: 40 }}
+                    style={{ borderRadius: 16, overflow: 'hidden', marginTop: 36, marginBottom: 40 }}
                 >
                     <LinearGradient
                         colors={[COLORS.accent, COLORS.accentDark]}
@@ -228,13 +228,13 @@ const styles = StyleSheet.create({
     sliderLabels: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 10, marginTop: -2 },
     sliderLbl: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600' },
     intensityRow: { flexDirection: 'row', gap: 10 },
-    intensityBtn: { flex: 1, paddingVertical: 15, backgroundColor: COLORS.glass, borderWidth: 1.5, borderColor: COLORS.glassBorder, borderRadius: 14, alignItems: 'center' },
+    intensityBtn: { flex: 1, paddingVertical: 15, backgroundColor: COLORS.glass, borderWidth: 1.5, borderColor: COLORS.glassBorder, borderRadius: 16, alignItems: 'center' },
     intensityActive: { borderColor: COLORS.accent, backgroundColor: COLORS.accentGlow },
     intensityText: { color: COLORS.textSecondary, fontSize: 14, fontWeight: '700' },
     intensityTextActive: { color: COLORS.accent },
     dateChip: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', backgroundColor: COLORS.glass, paddingHorizontal: 16, paddingVertical: 11, borderRadius: 30, borderWidth: 1, borderColor: COLORS.glassBorder },
     dateText: { color: COLORS.white, fontSize: 14, fontWeight: '500' },
-    inputWrap: { backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder, borderRadius: 16, overflow: 'hidden' },
+    inputWrap: { backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder, borderRadius: 18, overflow: 'hidden' },
     notesInput: { padding: 16, color: COLORS.white, fontSize: 15, minHeight: 110, textAlignVertical: 'top' },
     saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 17 },
     saveBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16, letterSpacing: 0.3 },

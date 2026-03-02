@@ -35,18 +35,27 @@ export default function MainTabNavigator() {
                 screenOptions={({ route }) => ({
                     headerShown: false,
                     tabBarStyle: {
-                        backgroundColor: COLORS.surface,
-                        borderTopColor: COLORS.glassBorder,
-                        borderTopWidth: 1,
-                        paddingBottom: 6,
-                        paddingTop: 6,
-                        height: 64,
+                        position: 'absolute',
+                        bottom: 16,
+                        left: 20,
+                        right: 20,
+                        backgroundColor: COLORS.surfaceElevated,
+                        borderTopWidth: 0,
+                        borderRadius: 28,
+                        height: 68,
+                        paddingBottom: 10,
+                        paddingTop: 10,
+                        borderWidth: 1,
+                        borderColor: COLORS.glassBorder,
                         ...Platform.select({
                             ios: {
                                 shadowColor: '#000',
-                                shadowOffset: { width: 0, height: -4 },
-                                shadowOpacity: 0.3,
-                                shadowRadius: 12,
+                                shadowOffset: { width: 0, height: -8 },
+                                shadowOpacity: 0.40,
+                                shadowRadius: 20,
+                            },
+                            android: {
+                                elevation: 12,
                             },
                         }),
                     },
@@ -57,7 +66,7 @@ export default function MainTabNavigator() {
                         fontWeight: '600',
                         letterSpacing: 0.3,
                     },
-                    tabBarIcon: ({ color, size }) => {
+                    tabBarIcon: ({ color, focused }) => {
                         let iconName;
                         if (route.name === 'Home') iconName = 'home';
                         else if (route.name === 'Nutrition') iconName = 'heart';
@@ -65,7 +74,11 @@ export default function MainTabNavigator() {
                         else if (route.name === 'Mood') iconName = 'smile';
                         else if (route.name === 'Profile') iconName = 'user';
 
-                        return <Feather name={iconName} size={22} color={color} />;
+                        return (
+                            <View style={[styles.tabIconWrap, focused && styles.tabIconActive]}>
+                                <Feather name={iconName} size={22} color={color} />
+                            </View>
+                        );
                     },
                 })}
             >
@@ -81,26 +94,46 @@ export default function MainTabNavigator() {
 }
 
 const styles = StyleSheet.create({
+    tabIconWrap: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    tabIconActive: {
+        backgroundColor: COLORS.accentGlow,
+        ...Platform.select({
+            ios: {
+                shadowColor: COLORS.accent,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.35,
+                shadowRadius: 8,
+            },
+        }),
+    },
     fab: {
         position: 'absolute',
         right: 16,
-        bottom: 140,
+        bottom: 100,
         zIndex: 999,
         ...Platform.select({
             ios: {
                 shadowColor: COLORS.accent,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.4,
-                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.45,
+                shadowRadius: 16,
             },
-            android: { elevation: 8 },
+            android: { elevation: 10 },
         }),
     },
     fabGradient: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 54,
+        height: 54,
+        borderRadius: 27,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.accentGlowMed,
     },
 });
