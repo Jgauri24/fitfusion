@@ -50,7 +50,7 @@ export default function OnboardingScreen({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#060B18', '#0B1530', '#060B18']}
+            colors={['#050608', '#020308', '#050608']}
             style={styles.container}
         >
             <View style={styles.topBar}>

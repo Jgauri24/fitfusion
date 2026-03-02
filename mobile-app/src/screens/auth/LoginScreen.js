@@ -39,7 +39,7 @@ export default function LoginScreen({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#060B18', '#0B1530', '#060B18']} style={styles.screen}>
+        <LinearGradient colors={['#050608', '#020308', '#050608']} style={styles.screen}>
             {/* Header */}
             <View style={styles.header}>
                 <VitaLogo size={26} fontSize={17} />
@@ -100,25 +100,6 @@ export default function LoginScreen({ navigation }) {
                         {!isLoading && <Feather name="arrow-right" size={18} color="#FFF" />}
                     </LinearGradient>
                 </TouchableOpacity>
-
-                {/* Divider */}
-                <View style={styles.dividerRow}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>OR</Text>
-                    <View style={styles.dividerLine} />
-                </View>
-
-                {/* Social */}
-                <View style={styles.socialRow}>
-                    <TouchableOpacity style={styles.socialBtn}>
-                        <Feather name="globe" size={18} color={COLORS.textSecondary} />
-                        <Text style={styles.socialText}>Google</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialBtn}>
-                        <Feather name="smartphone" size={18} color={COLORS.textSecondary} />
-                        <Text style={styles.socialText}>Apple</Text>
-                    </TouchableOpacity>
-                </View>
 
                 <View style={styles.signupRow}>
                     <Text style={styles.signupText}>Don't have an account? </Text>
@@ -199,45 +180,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         fontSize: 16,
         letterSpacing: 0.3,
-    },
-    dividerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: COLORS.border,
-    },
-    dividerText: {
-        color: COLORS.textMuted,
-        fontSize: 11,
-        fontWeight: '700',
-        letterSpacing: 1.5,
-        marginHorizontal: 14,
-    },
-    socialRow: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 28,
-    },
-    socialBtn: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        backgroundColor: COLORS.glass,
-        borderWidth: 1,
-        borderColor: COLORS.glassBorder,
-        borderRadius: 14,
-        paddingVertical: 15,
-    },
-    socialText: {
-        color: COLORS.textSecondary,
-        fontSize: 15,
-        fontWeight: '600',
     },
     signupRow: {
         flexDirection: 'row',

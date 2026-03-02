@@ -101,7 +101,7 @@ export default function ChatScreen({ navigation }) {
                         <Text style={{ fontSize: 18 }}>🤖</Text>
                     </View>
                     <View>
-                        <Text style={styles.headerTitle}>VITA Assistant</Text>
+                        <Text style={styles.headerTitle}>Sprout</Text>
                         <Text style={styles.headerSub}>Wellness • Fitness • Nutrition</Text>
                     </View>
                 </View>
@@ -125,7 +125,7 @@ export default function ChatScreen({ navigation }) {
                             <View style={styles.welcomeIcon}>
                                 <Text style={{ fontSize: 40 }}>🌿</Text>
                             </View>
-                            <Text style={styles.welcomeTitle}>Hi! I'm your VITA assistant</Text>
+                            <Text style={styles.welcomeTitle}>Hi! I'm Sprout</Text>
                             <Text style={styles.welcomeSub}>
                                 Ask me anything about fitness, nutrition, sleep, stress management, or campus wellness.
                             </Text>

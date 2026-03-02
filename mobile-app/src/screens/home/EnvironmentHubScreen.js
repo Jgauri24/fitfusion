@@ -48,7 +48,7 @@ export default function EnvironmentHubScreen({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#060B18', '#0B1530', '#060B18']} style={{ flex: 1 }}>
+        <LinearGradient colors={['#050608', '#020308', '#050608']} style={{ flex: 1 }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Feather name="arrow-left" size={24} color={COLORS.white} />

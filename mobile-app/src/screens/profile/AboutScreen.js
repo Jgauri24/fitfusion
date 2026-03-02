@@ -7,7 +7,7 @@ import VitaLogo from '../../components/VitaLogo';
 
 export default function AboutScreen({ navigation }) {
     return (
-        <LinearGradient colors={['#060B18', '#0B1530', '#060B18']} style={styles.screen}>
+        <LinearGradient colors={['#050608', '#020308', '#050608']} style={styles.screen}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="arrow-left" size={22} color={COLORS.white} />
