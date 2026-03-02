@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
-import { GlassCard } from '../../components/GlassCard';
 import api from '../../utils/api';
 
 export default function JournalViewScreen({ route, navigation }) {

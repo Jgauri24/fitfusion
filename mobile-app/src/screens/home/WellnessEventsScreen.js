@@ -49,7 +49,7 @@ export default function WellnessEventsScreen({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#050608', '#020308', '#050608']} style={{ flex: 1 }}>
+        <LinearGradient colors={['#080C06', '#0A1208', '#060A04']} style={{ flex: 1 }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                     <Feather name="arrow-left" size={24} color={COLORS.white} />
@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
     eventCard: { padding: 20, marginBottom: 16, position: 'relative' },
     joinedBadge: {
         position: 'absolute', top: 16, right: 16, flexDirection: 'row', alignItems: 'center',
-        backgroundColor: COLORS.success + '20', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, gap: 4
+        backgroundColor: COLORS.success + '20', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14, gap: 4
     },
     joinedText: { color: COLORS.success, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
 
     eventHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-    typeIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.accent + '20', justifyContent: 'center', alignItems: 'center' },
+    typeIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: COLORS.accent + '20', justifyContent: 'center', alignItems: 'center' },
     eventName: { color: COLORS.white, fontSize: 18, fontWeight: '700' },
     eventType: { color: COLORS.accent, fontSize: 13, fontWeight: '600', marginTop: 2 },
 
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     detail: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     detailText: { color: COLORS.textMuted, fontSize: 13, fontWeight: '500' },
 
-    actionBtn: { width: '100%', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 12 },
+    actionBtn: { width: '100%', paddingVertical: 14, borderRadius: 16, alignItems: 'center', marginTop: 12 },
     btnJoin: { backgroundColor: COLORS.accent },
     btnLeave: { backgroundColor: COLORS.danger + '15', borderWidth: 1, borderColor: COLORS.danger + '40' },
     btnFull: { backgroundColor: COLORS.textMuted + '80' },

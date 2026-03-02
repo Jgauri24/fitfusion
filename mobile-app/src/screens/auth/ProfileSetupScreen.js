@@ -141,7 +141,7 @@ export default function ProfileSetupScreen({ navigation, route }) {
     };
 
     return (
-        <LinearGradient colors={['#050608', '#020308']} style={styles.container}>
+        <LinearGradient colors={['#080C06', '#0A1208']} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scroll}>
                 {/* Back button in edit mode */}
                 {isEditMode && (
@@ -257,23 +257,23 @@ const styles = StyleSheet.create({
     label: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '500', marginBottom: 8, textTransform: 'uppercase' },
     input: {
         backgroundColor: COLORS.surface,
-        borderWidth: 1, borderColor: COLORS.divider, borderRadius: 12,
+        borderWidth: 1, borderColor: COLORS.divider, borderRadius: 14,
         color: COLORS.white, padding: 14, fontSize: 15
     },
     dropdownBtn: {
         backgroundColor: COLORS.surface,
-        borderWidth: 1, borderColor: COLORS.divider, borderRadius: 12,
+        borderWidth: 1, borderColor: COLORS.divider, borderRadius: 14,
         padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     },
     dropdownText: { color: COLORS.white, fontSize: 15 },
     modalOverlay: {
-        flex: 1, backgroundColor: 'rgba(0,0,0,0.7)',
+        flex: 1, backgroundColor: 'rgba(0,0,0,0.75)',
         justifyContent: 'center', alignItems: 'center', padding: 30,
     },
     modalContent: {
-        backgroundColor: COLORS.surface, borderRadius: 16, padding: 20,
+        backgroundColor: COLORS.surfaceElevated, borderRadius: 20, padding: 20,
         width: '100%', maxHeight: 400,
-        borderWidth: 1, borderColor: COLORS.divider,
+        borderWidth: 1, borderColor: COLORS.glassBorder,
     },
     modalTitle: { color: COLORS.white, fontSize: 18, fontWeight: '700', marginBottom: 16 },
     modalItem: {
@@ -281,12 +281,12 @@ const styles = StyleSheet.create({
         paddingVertical: 14, paddingHorizontal: 12,
         borderBottomWidth: 1, borderBottomColor: COLORS.divider,
     },
-    modalItemActive: { backgroundColor: COLORS.accent + '15', borderRadius: 10 },
+    modalItemActive: { backgroundColor: COLORS.accent + '15', borderRadius: 12 },
     modalItemText: { color: COLORS.white, fontSize: 16 },
     modalItemTextActive: { color: COLORS.accent, fontWeight: '600' },
     selectBtn: {
         paddingVertical: 10, paddingHorizontal: 16,
-        borderRadius: 20, borderWidth: 1, borderColor: COLORS.divider,
+        borderRadius: 22, borderWidth: 1, borderColor: COLORS.divider,
         backgroundColor: COLORS.surface,
     },
     selectBtnActive: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     },
     selectBtnText: { color: COLORS.textSecondary, fontSize: 14, fontWeight: '500' },
     selectBtnTextActive: { color: COLORS.accent, fontWeight: '600' },
-    submitBtn: { marginTop: 40, borderRadius: 14, overflow: 'hidden' },
+    submitBtn: { marginTop: 40, borderRadius: 16, overflow: 'hidden' },
     submitGradient: {
         padding: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8
     },

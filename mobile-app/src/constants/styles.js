@@ -16,19 +16,19 @@ export const globalStyles = StyleSheet.create({
     // ── Glass Card ──
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
+        borderRadius: 24,
         borderWidth: 1,
         borderColor: COLORS.glassBorder,
         padding: 18,
         ...Platform.select({
             ios: {
                 shadowColor: COLORS.accent,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 16,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.10,
+                shadowRadius: 20,
             },
             android: {
-                elevation: 4,
+                elevation: 6,
             },
         }),
     },
@@ -56,7 +56,7 @@ export const globalStyles = StyleSheet.create({
     },
     pillButton: {
         backgroundColor: COLORS.accent,
-        borderRadius: 14,
+        borderRadius: 16,
         paddingVertical: 16,
         paddingHorizontal: 24,
         alignItems: 'center',
@@ -64,12 +64,12 @@ export const globalStyles = StyleSheet.create({
         ...Platform.select({
             ios: {
                 shadowColor: COLORS.accent,
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.35,
-                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.40,
+                shadowRadius: 16,
             },
             android: {
-                elevation: 6,
+                elevation: 8,
             },
         }),
     },

@@ -140,7 +140,7 @@ export default function NutritionHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 },
     historyLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     historyText: { color: COLORS.accent, fontSize: 15, fontWeight: '700' },
@@ -159,11 +159,11 @@ const styles = StyleSheet.create({
     mealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 18 },
     mealBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
     mealLeft: { flexDirection: 'row', alignItems: 'center' },
-    mealIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    mealIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
     mealName: { color: COLORS.white, fontSize: 16, fontWeight: '600', marginBottom: 2 },
     mealSub: { color: COLORS.textSecondary, fontSize: 13 },
     mealCheck: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     mealKcal: { color: COLORS.white, fontWeight: '700', fontSize: 15 },
-    addBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: COLORS.accent + '50', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: COLORS.accentGlow },
+    addBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: COLORS.accent + '50', borderRadius: 22, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: COLORS.accentGlow },
     addText: { color: COLORS.accent, fontWeight: '700', fontSize: 13 },
 });

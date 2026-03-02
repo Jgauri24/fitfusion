@@ -100,14 +100,14 @@ export default function HomeScreen({ navigation }) {
             </GlassCard>
 
             <View style={styles.quickRow}>
-                <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
+                <TouchableOpacity style={{ flex: 1, borderRadius: 16, overflow: 'hidden' }}
                     onPress={() => navigation.navigate('Home', { screen: 'EnvironmentHubScreen' })}>
                     <LinearGradient colors={[COLORS.accentGlow, COLORS.accent]} style={styles.quickBtn}>
                         <Feather name="map" size={16} color="#FFF" />
                         <Text style={styles.quickText}>Campus Zones</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ flex: 1, borderRadius: 14, overflow: 'hidden' }}
+                <TouchableOpacity style={{ flex: 1, borderRadius: 16, overflow: 'hidden' }}
                     onPress={() => navigation.navigate('Home', { screen: 'WellnessEventsScreen' })}>
                     <LinearGradient colors={[COLORS.success + '80', COLORS.success]} style={styles.quickBtn}>
                         <Feather name="users" size={16} color="#FFF" />
@@ -127,18 +127,18 @@ export default function HomeScreen({ navigation }) {
                     width={screenWidth - 56}
                     height={195}
                     chartConfig={{
-                    backgroundColor: 'transparent',
-                    backgroundGradientFrom: COLORS.cardSolid,
-                    backgroundGradientTo: COLORS.cardSolid,
-                    decimalPlaces: 0,
-                    color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
-                    labelColor: () => COLORS.textMuted,
-                    style: { borderRadius: 20 },
-                    propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
-                    propsForBackgroundLines: { stroke: COLORS.border },
+                        backgroundColor: 'transparent',
+                        backgroundGradientFrom: COLORS.cardSolid,
+                        backgroundGradientTo: COLORS.cardSolid,
+                        decimalPlaces: 0,
+                        color: (opacity = 1) => `rgba(163, 230, 53, ${opacity})`,
+                        labelColor: () => COLORS.textMuted,
+                        style: { borderRadius: 24 },
+                        propsForDots: { r: '4', strokeWidth: '2', stroke: COLORS.accent },
+                        propsForBackgroundLines: { stroke: COLORS.border },
                     }}
                     bezier
-                    style={{ borderRadius: 20, padding: 8 }}
+                    style={{ borderRadius: 24, padding: 8 }}
                     withInnerLines={true}
                     withOuterLines={false}
                 />
@@ -154,15 +154,16 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.bg },
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
     greeting: { color: COLORS.white, fontWeight: '700', fontSize: 24, letterSpacing: -0.5 },
     dateSub: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
     avatar: {
-        width: 46, height: 46, borderRadius: 23,
+        width: 48, height: 48, borderRadius: 24,
         backgroundColor: COLORS.accent,
         justifyContent: 'center', alignItems: 'center',
-        ...Platform.select({ ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 } }),
+        borderWidth: 2, borderColor: COLORS.accentGlowMed,
+        ...Platform.select({ ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10 } }),
     },
     avatarText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
     heroCard: { marginBottom: 0 },
@@ -172,15 +173,15 @@ const styles = StyleSheet.create({
     ringVal: { fontSize: 22, fontWeight: '700', color: COLORS.white },
     focusRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
     focusCard: {
-        flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 14,
+        flex: 1, backgroundColor: COLORS.card, borderRadius: 20, padding: 14,
         alignItems: 'center', borderWidth: 1, borderColor: COLORS.glassBorder,
     },
-    focusIconCircle: { width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+    focusIconCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
     focusLabel: { color: COLORS.textSecondary, fontSize: 12, marginBottom: 6 },
     focusScore: { fontWeight: '700', fontSize: 18 },
     nudgeCard: { marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.accent },
     nudgeRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-    nudgeIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
+    nudgeIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center' },
     nudgeTitle: { color: COLORS.white, fontWeight: '700', fontSize: 14, marginBottom: 4 },
     nudgeText: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
     quickRow: { flexDirection: 'row', gap: 12, marginBottom: 0 },

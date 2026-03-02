@@ -210,8 +210,8 @@ const styles = StyleSheet.create({
     backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     botAvatar: {
-        width: 38, height: 38, borderRadius: 19,
-        backgroundColor: COLORS.accentGlow, borderWidth: 1, borderColor: COLORS.accent + '40',
+        width: 40, height: 40, borderRadius: 20,
+        backgroundColor: COLORS.accentGlow, borderWidth: 1.5, borderColor: COLORS.accentGlowMed,
         justifyContent: 'center', alignItems: 'center',
     },
     headerTitle: { color: COLORS.white, fontSize: 17, fontWeight: '700' },
@@ -222,9 +222,9 @@ const styles = StyleSheet.create({
 
     welcomeContainer: { alignItems: 'center', paddingTop: 30, paddingBottom: 20 },
     welcomeIcon: {
-        width: 80, height: 80, borderRadius: 40,
+        width: 84, height: 84, borderRadius: 42,
         backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 20, borderWidth: 1, borderColor: COLORS.accentGlowMed,
     },
     welcomeTitle: { color: COLORS.white, fontSize: 22, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
     welcomeSub: { color: COLORS.textSecondary, fontSize: 14, textAlign: 'center', lineHeight: 21, paddingHorizontal: 20 },
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     quickPrompt: {
         flexDirection: 'row', alignItems: 'center', gap: 10,
         backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.glassBorder,
-        borderRadius: 14, paddingVertical: 12, paddingHorizontal: 16,
+        borderRadius: 18, paddingVertical: 12, paddingHorizontal: 16,
         marginTop: 8, width: '100%',
     },
     quickPromptText: { flex: 1, color: COLORS.white, fontSize: 14, fontWeight: '500' },
@@ -242,17 +242,17 @@ const styles = StyleSheet.create({
     typingRow: { flexDirection: 'row', justifyContent: 'flex-start', marginBottom: 12, gap: 8 },
 
     botAvatarSmall: {
-        width: 28, height: 28, borderRadius: 14,
+        width: 30, height: 30, borderRadius: 15,
         backgroundColor: COLORS.accentGlow, justifyContent: 'center', alignItems: 'center',
         marginTop: 4,
     },
     userBubble: {
-        backgroundColor: COLORS.accent, borderRadius: 18,
+        backgroundColor: COLORS.accent, borderRadius: 20,
         borderBottomRightRadius: 4, paddingVertical: 10, paddingHorizontal: 16,
         maxWidth: '80%',
     },
     botBubble: {
-        backgroundColor: COLORS.card, borderRadius: 18,
+        backgroundColor: COLORS.card, borderRadius: 20,
         borderBottomLeftRadius: 4, paddingVertical: 10, paddingHorizontal: 16,
         maxWidth: '80%', borderWidth: 1, borderColor: COLORS.glassBorder,
     },
@@ -271,12 +271,12 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1, color: COLORS.white, fontSize: 15,
-        backgroundColor: COLORS.glass, borderRadius: 20,
+        backgroundColor: COLORS.glass, borderRadius: 22,
         paddingHorizontal: 16, paddingVertical: 10,
         maxHeight: 100, borderWidth: 1, borderColor: COLORS.glassBorder,
     },
     sendBtn: {
-        width: 42, height: 42, borderRadius: 21,
+        width: 44, height: 44, borderRadius: 22,
         backgroundColor: COLORS.accent, justifyContent: 'center', alignItems: 'center',
     },
     sendBtnDisabled: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glassBorder },

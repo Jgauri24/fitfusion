@@ -50,7 +50,7 @@ export default function NutritionHistoryScreen({ navigation }) {
                         propsForBackgroundLines: { stroke: COLORS.border },
                         barPercentage: 0.5,
                     }}
-                    style={{ borderRadius: 20, padding: 8 }}
+                    style={{ borderRadius: 24, padding: 8 }}
                     withInnerLines={true}
                     showBarTops={false}
                     flatColor={true}
@@ -85,6 +85,6 @@ const styles = StyleSheet.create({
     historyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 18 },
     historyBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
     historyDate: { color: COLORS.white, fontSize: 15, fontWeight: '500' },
-    scoreBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10, borderWidth: 1, borderColor: COLORS.accentGlowMed },
+    scoreBadge: { backgroundColor: COLORS.accentGlow, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12, borderWidth: 1, borderColor: COLORS.accentGlowMed },
     scoreText: { color: COLORS.accent, fontWeight: '700', fontSize: 13 },
 });

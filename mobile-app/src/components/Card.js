@@ -13,19 +13,19 @@ export const Card = ({ children, style, ...props }) => {
 const styles = StyleSheet.create({
     card: {
         backgroundColor: COLORS.card,
-        borderRadius: 20,
+        borderRadius: 24,
         borderWidth: 1,
         borderColor: COLORS.glassBorder,
         padding: 18,
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.2,
-                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.25,
+                shadowRadius: 16,
             },
             android: {
-                elevation: 4,
+                elevation: 6,
             },
         }),
     },

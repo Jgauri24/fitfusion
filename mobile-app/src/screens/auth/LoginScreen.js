@@ -39,7 +39,7 @@ export default function LoginScreen({ navigation }) {
     };
 
     return (
-        <LinearGradient colors={['#050608', '#020308', '#050608']} style={styles.screen}>
+        <LinearGradient colors={['#080C06', '#0A1208', '#060A04']} style={styles.screen}>
             {/* Header */}
             <View style={styles.header}>
                 <VitaLogo size={26} fontSize={17} />
@@ -86,7 +86,7 @@ export default function LoginScreen({ navigation }) {
                     onPress={handleLogin}
                     disabled={isLoading}
                     activeOpacity={0.85}
-                    style={{ borderRadius: 14, overflow: 'hidden', marginTop: 8 }}
+                    style={{ borderRadius: 16, overflow: 'hidden', marginTop: 8 }}
                 >
                     <LinearGradient
                         colors={isLoading ? [COLORS.textMuted, COLORS.textMuted] : [COLORS.accent, COLORS.accentDark]}
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.glass,
         borderWidth: 1,
         borderColor: COLORS.glassBorder,
-        borderRadius: 14,
+        borderRadius: 16,
         marginBottom: 18,
         paddingHorizontal: 14,
     },
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 8,
         paddingVertical: 17,
-        borderRadius: 14,
+        borderRadius: 16,
     },
     loginBtnText: {
         color: '#FFFFFF',
@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     signupRow: {
         flexDirection: 'row',
         justifyContent: 'center',
+        marginTop: 20,
     },
     signupText: {
         color: COLORS.textSecondary,

@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
     },
     toggleBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.divider },
     toggleLeft: { flexDirection: 'row', alignItems: 'center' },
-    toggleIcon: { width: 34, height: 34, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+    toggleIcon: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
     toggleLabel: { color: COLORS.white, fontSize: 15, fontWeight: '600' },
 });

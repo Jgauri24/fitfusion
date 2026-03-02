@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
 
     mealTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
     mealTypeBtn: {
-        flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
+        flex: 1, paddingVertical: 10, borderRadius: 16, alignItems: 'center',
         borderWidth: 1, borderColor: COLORS.glassBorder, backgroundColor: COLORS.card,
     },
     mealTypeBtnActive: {
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row', alignItems: 'center',
         backgroundColor: COLORS.glass, borderWidth: 1, borderColor: COLORS.glassBorder,
-        borderRadius: 14, marginBottom: 12, paddingHorizontal: 14,
+        borderRadius: 18, marginBottom: 12, paddingHorizontal: 14,
     },
     searchIcon: { marginRight: 10 },
     searchInput: { flex: 1, color: COLORS.white, paddingVertical: 14, fontSize: 15 },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     customRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     customInput: {
         backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.divider,
-        borderRadius: 10, color: COLORS.white, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14,
+        borderRadius: 14, color: COLORS.white, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14,
     },
     customAddBtn: {
         width: 38, height: 38, borderRadius: 19, justifyContent: 'center', alignItems: 'center',
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
 
     logBtn: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: COLORS.accent, paddingVertical: 16, borderRadius: 14, marginTop: 8,
+        backgroundColor: COLORS.accent, paddingVertical: 16, borderRadius: 16, marginTop: 8,
     },
     logBtnDisabled: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.glassBorder },
     logBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },

@@ -1,19 +1,20 @@
 export const COLORS = {
-  // ── Backgrounds (Deep Charcoal) ──
-  bg:             '#050608',           // main background — almost pure black
-  bgAlt:          '#090B10',           // slightly lighter panels
-  card:           'rgba(14, 18, 28, 0.90)', // glass card — soft charcoal
-  cardSolid:      '#0F131E',           // solid fallback
-  cardBorder:     'rgba(163, 230, 53, 0.10)', // subtle lime border
-  surface:        '#07080C',           // tab bar / header surface
+  // ── Backgrounds (Olive-Green Tinted Dark) ──
+  bg:             '#080C06',           // main bg — olive-black
+  bgAlt:          '#0D120A',           // slightly lighter panels
+  card:           'rgba(18, 26, 14, 0.92)', // glass card — olive-tinted
+  cardSolid:      '#111A0E',           // solid card fallback
+  cardBorder:     'rgba(163, 230, 53, 0.12)', // subtle lime border
+  surface:        '#0A0F07',           // tab bar / header surface
+  surfaceElevated:'#131C0F',           // elevated surface (modals, popovers)
 
-  // ── Accent — Softer Lime ──
-  accent:         '#A3E635',           // primary lime (darker/softer)
+  // ── Accent — Neon Lime ──
+  accent:         '#A3E635',           // primary lime
   accentLight:    '#BEF264',           // hover / secondary
   accentDark:     '#4D7C0F',           // pressed state
-  accentGlow:     'rgba(163, 230, 53, 0.12)',  // subtle glow bg
-  accentGlowMed:  'rgba(163, 230, 53, 0.20)',  // medium glow
-  accentGlowStrong: 'rgba(163, 230, 53, 0.32)', // strong glow
+  accentGlow:     'rgba(163, 230, 53, 0.14)',  // subtle glow bg
+  accentGlowMed:  'rgba(163, 230, 53, 0.24)',  // medium glow
+  accentGlowStrong: 'rgba(163, 230, 53, 0.38)', // strong glow
 
   // ── Semantic ──
   success:        '#4ADE80',           // green — positive
@@ -22,19 +23,19 @@ export const COLORS = {
   info:           '#38BDF8',           // cyan — information
 
   // ── Text ──
-  white:          '#F9FAFB',           // neutral white
-  textPrimary:    '#E5E7EB',           // high contrast
-  textSecondary:  '#9CA3AF',           // muted descriptions
-  textMuted:      '#6B7280',           // faint labels
+  white:          '#F4F7F0',           // warm white
+  textPrimary:    '#E2E8D8',           // high contrast (olive-warm)
+  textSecondary:  '#9CA88F',           // muted descriptions
+  textMuted:      '#5E6B52',           // faint labels
   textAccent:     '#A3E635',           // accent text
 
   // ── Borders & Dividers ──
-  border:         'rgba(148, 163, 184, 0.28)',
-  borderLight:    'rgba(163, 230, 53, 0.22)',
-  divider:        'rgba(31, 41, 55, 0.80)',
+  border:         'rgba(120, 145, 100, 0.22)',
+  borderLight:    'rgba(163, 230, 53, 0.25)',
+  divider:        'rgba(30, 42, 22, 0.85)',
 
   // ── Glass morphism ──
-  glass:          'rgba(15, 23, 42, 0.82)',   // glass bg
-  glassBorder:    'rgba(163, 230, 53, 0.16)', // glass edge
-  glassHighlight: 'rgba(255, 255, 255, 0.04)', // top highlight
+  glass:          'rgba(14, 22, 10, 0.85)',   // glass bg
+  glassBorder:    'rgba(163, 230, 53, 0.18)', // glass edge
+  glassHighlight: 'rgba(190, 242, 100, 0.06)', // top highlight — warmer
 };
