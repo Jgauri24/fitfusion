@@ -11,12 +11,38 @@ const searchFood = async (req, res) => {
             return res.status(400).json({ message: 'Search query must be at least 2 characters.', items: [] });
         }
 
-        const response = await fetch(
-            `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=${encodeURIComponent(q)}&pageSize=8&dataType=Survey%20(FNDDS)`,
-        );
+        const apiKey = process.env.USDA_API_KEY || 'DEMO_KEY';
+        const isDemo = apiKey === 'DEMO_KEY';
+
+        console.log(`[NutritionSearch] Query: "${q}" | Key: ${isDemo ? 'DEMO_KEY' : `Configured (ends in ...${apiKey.slice(-4)})`}`);
+
+        const params = new URLSearchParams({
+            query: q,
+            pageSize: '8',
+            dataType: 'Survey (FNDDS),Branded' // Expanded search
+        });
+
+        // Some data.gov APIs prefer Headers, let's include it there and keep as fallback in URL
+        const url = `https://api.nal.usda.gov/fdc/v1/foods/search?${params.toString()}&api_key=${apiKey}`;
+
+        const response = await fetch(url, {
+            headers: {
+                'X-Api-Key': apiKey,
+                'Content-Type': 'application/json'
+            }
+        });
 
         if (!response.ok) {
-            throw new Error(`USDA API error: ${response.status}`);
+            let errorMessage = `USDA API error: ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorMessage += ` - ${JSON.stringify(errorData)}`;
+            } catch (e) {
+                // If not JSON, try text
+                const errorText = await response.text().catch(() => '');
+                if (errorText) errorMessage += ` - ${errorText.substring(0, 200)}`;
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();
