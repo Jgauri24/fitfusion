@@ -17,6 +17,7 @@ interface DataTableProps {
     data: any[];
     searchKey?: string;
     searchPlaceholder?: string;
+    filters?: React.ReactNode;
 }
 
 export default function DataTable({
@@ -25,34 +26,37 @@ export default function DataTable({
     data,
     searchKey,
     searchPlaceholder = "Search...",
+    filters,
 }: DataTableProps) {
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredData = searchKey
-        ? data.filter((item) =>
-            String(item[searchKey])
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-        )
-        : data;
+    const filteredData = data.filter((item) => {
+        if (!searchQuery || !searchKey) return true;
+        const value = item[searchKey];
+        if (!value) return false;
+        return value.toString().toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     return (
-        <div className="table-container">
+        <div className="table-card">
             <div className="table-header">
-                <span className="table-title">{title}</span>
-                {searchKey && (
-                    <div className="table-search">
-                        <span className="table-search-icon">
-                            <Search size={14} />
-                        </span>
-                        <input
-                            type="text"
-                            placeholder={searchPlaceholder}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                )}
+                <div>
+                    <h3 className="table-title">{title}</h3>
+                </div>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    {filters}
+                    {searchKey && (
+                        <div className="table-search">
+                            <Search size={16} />
+                            <input
+                                type="text"
+                                placeholder={searchPlaceholder || "Search..."}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
             <div className="table-overflow">
                 <table>

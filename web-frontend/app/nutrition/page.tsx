@@ -75,12 +75,12 @@ export default function NutritionPage() {
         }
     };
 
-    const avgCalories = foodItems.length ? Math.round(foodItems.reduce((s, f) => s + f.calories, 0) / foodItems.length) : 0;
-    const avgProtein = foodItems.length ? Math.round(foodItems.reduce((s, f) => s + f.protein, 0) / foodItems.length) : 0;
-    const avgCarbs = foodItems.length ? Math.round(foodItems.reduce((s, f) => s + f.carbs, 0) / foodItems.length) : 0;
-    const avgFats = foodItems.length ? Math.round(foodItems.reduce((s, f) => s + f.fats, 0) / foodItems.length) : 0;
-
     const filtered = mealFilter === "All" ? foodItems : foodItems.filter((f) => f.meal === mealFilter);
+
+    const avgCalories = filtered.length ? Math.round(filtered.reduce((s, f) => s + f.calories, 0) / filtered.length) : 0;
+    const avgProtein = filtered.length ? Math.round(filtered.reduce((s, f) => s + f.protein, 0) / filtered.length) : 0;
+    const avgCarbs = filtered.length ? Math.round(filtered.reduce((s, f) => s + f.carbs, 0) / filtered.length) : 0;
+    const avgFats = filtered.length ? Math.round(filtered.reduce((s, f) => s + f.fats, 0) / filtered.length) : 0;
 
     const nutritionByMeal = meals.filter(m => m !== "All").map(meal => {
         const items = foodItems.filter(f => f.meal === meal);
@@ -132,11 +132,19 @@ export default function NutritionPage() {
                 </button>
             </div>
 
+            <div className="filters-row animate-fade-in-up stagger-1">
+                {meals.map((meal) => (
+                    <button key={meal} className={`filter-btn ${mealFilter === meal ? "active" : ""}`} onClick={() => setMealFilter(meal)}>
+                        {meal}
+                    </button>
+                ))}
+            </div>
+
             <div className="stats-grid">
-                <StatCard icon={<Flame size={20} />} label="Avg Calories" value={`${avgCalories} kcal`} accentColor="var(--orange)" className="animate-fade-in-up stagger-1" />
-                <StatCard icon={<Beef size={20} />} label="Avg Protein" value={`${avgProtein}g`} accentColor="var(--red)" className="animate-fade-in-up stagger-2" />
-                <StatCard icon={<Wheat size={20} />} label="Avg Carbs" value={`${avgCarbs}g`} accentColor="var(--blue)" className="animate-fade-in-up stagger-3" />
-                <StatCard icon={<Droplet size={20} />} label="Avg Fats" value={`${avgFats}g`} accentColor="var(--yellow)" className="animate-fade-in-up stagger-4" />
+                <StatCard icon={<Flame size={20} />} label={mealFilter === "All" ? "Avg Calories" : `Avg Calories (${mealFilter})`} value={`${avgCalories} kcal`} accentColor="var(--orange)" className="animate-fade-in-up stagger-1" />
+                <StatCard icon={<Beef size={20} />} label={mealFilter === "All" ? "Avg Protein" : `Avg Protein (${mealFilter})`} value={`${avgProtein}g`} accentColor="var(--red)" className="animate-fade-in-up stagger-2" />
+                <StatCard icon={<Wheat size={20} />} label={mealFilter === "All" ? "Avg Carbs" : `Avg Carbs (${mealFilter})`} value={`${avgCarbs}g`} accentColor="var(--blue)" className="animate-fade-in-up stagger-3" />
+                <StatCard icon={<Droplet size={20} />} label={mealFilter === "All" ? "Avg Fats" : `Avg Fats (${mealFilter})`} value={`${avgFats}g`} accentColor="var(--yellow)" className="animate-fade-in-up stagger-4" />
             </div>
 
             <div className="charts-grid" style={{ marginBottom: "24px" }}>
@@ -172,13 +180,6 @@ export default function NutritionPage() {
                 </ChartCard>
             </div>
 
-            <div className="filters-row animate-fade-in-up stagger-4">
-                {meals.map((meal) => (
-                    <button key={meal} className={`filter-btn ${mealFilter === meal ? "active" : ""}`} onClick={() => setMealFilter(meal)}>
-                        {meal}
-                    </button>
-                ))}
-            </div>
 
             <div className="animate-fade-in-up stagger-5">
                 <DataTable title="Food Items" columns={columns} data={filtered} searchKey="name" searchPlaceholder="Search food items..." />
