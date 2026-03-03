@@ -21,6 +21,7 @@ const navItems = [
     { label: "Nutrition", href: "/nutrition", icon: <Salad size={20} /> },
     { label: "Activities", href: "/activities", icon: <Activity size={20} /> },
     { label: "Environment", href: "/environment", icon: <TreePine size={20} /> },
+    { label: "Wellness", href: "/wellness", icon: <HeartPulse size={20} /> },
     { label: "Analytics", href: "/analytics", icon: <TrendingUp size={20} /> },
     { label: "Reports", href: "/reports", icon: <FileText size={20} /> },
 ];

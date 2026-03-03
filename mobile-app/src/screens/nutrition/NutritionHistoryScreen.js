@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions } from
 import { Feather } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 
 const screenWidth = Dimensions.get('window').width;
@@ -79,7 +79,7 @@ export default function NutritionHistoryScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 40 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     historyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 18 },

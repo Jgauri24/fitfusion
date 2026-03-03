@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -117,7 +118,7 @@ export default function EnvironmentHubScreen({ navigation }) {
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 24, paddingTop: 60, paddingBottom: 20,
+        paddingHorizontal: 24, paddingTop: TOP_PADDING, paddingBottom: 20,
     },
     backBtn: { width: 40, height: 40, justifyContent: 'center' },
     refreshBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'flex-end' },

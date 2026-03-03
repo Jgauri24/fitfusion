@@ -5,10 +5,9 @@ import { LineChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 import VitaLogo from '../../components/VitaLogo';
-import { mockMoodTrend } from '../../constants/mockData';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -22,7 +21,7 @@ const MOODS = [
 
 export default function MoodHomeScreen({ navigation }) {
     const [todayMood, setTodayMood] = useState(null);
-    const [moodTrend, setMoodTrend] = useState(mockMoodTrend);
+    const [moodTrend, setMoodTrend] = useState([3, 3, 3, 3, 3, 3, 3]);
     const [journals, setJournals] = useState([]);
 
     useFocusEffect(
@@ -44,7 +43,7 @@ export default function MoodHomeScreen({ navigation }) {
 
             {/* Header */}
             <View style={styles.header}>
-                <VitaLogo size={22} fontSize={15} />
+                <VitaLogo size={22} fontSize={15} showSubtitle={true} />
             </View>
 
             <Text style={styles.heroTitle}>How are you feeling?</Text>
@@ -159,7 +158,7 @@ export default function MoodHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 100 },
     header: { marginBottom: 24 },
     heroTitle: { color: COLORS.white, fontSize: 24, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5 },
     heroSub: { color: COLORS.textSecondary, fontSize: 14, marginBottom: 24 },

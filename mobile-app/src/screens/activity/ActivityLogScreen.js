@@ -6,7 +6,7 @@ import Slider from '@react-native-community/slider';
 import Toast from 'react-native-toast-message';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 
 const ACTIVITY_TYPES = [
     { id: '1', name: 'Running', icon: 'trending-up' },
@@ -214,7 +214,7 @@ export default function ActivityLogScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20 },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     scroll: { paddingHorizontal: 20, paddingBottom: 20 },
     typeScroll: { flexGrow: 0, marginBottom: 10 },

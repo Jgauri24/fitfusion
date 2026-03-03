@@ -10,6 +10,7 @@ export default function VitaLogo({
     size = 32,
     fontSize = 22,
     showText = true,
+    showSubtitle = true,
     layout = 'row',
 }) {
     const isColumn = layout === 'column';
@@ -33,9 +34,16 @@ export default function VitaLogo({
                 </Svg>
             </View>
             {showText && (
-                <Text style={[styles.text, { fontSize }, isColumn && styles.textColumn]}>
-                    VITA
-                </Text>
+                <View style={[isColumn ? { alignItems: 'center' } : { flexDirection: 'row', alignItems: 'baseline', gap: 6 }]}>
+                    <Text style={[styles.text, { fontSize }, isColumn && styles.textColumn]}>
+                        VITA
+                    </Text>
+                    {showSubtitle && (
+                        <Text style={[styles.subtitle, { fontSize: fontSize * 0.7 }]}>
+                            Intelligence
+                        </Text>
+                    )}
+                </View>
             )}
         </View>
     );
@@ -61,5 +69,10 @@ const styles = StyleSheet.create({
     },
     textColumn: {
         letterSpacing: 6,
+    },
+    subtitle: {
+        color: COLORS.textSecondary,
+        fontWeight: '400',
+        letterSpacing: 1,
     },
 });

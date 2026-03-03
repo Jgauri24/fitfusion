@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -42,7 +43,7 @@ export default function LoginScreen({ navigation }) {
         <LinearGradient colors={['#080C06', '#0A1208', '#060A04']} style={styles.screen}>
             {/* Header */}
             <View style={styles.header}>
-                <VitaLogo size={26} fontSize={17} />
+                <VitaLogo size={26} fontSize={17} showSubtitle={true} />
             </View>
 
             <View style={styles.content}>
@@ -95,7 +96,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.loginBtn}
                     >
                         <Text style={styles.loginBtnText}>
-                            {isLoading ? 'Signing in...' : 'Login to VITA'}
+                            {isLoading ? 'Signing in...' : 'Login to VITA Intelligence'}
                         </Text>
                         {!isLoading && <Feather name="arrow-right" size={18} color="#FFF" />}
                     </LinearGradient>
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     screen: { flex: 1 },
     header: {
         paddingHorizontal: 24,
-        paddingTop: 60,
+        paddingTop: TOP_PADDING,
         paddingBottom: 10,
     },
     content: {

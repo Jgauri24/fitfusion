@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -57,7 +58,7 @@ export default function JournalViewScreen({ route, navigation }) {
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
+        paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20,
     },
     deleteLink: { color: COLORS.danger, fontSize: 15, fontWeight: '700' },
     scroll: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 },

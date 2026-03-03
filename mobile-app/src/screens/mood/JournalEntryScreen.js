@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 
 export default function JournalEntryScreen({ navigation }) {
     const [title, setTitle] = useState('');
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 60,
+        paddingTop: TOP_PADDING,
         paddingBottom: 20,
         backgroundColor: COLORS.bg,
     },

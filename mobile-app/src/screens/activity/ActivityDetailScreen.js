@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -89,7 +90,7 @@ export default function ActivityDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20 },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     body: { flex: 1, paddingHorizontal: 20, paddingTop: 36, alignItems: 'center' },
     bigIcon: {

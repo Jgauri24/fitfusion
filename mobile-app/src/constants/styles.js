@@ -1,5 +1,10 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, StatusBar } from 'react-native';
 import { COLORS } from './theme';
+
+// Proper top padding: status bar height + small margin
+export const TOP_PADDING = Platform.OS === 'android'
+    ? (StatusBar.currentHeight || 24) + 10
+    : 50;
 
 export const globalStyles = StyleSheet.create({
     // ── Containers ──

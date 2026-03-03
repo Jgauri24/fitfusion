@@ -5,7 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 
 const MacroBar = ({ label, icon, current, max }) => {
@@ -140,7 +140,7 @@ export default function NutritionHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 100 },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 },
     historyLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     historyText: { color: COLORS.accent, fontSize: 15, fontWeight: '700' },

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 
 const ToggleRow = ({ iconName, iconColor, label, value, onValueChange, isLast }) => (
@@ -55,7 +55,7 @@ export default function NotificationSettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
+        paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20,
     },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     content: { paddingHorizontal: 20, paddingTop: 10 },

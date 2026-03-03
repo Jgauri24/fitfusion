@@ -620,6 +620,36 @@ router.get('/environment', getAllZones);
 router.post('/environment', createZone);
 
 // Wellness Event Management (Admin)
+router.get('/wellness/events', async (req, res) => {
+    try {
+        const events = await prisma.wellnessEvent.findMany({
+            orderBy: { scheduledAt: 'asc' },
+            include: {
+                _count: {
+                    select: { participants: true }
+                }
+            }
+        });
+
+        const formatted = events.map(e => ({
+            id: e.id,
+            name: e.name,
+            type: e.type,
+            description: e.description,
+            location: e.location,
+            scheduledAt: e.scheduledAt,
+            durationMins: e.durationMins,
+            maxCapacity: e.maxCapacity,
+            currentParticipants: e._count.participants,
+        }));
+
+        res.json(formatted);
+    } catch (error) {
+        console.error('getAdminWellnessEvents error:', error);
+        res.status(500).json({ message: 'Failed to fetch wellness events.' });
+    }
+});
+
 router.post('/wellness/manage', async (req, res) => {
     try {
         const { name, type, description, location, scheduledAt, durationMins, maxCapacity } = req.body;

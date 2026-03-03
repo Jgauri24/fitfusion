@@ -4,9 +4,9 @@ import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
-import { mockCanteenItems } from '../../constants/mockData';
+import VitaLogo from '../../components/VitaLogo';
 
 const MealTypeBtn = ({ label, active, onPress }) => (
     <TouchableOpacity
@@ -25,6 +25,15 @@ export default function MealLogScreen({ navigation, route }) {
     const [customName, setCustomName] = useState('');
     const [customKcal, setCustomKcal] = useState('');
     const [nextCustomId, setNextCustomId] = useState(1000);
+
+    const [canteenItems, setCanteenItems] = useState([]);
+
+    // Fetch canteen items on mount
+    useState(() => {
+        api.get('/api/student/nutrition/canteen')
+            .then(res => setCanteenItems(res.data))
+            .catch(() => setCanteenItems([]));
+    }, []);
 
     // API search state
     const [apiResults, setApiResults] = useState([]);
@@ -55,13 +64,13 @@ export default function MealLogScreen({ navigation, route }) {
         }, 600);
     };
 
-    // Combine mock canteen items with API results
-    const filteredCanteen = mockCanteenItems.filter(item =>
+    // Combine canteen items with API results
+    const filteredCanteen = canteenItems.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     const displayItems = searchQuery.trim().length >= 2
         ? [...filteredCanteen, ...apiResults]
-        : mockCanteenItems;
+        : canteenItems;
 
     const addItem = (item) => {
         const existing = selectedItems.find(i => i.id === item.id);
@@ -139,7 +148,7 @@ export default function MealLogScreen({ navigation, route }) {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="arrow-left" size={24} color={COLORS.white} />
                 </TouchableOpacity>
-                <Text style={styles.title}>Log Meal</Text>
+                <VitaLogo size={22} fontSize={16} showSubtitle={true} />
                 <View style={{ width: 24 }} />
             </View>
 
@@ -304,11 +313,11 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.bg },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 16,
+        paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 16,
     },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     scrollArea: { flex: 1 },
-    scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
+    scrollContent: { paddingHorizontal: 20, paddingBottom: 140 },
 
     mealTypeRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
     mealTypeBtn: {

@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -244,7 +245,7 @@ export default function ProfileSetupScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    scroll: { padding: 24, paddingTop: 60, paddingBottom: 60 },
+    scroll: { padding: 24, paddingTop: TOP_PADDING, paddingBottom: 60 },
     backBtn: { marginBottom: 10 },
     header: { marginBottom: 32 },
     title: { color: COLORS.white, fontSize: 28, fontWeight: '700', marginBottom: 8 },

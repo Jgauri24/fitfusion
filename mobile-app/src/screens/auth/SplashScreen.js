@@ -22,7 +22,7 @@ export default function SplashScreen({ navigation }) {
             {/* Ambient glow */}
             <View style={styles.ambientGlow} />
 
-            <VitaLogo size={72} fontSize={40} layout="column" />
+            <VitaLogo size={72} fontSize={40} layout="column" showSubtitle={true} />
             <Text style={styles.tagline}>Your Campus. Your Wellness.</Text>
         </LinearGradient>
     );

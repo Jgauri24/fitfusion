@@ -5,7 +5,7 @@ import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
 import VitaLogo from '../../components/VitaLogo';
 
@@ -77,8 +77,7 @@ export default function ActivityHomeScreen({ navigation }) {
 
                 {/* Header */}
                 <View style={styles.headerRow}>
-                    <VitaLogo size={22} fontSize={15} />
-                    <Text style={styles.headerBadge}>Intelligence</Text>
+                    <VitaLogo size={22} fontSize={15} showSubtitle={true} />
                 </View>
 
                 {/* Streak */}
@@ -176,7 +175,7 @@ export default function ActivityHomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 120 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 120 },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 24 },
     headerBadge: { color: COLORS.textSecondary, fontSize: 15, fontWeight: '500' },
     streakCard: { marginBottom: 20, borderLeftWidth: 3, borderLeftColor: COLORS.warning },
