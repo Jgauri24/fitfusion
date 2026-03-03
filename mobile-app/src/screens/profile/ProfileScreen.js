@@ -1,3 +1,4 @@
+import { TOP_PADDING } from '../../constants/styles';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -150,7 +151,7 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 100 },
     pageTitle: { color: COLORS.white, fontSize: 24, fontWeight: '700', marginBottom: 32, letterSpacing: -0.5 },
     profileCenter: { alignItems: 'center', marginBottom: 36 },
     avatarLarge: {

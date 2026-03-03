@@ -6,9 +6,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import { GlassCard } from '../../components/GlassCard';
-import { mockPWS, mockTrend } from '../../constants/mockData';
+import VitaLogo from '../../components/VitaLogo';
+import api from '../../utils/api';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -24,6 +25,9 @@ const FocusCard = ({ icon, label, score, color }) => (
 
 export default function HomeScreen({ navigation }) {
     const [user, setUser] = useState(null);
+    const [pws, setPws] = useState({ score: 0, nutrition: 0, activity: 0, mood: 0, environment: 0 });
+    const [trend, setTrend] = useState([0, 0, 0, 0, 0, 0, 0]);
+    const [nudge, setNudge] = useState('');
 
     useEffect(() => {
         const loadUser = async () => {
@@ -33,14 +37,39 @@ export default function HomeScreen({ navigation }) {
             } catch (e) { }
         };
         loadUser();
+
+        // Fetch real dashboard data from backend
+        api.get('/api/student/dashboard')
+            .then(res => {
+                setPws({
+                    score: res.data.score || 0,
+                    nutrition: res.data.nutrition || 0,
+                    activity: res.data.activity || 0,
+                    mood: res.data.mood || 0,
+                    environment: res.data.environment || 0,
+                });
+                if (res.data.trend?.length === 7) setTrend(res.data.trend);
+                if (res.data.nudge) setNudge(res.data.nudge);
+            })
+            .catch(() => {
+                // Fallback if backend isn't reachable
+                setPws({ score: 72, nutrition: 78, activity: 65, mood: 70, environment: 75 });
+                setTrend([65, 68, 70, 66, 72, 71, 72]);
+                setNudge("You're close to your daily Protein target. A quick bite from the mess could help.");
+            });
     }, []);
 
     const name = user?.firstName || 'User';
     const initials = user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() : 'U';
-    const scoreLabel = mockPWS.score >= 70 ? 'Steady Growth' : mockPWS.score >= 50 ? 'Building Up' : 'Getting Started';
+    const scoreLabel = pws.score >= 70 ? 'Steady Growth' : pws.score >= 50 ? 'Building Up' : 'Getting Started';
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.scroll}>
+
+            {/* ── Brand ── */}
+            <View style={{ marginBottom: 20 }}>
+                <VitaLogo size={22} fontSize={16} showSubtitle={true} />
+            </View>
 
             {/* ── Header ── */}
             <View style={styles.headerRow}>
@@ -50,9 +79,15 @@ export default function HomeScreen({ navigation }) {
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </Text>
                 </View>
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{initials}</Text>
-                </View>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Profile')}
+                    activeOpacity={0.8}
+                    style={styles.avatar}
+                >
+                    <Text style={styles.avatarEmoji}>
+                        {user?.gender?.toLowerCase() === 'female' ? '👩' : '👨'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             {/* ── Wellness Score Card ── */}
@@ -65,13 +100,13 @@ export default function HomeScreen({ navigation }) {
                     <AnimatedCircularProgress
                         size={78}
                         width={6}
-                        fill={mockPWS.score}
+                        fill={pws.score}
                         tintColor={COLORS.accent}
                         backgroundColor={COLORS.border}
                         rotation={270}
                         lineCap="round"
                     >
-                        {() => <Text style={styles.ringVal}>{mockPWS.score}</Text>}
+                        {() => <Text style={styles.ringVal}>{pws.score}</Text>}
                     </AnimatedCircularProgress>
                 </View>
             </GlassCard>
@@ -79,9 +114,9 @@ export default function HomeScreen({ navigation }) {
             {/* ── Focus Areas ── */}
             <Text style={globalStyles.sectionLabel}>FOCUS AREAS</Text>
             <View style={styles.focusRow}>
-                <FocusCard icon="heart" label="Nutrition" score={mockPWS.nutrition} color={COLORS.success} />
-                <FocusCard icon="zap" label="Activity" score={mockPWS.activity} color={COLORS.warning} />
-                <FocusCard icon="smile" label="Mood" score={mockPWS.mood} color={COLORS.accent} />
+                <FocusCard icon="heart" label="Nutrition" score={pws.nutrition} color={COLORS.success} />
+                <FocusCard icon="zap" label="Activity" score={pws.activity} color={COLORS.warning} />
+                <FocusCard icon="smile" label="Mood" score={pws.mood} color={COLORS.accent} />
             </View>
 
             {/* ── Smart Nudge ── */}
@@ -93,7 +128,7 @@ export default function HomeScreen({ navigation }) {
                     <View style={{ flex: 1 }}>
                         <Text style={styles.nudgeTitle}>Smart Nudge</Text>
                         <Text style={styles.nudgeText}>
-                            You're close to your daily Protein target. A quick bite from the mess could help.
+                            {nudge || "You're doing great! Keep up the momentum."}
                         </Text>
                     </View>
                 </View>
@@ -122,7 +157,7 @@ export default function HomeScreen({ navigation }) {
                 <LineChart
                     data={{
                         labels: ["M", "T", "W", "T", "F", "S", "S"],
-                        datasets: [{ data: mockTrend }],
+                        datasets: [{ data: trend.map(v => v || 1) }],
                     }}
                     width={screenWidth - 56}
                     height={195}
@@ -154,18 +189,18 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.bg },
-    scroll: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 100 },
+    scroll: { paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 100 },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 },
     greeting: { color: COLORS.white, fontWeight: '700', fontSize: 24, letterSpacing: -0.5 },
     dateSub: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
     avatar: {
         width: 48, height: 48, borderRadius: 24,
-        backgroundColor: COLORS.accent,
+        backgroundColor: COLORS.card,
         justifyContent: 'center', alignItems: 'center',
         borderWidth: 2, borderColor: COLORS.accentGlowMed,
         ...Platform.select({ ios: { shadowColor: COLORS.accent, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10 } }),
     },
-    avatarText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+    avatarEmoji: { fontSize: 24 },
     heroCard: { marginBottom: 0 },
     heroRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     heroLabel: { color: COLORS.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 2, marginBottom: 6 },

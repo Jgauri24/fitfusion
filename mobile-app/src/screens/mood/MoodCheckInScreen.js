@@ -5,7 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import api from '../../utils/api';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 
 const MOODS = [
     { icon: 'frown', label: 'Low' },
@@ -112,7 +112,7 @@ export default function MoodCheckInScreen({ navigation }) {
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20,
+        paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20,
     },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
     content: { paddingHorizontal: 20, paddingTop: 20 },

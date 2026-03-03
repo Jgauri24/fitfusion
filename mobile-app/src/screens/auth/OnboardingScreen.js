@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
-import { globalStyles } from '../../constants/styles';
+import { globalStyles, TOP_PADDING } from '../../constants/styles';
 import VitaLogo from '../../components/VitaLogo';
 import { GlassCard } from '../../components/GlassCard';
 
@@ -54,7 +54,7 @@ export default function OnboardingScreen({ navigation }) {
             style={styles.container}
         >
             <View style={styles.topBar}>
-                <VitaLogo size={24} fontSize={16} />
+                <VitaLogo size={24} fontSize={16} showSubtitle={true} />
             </View>
 
             <ScrollView
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     },
     topBar: {
         paddingHorizontal: 24,
-        paddingTop: 60,
+        paddingTop: TOP_PADDING,
         paddingBottom: 10,
     },
     pager: {
