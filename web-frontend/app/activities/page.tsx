@@ -48,10 +48,10 @@ export default function ActivitiesPage() {
     const categories = ["All", ...new Set(activities.map((a) => a.category))];
     const filtered = categoryFilter === "All" ? activities : activities.filter((a) => a.category === categoryFilter);
 
-    const totalParticipants = activities.reduce((s, a) => s + a.participants, 0);
-    const trendingActivity = [...activities].sort((a, b) => b.participants - a.participants)[0]?.name || "-";
-    const avgDuration = activities.length ? Math.round(activities.reduce((s, a) => s + a.avgDuration, 0) / activities.length) : 0;
-    const avgCalBurned = activities.length ? Math.round(activities.reduce((s, a) => s + a.avgCalories, 0) / activities.length) : 0;
+    const totalParticipants = filtered.reduce((s, a) => s + a.participants, 0);
+    const trendingActivity = [...filtered].sort((a, b) => b.participants - a.participants)[0]?.name || "-";
+    const avgDuration = filtered.length ? Math.round(filtered.reduce((s, a) => s + a.avgDuration, 0) / filtered.length) : 0;
+    const avgCalBurned = filtered.length ? Math.round(filtered.reduce((s, a) => s + a.avgCalories, 0) / filtered.length) : 0;
 
     const maxParticipants = Math.max(...activities.map((a) => a.participants), 1);
     const maxCalories = Math.max(...activities.map((a) => a.avgCalories), 1);
@@ -67,11 +67,20 @@ export default function ActivitiesPage() {
                 <p className="page-subtitle">Track campus fitness trends, participation rates, and activity performance</p>
             </div>
 
+            {/* Category Filters */}
+            <div className="filters-row animate-fade-in-up stagger-1">
+                {categories.map((cat) => (
+                    <button key={cat} className={`filter-btn ${categoryFilter === cat ? "active" : ""}`} onClick={() => setCategoryFilter(cat)}>
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
             <div className="stats-grid">
-                <StatCard icon={<Users size={20} />} label="Total Participants" value={totalParticipants.toLocaleString()} trend={{ value: "14%", direction: "up" }} className="animate-fade-in-up stagger-1" />
-                <StatCard icon={<Activity size={20} />} label="Trending Activity" value={trendingActivity} accentColor="var(--blue)" className="animate-fade-in-up stagger-2" />
-                <StatCard icon={<Clock size={20} />} label="Avg Duration" value={`${avgDuration} min`} accentColor="var(--purple)" className="animate-fade-in-up stagger-3" />
-                <StatCard icon={<Flame size={20} />} label="Avg Calories Burned" value={`${avgCalBurned} kcal`} accentColor="var(--orange)" className="animate-fade-in-up stagger-4" />
+                <StatCard icon={<Users size={20} />} label={categoryFilter === "All" ? "Total Participants" : `Participants (${categoryFilter})`} value={totalParticipants.toLocaleString()} trend={{ value: "14%", direction: "up" }} className="animate-fade-in-up stagger-1" />
+                <StatCard icon={<Activity size={20} />} label={categoryFilter === "All" ? "Trending Activity" : `Top in ${categoryFilter}`} value={trendingActivity} accentColor="var(--blue)" className="animate-fade-in-up stagger-2" />
+                <StatCard icon={<Clock size={20} />} label={categoryFilter === "All" ? "Avg Duration" : `Avg Duration (${categoryFilter})`} value={`${avgDuration} min`} accentColor="var(--purple)" className="animate-fade-in-up stagger-3" />
+                <StatCard icon={<Flame size={20} />} label={categoryFilter === "All" ? "Avg Calories Burned" : `Avg Calories (${categoryFilter})`} value={`${avgCalBurned} kcal`} accentColor="var(--orange)" className="animate-fade-in-up stagger-4" />
             </div>
 
             <div className="charts-grid">
@@ -100,14 +109,6 @@ export default function ActivitiesPage() {
                 </ChartCard>
             </div>
 
-            {/* Category Filters */}
-            <div className="filters-row animate-fade-in-up stagger-5">
-                {categories.map((cat) => (
-                    <button key={cat} className={`filter-btn ${categoryFilter === cat ? "active" : ""}`} onClick={() => setCategoryFilter(cat)}>
-                        {cat}
-                    </button>
-                ))}
-            </div>
 
             {/* Activity Detail Cards */}
             <div className="info-grid animate-fade-in-up stagger-6">

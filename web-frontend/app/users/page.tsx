@@ -50,11 +50,20 @@ export default function UsersPage() {
         fetchUserStats();
     }, []);
 
+    // Derive unique filter options from actual data
+    const hostelOptions = ["All", ...Array.from(new Set(cohorts.map(c => c.hostel))).sort()];
+    const branchOptions = ["All", ...Array.from(new Set(cohorts.map(c => c.branch))).filter(b => b !== "N/A").sort()];
+    const yearOptions = ["All", ...Array.from(new Set(cohorts.map(c => c.year))).filter(y => y !== "N/A").sort()];
+
     const filteredCohorts = cohorts.filter(c => {
         if (hostel !== "All" && c.hostel !== hostel) return false;
         if (branch !== "All" && c.branch !== branch) return false;
-        if (year !== "All" && c.year !== year.replace(/\D/g, '')) return false;
-        if (fitness !== "All") return false;
+        if (year !== "All" && c.year !== year) return false;
+        if (fitness !== "All") {
+            if (fitness === "Beginner" && c.wellness >= 70) return false;
+            if (fitness === "Intermediate" && (c.wellness < 70 || c.wellness >= 85)) return false;
+            if (fitness === "Advanced" && c.wellness < 85) return false;
+        }
         return true;
     });
 
@@ -62,10 +71,29 @@ export default function UsersPage() {
     const showSuppression = filteredTotal < 10;
     const finalCohorts = showSuppression ? [] : filteredCohorts;
 
+    // Reactive stat cards — recalculated from filtered data
+    const isFiltered = hostel !== "All" || branch !== "All" || year !== "All" || fitness !== "All";
+    const displayTotal = isFiltered ? filteredTotal : totalStudents;
+    const displayBeginners = isFiltered
+        ? filteredCohorts.filter(c => c.wellness < 70).reduce((s, c) => s + c.students, 0)
+        : beginners;
+    const displayIntermediate = isFiltered
+        ? filteredCohorts.filter(c => c.wellness >= 70 && c.wellness < 85).reduce((s, c) => s + c.students, 0)
+        : intermediate;
+    const displayAdvanced = isFiltered
+        ? filteredCohorts.filter(c => c.wellness >= 85).reduce((s, c) => s + c.students, 0)
+        : advanced;
+
+    // Dynamic flagged cohorts — those with low wellness
+    const flaggedCohorts = cohorts
+        .filter(c => c.wellness > 0 && c.wellness < 70 && c.students >= 10)
+        .sort((a, b) => a.wellness - b.wellness)
+        .slice(0, 4);
+
     const columns = [
         {
             key: "cohort", label: "COHORT",
-            render: (c: Cohort) => <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{c.hostel} · {c.branch} · Year {c.year}</span>,
+            render: (c: Cohort) => <span style={{ fontWeight: 600, color: "var(--text-primary)" }}>{c.hostel} · {c.branch} · {c.year?.toString().startsWith('Year') ? c.year : `Year ${c.year}`}</span>,
         },
         { key: "students", label: "STUDENTS" },
         {
@@ -116,21 +144,21 @@ export default function UsersPage() {
             </div>
 
             <div className="stats-grid">
-                <StatCard icon={<Users size={20} />} label="Total Students (Aggregated)" value={totalStudents} className="animate-fade-in-up stagger-1" />
-                <StatCard icon={<Sprout size={20} />} label="Beginners" value={beginners} accentColor="var(--orange)" className="animate-fade-in-up stagger-2" />
-                <StatCard icon={<Dumbbell size={20} />} label="Intermediate" value={intermediate} accentColor="var(--blue)" className="animate-fade-in-up stagger-3" />
-                <StatCard icon={<Trophy size={20} />} label="Advanced" value={advanced} accentColor="var(--green)" className="animate-fade-in-up stagger-4" />
+                <StatCard icon={<Users size={20} />} label={isFiltered ? "Filtered Students" : "Total Students (Aggregated)"} value={displayTotal} className="animate-fade-in-up stagger-1" />
+                <StatCard icon={<Sprout size={20} />} label="Beginners" value={displayBeginners} accentColor="var(--orange)" className="animate-fade-in-up stagger-2" />
+                <StatCard icon={<Dumbbell size={20} />} label="Intermediate" value={displayIntermediate} accentColor="var(--blue)" className="animate-fade-in-up stagger-3" />
+                <StatCard icon={<Trophy size={20} />} label="Advanced" value={displayAdvanced} accentColor="var(--green)" className="animate-fade-in-up stagger-4" />
             </div>
 
             <div className="filters-row animate-fade-in-up stagger-4">
                 <select className="filter-btn" value={hostel} onChange={e => setHostel(e.target.value)}>
-                    {["All", "Govind Bhawan", "Sarojini Bhawan", "Rajendra Bhawan", "Kasturba Bhawan", "Cautley Bhawan", "Jawahar Bhawan"].map(o => <option key={o} value={o}>{o === "All" ? "Hostel: All" : o}</option>)}
+                    {hostelOptions.map(o => <option key={o} value={o}>{o === "All" ? "Hostel: All" : o}</option>)}
                 </select>
                 <select className="filter-btn" value={branch} onChange={e => setBranch(e.target.value)}>
-                    {["All", "CSE", "IT", "ME", "ECE", "Civil", "EE", "BT", "CH"].map(o => <option key={o} value={o}>{o === "All" ? "Branch: All" : o}</option>)}
+                    {branchOptions.map(o => <option key={o} value={o}>{o === "All" ? "Branch: All" : o}</option>)}
                 </select>
                 <select className="filter-btn" value={year} onChange={e => setYear(e.target.value)}>
-                    {["All", "1st", "2nd", "3rd", "4th"].map(o => <option key={o} value={o}>{o === "All" ? "Year: All" : o}</option>)}
+                    {yearOptions.map(o => <option key={o} value={o}>{o === "All" ? "Year: All" : (o.toString().startsWith('Year') ? o : `Year ${o}`)}</option>)}
                 </select>
                 <select className="filter-btn" value={fitness} onChange={e => setFitness(e.target.value)}>
                     {["All", "Beginner", "Intermediate", "Advanced"].map(o => <option key={o} value={o}>{o === "All" ? "Fitness: All" : o}</option>)}
@@ -141,47 +169,37 @@ export default function UsersPage() {
                 {showSuppression ? (
                     <div className="empty-state">🔒 Group too small to display (privacy protected — minimum group size: 10)</div>
                 ) : (
-                    <DataTable title="Cohort Overview" columns={columns} data={finalCohorts} />
+                    <DataTable title="Cohort Overview" columns={columns} data={finalCohorts} searchKey="hostel" searchPlaceholder="Search by hostel..." />
                 )}
             </div>
 
-            {/* Flagged Cohorts */}
-            <div className="animate-fade-in-up stagger-6">
-                <h3 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "16px" }}>Flagged Cohorts Requiring Attention</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "16px" }}>
-                    <div className="flagged-card">
-                        <div className="flagged-card-title">Sarojini Bhawan · Year 1 · Mixed Branches</div>
-                        <div className="flagged-card-metrics">
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Flagged Students</div><div className="flagged-card-metric-value" style={{ color: "var(--red)" }}>3 students</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Mood</div><div className="flagged-card-metric-value">2.8/5</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Sleep</div><div className="flagged-card-metric-value">5.2h</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Stress</div><div className="flagged-card-metric-value" style={{ color: "var(--orange)" }}>7.1</div></div>
-                        </div>
-                        <div className="flagged-card-recommendation warning"><strong>Recommendation:</strong> Schedule wellness circle session this week</div>
-                        <div className="flagged-card-actions">
-                            <button className="btn-ghost">Notify Warden</button>
-                            <button className="btn-primary" style={{ padding: "8px 16px", fontSize: "13px" }}>Schedule Circle</button>
-                            <button className="btn-ghost" style={{ marginLeft: "auto" }}>Dismiss</button>
-                        </div>
-                    </div>
-
-                    <div className="flagged-card">
-                        <div className="flagged-card-title">Kasturba Bhawan · BT · Year 1</div>
-                        <div className="flagged-card-metrics">
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Flagged Students</div><div className="flagged-card-metric-value" style={{ color: "var(--red)" }}>5 students</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Mood</div><div className="flagged-card-metric-value">2.5/5</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Sleep</div><div className="flagged-card-metric-value">4.9h</div></div>
-                            <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Stress</div><div className="flagged-card-metric-value" style={{ color: "var(--red)" }}>7.8</div></div>
-                        </div>
-                        <div className="flagged-card-recommendation critical"><strong>Recommendation:</strong> Urgent: Notify warden and counselor referral</div>
-                        <div className="flagged-card-actions">
-                            <button className="btn-ghost">Notify Warden</button>
-                            <button className="btn-primary" style={{ padding: "8px 16px", fontSize: "13px" }}>Schedule Circle</button>
-                            <button className="btn-ghost" style={{ marginLeft: "auto" }}>Dismiss</button>
-                        </div>
+            {/* Flagged Cohorts — Dynamic */}
+            {flaggedCohorts.length > 0 && (
+                <div className="animate-fade-in-up stagger-6">
+                    <h3 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "16px" }}>Flagged Cohorts Requiring Attention</h3>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "16px" }}>
+                        {flaggedCohorts.map(fc => (
+                            <div className="flagged-card" key={fc.id}>
+                                <div className="flagged-card-title">{fc.hostel} · {fc.branch} · {fc.year?.toString().startsWith('Year') ? fc.year : `Year ${fc.year}`}</div>
+                                <div className="flagged-card-metrics">
+                                    <div className="flagged-card-metric"><div className="flagged-card-metric-label">Students</div><div className="flagged-card-metric-value">{fc.students}</div></div>
+                                    <div className="flagged-card-metric"><div className="flagged-card-metric-label">Wellness</div><div className="flagged-card-metric-value" style={{ color: "var(--red)" }}>{fc.wellness}/100</div></div>
+                                    <div className="flagged-card-metric"><div className="flagged-card-metric-label">Avg Steps</div><div className="flagged-card-metric-value">{fc.steps.toLocaleString()}</div></div>
+                                    <div className="flagged-card-metric"><div className="flagged-card-metric-label">Trend</div><div className="flagged-card-metric-value" style={{ color: fc.trend === "down" ? "var(--red)" : "var(--orange)" }}>{fc.trend === "down" ? "↓ Declining" : "— Stagnant"}</div></div>
+                                </div>
+                                <div className={`flagged-card-recommendation ${fc.wellness < 60 ? "critical" : "warning"}`}>
+                                    <strong>Recommendation:</strong> {fc.wellness < 60 ? "Urgent: Notify warden and schedule counselor referral" : "Schedule wellness circle session this week"}
+                                </div>
+                                <div className="flagged-card-actions">
+                                    <button className="btn-ghost">Notify Warden</button>
+                                    <button className="btn-primary" style={{ padding: "8px 16px", fontSize: "13px" }}>Schedule Circle</button>
+                                    <button className="btn-ghost" style={{ marginLeft: "auto" }}>Dismiss</button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
+            )}
         </>
     );
 }

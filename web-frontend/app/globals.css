@@ -175,45 +175,181 @@ body {
   border: 2px solid var(--bg-primary);
 }
 
-.header-notification-dropdown {
-  position: absolute;
-  top: 44px;
-  right: 0;
-  width: 300px;
+/* Notification Panel — Fixed position dropdown */
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+}
+
+.notif-panel {
+  position: fixed;
+  top: 64px;
+  right: 32px;
+  width: 380px;
   background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
-  z-index: 100;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  z-index: 999;
+  animation: notif-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-.header-notification-title {
-  font-weight: 500;
+.notif-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 8px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+@keyframes notif-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 16px;
   font-size: 13px;
-  color: var(--text-primary);
-  margin-bottom: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
 }
 
-.header-notification-list {
+.btn-ghost:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+
+.notif-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notif-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.notif-panel-close {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.notif-panel-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.notif-panel-list {
+  padding: 8px 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notif-panel-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-panel-item:hover {
+  background: var(--bg-elevated);
+}
+
+.notif-panel-item.notif-unread {
+  background: rgba(0, 112, 243, 0.04);
+}
+
+.notif-panel-item.notif-unread:hover {
+  background: rgba(0, 112, 243, 0.08);
+}
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.notif-item-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
+  min-width: 0;
 }
 
-.header-notification-item {
+.notif-item-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.notif-item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.notif-panel-footer {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
   font-size: 12px;
-  color: var(--text-secondary);
-  padding: 8px 12px;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-sm);
-  border-left: 2px solid var(--accent);
-  transition: background 0.2s;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
 }
 
-.header-notification-item:hover {
-  background: var(--bg-card-hover);
+.notif-panel-footer:hover {
+  background: var(--bg-elevated);
 }
+
 
 .header-profile-chip {
   display: flex;
@@ -304,7 +440,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  overflow-y: auto;
+  overflow: visible;
   width: 100%;
 }
 
@@ -562,7 +698,8 @@ body {
 /* ============================================================
    TABLES — Linear Style
    ============================================================ */
-.table-container {
+.table-container,
+.table-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

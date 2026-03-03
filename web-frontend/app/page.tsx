@@ -17,30 +17,37 @@ import {
   Area,
 } from "recharts";
 
-function DateSelector() {
-  const days = [
-    { num: "01", day: "Sat" },
-    { num: "02", day: "Sun" },
-    { num: "03", day: "Mon" },
-    { num: "04", day: "Tue" },
-    { num: "05", day: "Wed" },
-    { num: "06", day: "Thu" },
-    { num: "07", day: "Fri" },
-    { num: "08", day: "Sat" },
-    { num: "09", day: "Sun" },
-    { num: "10", day: "Mon" },
-    { num: "11", day: "Tue" },
-    { num: "12", day: "Wed" },
-    { num: "13", day: "Thu" },
-  ];
-  const [active, setActive] = useState(9);
+interface DatePill {
+  num: string;
+  day: string;
+  date: Date;
+}
+
+function DateSelector({ activeIndex, onDateChange }: { activeIndex: number; onDateChange: (index: number, date: Date) => void }) {
+  const [days, setDays] = useState<DatePill[]>([]);
+
+  useEffect(() => {
+    const list: DatePill[] = [];
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      list.push({
+        num: d.getDate().toString().padStart(2, '0'),
+        day: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        date: d
+      });
+    }
+    setDays(list);
+  }, []);
+
   return (
     <div className="date-selector">
       {days.map((d, i) => (
         <div
           key={i}
-          className={`date-pill ${active === i ? "active" : ""}`}
-          onClick={() => setActive(i)}
+          className={`date-pill ${activeIndex === i ? "active" : ""}`}
+          onClick={() => onDateChange(i, d.date)}
         >
           <span className="date-pill-day">{d.num}</span>
           <span className="date-pill-label">{d.day}</span>
@@ -54,20 +61,30 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("Days");
+  const [activeIndex, setActiveIndex] = useState(13); // Default to today (last item)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const fetchStats = async (date: Date, p: string) => {
+    setLoading(true);
+    try {
+      const dateStr = date.toISOString().split('T')[0];
+      const res = await api.get(`/api/admin/dashboard/stats?date=${dateStr}&period=${p}`);
+      setStats(res.data);
+    } catch (error) {
+      console.error("Failed to fetch dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get('/api/admin/dashboard/stats');
-        setStats(res.data);
-      } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
+    fetchStats(selectedDate, period);
+  }, [selectedDate, period]);
+
+  const handleDateChange = (index: number, date: Date) => {
+    setActiveIndex(index);
+    setSelectedDate(date);
+  };
 
   const weeklyActivityTrend = stats?.weeklyActivityTrend || [];
   const maxActivity = weeklyActivityTrend.length ? Math.max(...weeklyActivityTrend.map((d: any) => d.count)) : 0;
@@ -86,15 +103,6 @@ export default function DashboardPage() {
   );
 
   const hostelComparison = stats?.hostelComparison || [];
-
-  const burnoutFlagsMap: Record<string, number> = {
-    "Govind": 1,
-    "Sarojini": 3,
-    "Rajendra": 0,
-    "Kasturba": 5,
-    "Cautley": 2,
-    "Jawahar": 4,
-  };
 
   if (loading) {
     return (
@@ -133,7 +141,7 @@ export default function DashboardPage() {
 
       {/* Date Selector */}
       <div className="animate-fade-in-up stagger-1">
-        <DateSelector />
+        <DateSelector activeIndex={activeIndex} onDateChange={handleDateChange} />
       </div>
 
       {/* KPI Stats */}
@@ -156,8 +164,8 @@ export default function DashboardPage() {
         <StatCard
           icon={<AlertTriangle size={20} />}
           label="Active Burnout Alerts"
-          value="24"
-          trend={{ value: "2 new", direction: "up" }}
+          value={stats?.burnoutAlerts?.toString() || "0"}
+          trend={{ value: stats?.burnoutAlerts > 0 ? "Needs attention" : "All clear", direction: stats?.burnoutAlerts > 0 ? "up" : "down" }}
           accentColor="var(--red)"
           className="animate-fade-in-up stagger-3"
         />
@@ -174,8 +182,8 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="charts-grid">
         <ChartCard
-          title="Weekly Activity Trends"
-          badge="This Week"
+          title={period === "Months" ? "Monthly Activity Trends" : period === "Weeks" ? "Weekly Activity Trends" : "Daily Activity Trends"}
+          badge={period === "Months" ? "Last 6 Months" : period === "Weeks" ? "Last 4 Weeks" : "This Week"}
           className="animate-fade-in-up stagger-3"
         >
           <div style={{ width: "100%", height: 220, marginTop: 16 }}>
@@ -304,7 +312,7 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {hostelComparison.map((h: any) => {
-                const flags = burnoutFlagsMap[h.hostel] || 0;
+                const flags = h.burnoutFlags || 0;
                 return (
                   <tr key={h.hostel}>
                     <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>

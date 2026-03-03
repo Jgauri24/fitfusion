@@ -18,6 +18,7 @@ interface Zone {
 
 export default function EnvironmentPage() {
     const [zones, setZones] = useState<Zone[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -36,6 +37,10 @@ export default function EnvironmentPage() {
             setLoading(false);
         }
     };
+
+    const filteredZones = zones.filter(z => 
+        z.zone.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,10 +63,10 @@ export default function EnvironmentPage() {
         }
     };
 
-    const avgAqi = zones.length ? Math.round(zones.reduce((s, e) => s + e.aqi, 0) / zones.length) : 0;
-    const avgNoise = zones.length ? Math.round(zones.reduce((s, e) => s + e.noiseDb, 0) / zones.length) : 0;
-    const avgTemp = zones.length ? Math.round(zones.reduce((s, e) => s + e.temperature, 0) / zones.length) : 0;
-    const avgHumidity = zones.length ? Math.round(zones.reduce((s, e) => s + e.humidity, 0) / zones.length) : 0;
+    const avgAqi = filteredZones.length ? Math.round(filteredZones.reduce((s, e) => s + e.aqi, 0) / filteredZones.length) : 0;
+    const avgNoise = filteredZones.length ? Math.round(filteredZones.reduce((s, e) => s + e.noiseDb, 0) / filteredZones.length) : 0;
+    const avgTemp = filteredZones.length ? Math.round(filteredZones.reduce((s, e) => s + e.temperature, 0) / filteredZones.length) : 0;
+    const avgHumidity = filteredZones.length ? Math.round(filteredZones.reduce((s, e) => s + e.humidity, 0) / filteredZones.length) : 0;
 
     const getAqiColor = (aqi: number) => {
         if (aqi <= 50) return "var(--green)";
@@ -77,7 +82,7 @@ export default function EnvironmentPage() {
         return "var(--red)";
     };
 
-    const impactData = zones.length ? zones.map(z => ({
+    const impactData = filteredZones.length ? filteredZones.map(z => ({
         zone: z.zone,
         stress: Math.max(1, Math.round((z.aqi / 50 + z.noiseDb / 30) * 10) / 10),
         activity: Math.max(10, Math.round(100 - z.aqi * 0.3 - z.noiseDb * 0.2)),
@@ -88,7 +93,7 @@ export default function EnvironmentPage() {
         { zone: "Hostel Zone", stress: 3.5, activity: 55 },
     ];
 
-    const heatmapData = zones.length ? zones.map(z => ({
+    const heatmapData = filteredZones.length ? filteredZones.map(z => ({
         zone: z.zone,
         morning: z.aqi <= 50 ? "Low" : z.aqi <= 100 ? "Medium" : "High",
         afternoon: z.noiseDb <= 40 ? "Low" : z.noiseDb <= 60 ? "Medium" : "High",
@@ -116,14 +121,25 @@ export default function EnvironmentPage() {
 
     return (
         <>
-            <div className="page-header animate-fade-in-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div className="page-header animate-fade-in-up" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "16px" }}>
                 <div>
                     <h1 className="page-title">Campus Environment</h1>
                     <p className="page-subtitle">Monitor air quality, noise levels, temperature, and humidity across zones</p>
                 </div>
-                <button onClick={() => setShowModal(true)} className="btn-primary">
-                    <Plus size={16} /> Add Zone Reading
-                </button>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                    <div className="table-search" style={{ border: "1px solid var(--border)", background: "var(--bg-card)", padding: "8px 16px", borderRadius: "10px", width: "240px" }}>
+                        <input 
+                            type="text" 
+                            placeholder="Search zones..." 
+                            value={searchQuery} 
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ background: "transparent", border: "none", color: "var(--text-primary)", outline: "none", width: "100%" }}
+                        />
+                    </div>
+                    <button onClick={() => setShowModal(true)} className="btn-primary" style={{ whiteSpace: "nowrap" }}>
+                        <Plus size={16} /> Add Zone
+                    </button>
+                </div>
             </div>
 
             <div className="stats-grid">
@@ -150,8 +166,8 @@ export default function EnvironmentPage() {
             </ChartCard>
 
             {/* Zone Cards */}
-            <div className="info-grid animate-fade-in-up stagger-5">
-                {zones.map((zone) => (
+            <div className="info-grid animate-fade-in-up stagger-5" style={{ marginBottom: "32px" }}>
+                {filteredZones.map((zone) => (
                     <div className="info-card" key={zone.id}>
                         <div className="info-card-header">
                             <div className="info-card-icon" style={{ background: `${getAqiColor(zone.aqi)}15`, color: getAqiColor(zone.aqi) }}>
