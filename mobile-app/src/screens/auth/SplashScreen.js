@@ -131,7 +131,7 @@ export default function SplashScreen({ navigation }) {
             </Animated.Text>
 
             <Animated.Text style={[styles.brandSubtitle, { opacity: subtitleOpacity }]}>
-                Intelligence
+                Wellness
             </Animated.Text>
 
             {/* Tagline */}

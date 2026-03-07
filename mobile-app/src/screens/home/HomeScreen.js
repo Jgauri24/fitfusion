@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Dimensions, Platf
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from '../../constants/theme';
 import { globalStyles, TOP_PADDING } from '../../constants/styles';
@@ -74,7 +74,7 @@ export default function HomeScreen({ navigation }) {
             {/* ── Header ── */}
             <View style={styles.headerRow}>
                 <View>
-                    <Text style={styles.greeting}>Hey, {name} <Text style={{ fontSize: 20 }}>👋</Text></Text>
+                    <Text style={styles.greeting}>Hey, {name}</Text>
                     <Text style={styles.dateSub}>
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </Text>
@@ -84,9 +84,7 @@ export default function HomeScreen({ navigation }) {
                     activeOpacity={0.8}
                     style={styles.avatar}
                 >
-                    <Text style={styles.avatarEmoji}>
-                        {user?.gender?.toLowerCase() === 'female' ? '👩' : '👨'}
-                    </Text>
+                    <Ionicons name="person" size={26} color={COLORS.textMuted} />
                 </TouchableOpacity>
             </View>
 

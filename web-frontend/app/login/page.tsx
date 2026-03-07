@@ -82,7 +82,7 @@ export default function LoginPage() {
                     </form>
 
                     <p className="login-footer-simple">
-                        Campus wellness intelligence by VITA
+                        Campus wellness platform by VITA
                     </p>
                 </div>
             </div>

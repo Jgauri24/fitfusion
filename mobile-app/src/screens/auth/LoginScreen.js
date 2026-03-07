@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation }) {
 
             <View style={styles.content}>
                 <Text style={styles.welcomeTitle}>Welcome back</Text>
-                <Text style={styles.welcomeSub}>Your campus wellness intelligence, reinstated.</Text>
+                <Text style={styles.welcomeSub}>Your campus wellness platform, reinstated.</Text>
 
                 {/* Email */}
                 <Text style={styles.inputLabel}>UNIVERSITY EMAIL</Text>
@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.loginBtn}
                     >
                         <Text style={styles.loginBtnText}>
-                            {isLoading ? 'Signing in...' : 'Login to VITA Intelligence'}
+                            {isLoading ? 'Signing in...' : 'Login to VITA'}
                         </Text>
                         {!isLoading && <Feather name="arrow-right" size={18} color="#FFF" />}
                     </LinearGradient>
