@@ -15,6 +15,9 @@ const YEARS = [1, 2, 3, 4];
 const BRANCHES = ['CSE', 'ECE', 'ME', 'CE', 'EE', 'CH', 'BT', 'AR', 'MT', 'PE'];
 const ACTIVITY_TYPES = ['RUNNING', 'GYM', 'SWIMMING', 'CYCLING', 'YOGA', 'CRICKET', 'FOOTBALL', 'BADMINTON', 'WALKING', 'HIKING'];
 const MEAL_TYPES = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
+const GENDERS = ['MALE', 'FEMALE'];
+const FITNESS_LEVELS = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
+const DIETS = ['VEGETARIAN', 'NON_VEGETARIAN', 'VEGAN', 'EGGETARIAN'];
 const MOODS = [0, 1, 2, 3, 4]; // 0=Awful, 1=Bad, 2=Okay, 3=Good, 4=Great
 const MOOD_NOTES = [
     'Feeling energetic today!', 'Had a good workout', 'Stressed about exams',
@@ -142,7 +145,13 @@ async function main() {
                 role: 'STUDENT',
                 hostel: pick(HOSTELS),
                 branch: branch,
-                academicYear: `Year ${year}`
+                academicYear: `Year ${year}`,
+                age: rand(17, 25),
+                gender: pick(GENDERS),
+                height: randFloat(150, 190),
+                weight: randFloat(45, 95),
+                fitnessLevel: pick(FITNESS_LEVELS),
+                dietaryPref: pick(DIETS)
             });
         }
 

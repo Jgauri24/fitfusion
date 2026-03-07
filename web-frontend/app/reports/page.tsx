@@ -17,7 +17,7 @@ interface Report {
 export default function ReportsPage() {
     const [reportType, setReportType] = useState("Weekly Wellness Summary");
     const [timeRange, setTimeRange] = useState("This Week");
-    const [format, setFormat] = useState("PDF");
+    const [format, setFormat] = useState("CSV");
     const [generating, setGenerating] = useState(false);
     const [successMsg, setSuccessMsg] = useState(false);
     const [recentExports, setRecentExports] = useState<Report[]>([]);
@@ -51,6 +51,25 @@ export default function ReportsPage() {
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
             await api.post('/api/admin/reports', { name: reportType, format: format });
+
+            // Generate a simple CSV for download based on selection
+            const csvData = [
+                ["Report Type", "Time Range", "Format"],
+                [reportType, timeRange, format],
+                [],
+                ["Scope Options", "Enabled"],
+                ...Object.entries(scope).map(([k, v]) => [k, v ? "Yes" : "No"])
+            ];
+            
+            const csvContent = "data:text/csv;charset=utf-8," + csvData.map(e => e.join(",")).join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${reportType.replace(/\\s+/g, '_')}_export.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
             setSuccessMsg(true);
             fetchReports();
             setTimeout(() => setSuccessMsg(false), 3000);
@@ -152,7 +171,7 @@ export default function ReportsPage() {
                         <div className="report-step" style={{ marginBottom: "24px" }}>
                             <div className="report-step-label">Step 4: Format</div>
                             <div className="report-format-options">
-                                {["PDF", "CSV"].map(f => (
+                                {["CSV"].map(f => (
                                     <button key={f} onClick={() => setFormat(f)} className={`report-format-btn ${format === f ? "active" : ""}`}>
                                         {f} Format
                                     </button>
