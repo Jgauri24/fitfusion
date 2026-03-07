@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
     View, Text, TextInput, ScrollView, StyleSheet,
     TouchableOpacity, KeyboardAvoidingView, Platform,
-    ActivityIndicator, Animated
+    ActivityIndicator, Animated, Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -98,7 +98,7 @@ export default function ChatScreen({ navigation }) {
                 </TouchableOpacity>
                 <View style={styles.headerCenter}>
                     <View style={styles.botAvatar}>
-                        <Text style={{ fontSize: 18 }}>🤖</Text>
+                        <Image source={require('../../../assets/chatbot-icon.png')} style={{ width: 28, height: 28 }} resizeMode="contain" />
                     </View>
                     <View>
                         <Text style={styles.headerTitle}>Sprout</Text>
@@ -123,7 +123,7 @@ export default function ChatScreen({ navigation }) {
                     {messages.length === 0 && (
                         <View style={styles.welcomeContainer}>
                             <View style={styles.welcomeIcon}>
-                                <Text style={{ fontSize: 40 }}>🌿</Text>
+                                <Image source={require('../../../assets/chatbot-icon.png')} style={{ width: 60, height: 60 }} resizeMode="contain" />
                             </View>
                             <Text style={styles.welcomeTitle}>Hi! I'm Sprout</Text>
                             <Text style={styles.welcomeSub}>
@@ -156,7 +156,7 @@ export default function ChatScreen({ navigation }) {
                         >
                             {msg.role === 'assistant' && (
                                 <View style={styles.botAvatarSmall}>
-                                    <Text style={{ fontSize: 12 }}>🤖</Text>
+                                    <Image source={require('../../../assets/chatbot-icon.png')} style={{ width: 16, height: 16 }} resizeMode="contain" />
                                 </View>
                             )}
                             <View style={msg.role === 'user' ? styles.userBubble : styles.botBubble}>

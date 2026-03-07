@@ -23,6 +23,11 @@ export default function LoginScreen({ navigation }) {
         try {
             const response = await api.post('/api/auth/login', { email, password });
             const { token, user } = response.data;
+
+            if (user.role === 'ADMIN') {
+                throw new Error("Admin access is restricted to the Web Dashboard.");
+            }
+
             await AsyncStorage.setItem('userToken', token);
             await AsyncStorage.setItem('userInfo', JSON.stringify(user));
 

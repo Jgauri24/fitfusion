@@ -1,9 +1,10 @@
-import { TOP_PADDING } from '../../constants/styles';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from '../../constants/theme';
+import { TOP_PADDING } from '../../constants/styles';
+import { GlassCard } from '../../components/GlassCard';
 import VitaLogo from '../../components/VitaLogo';
 
 export default function AboutScreen({ navigation }) {
@@ -17,21 +18,45 @@ export default function AboutScreen({ navigation }) {
                 <View style={{ width: 22 }} />
             </View>
 
-            <View style={styles.body}>
-                {/* Ambient glow */}
-                <View style={styles.glow} />
+            <ScrollView contentContainerStyle={styles.scroll}>
+                <View style={styles.logoContainer}>
+                    <View style={styles.glow} />
+                    <VitaLogo size={54} fontSize={32} layout="column" showSubtitle={true} />
+                    <Text style={styles.versionBadge}>v1.0.0</Text>
+                </View>
 
-                <VitaLogo size={64} fontSize={40} layout="column" showSubtitle={true} />
-                <Text style={styles.version}>Version 1.0.0</Text>
+                <GlassCard style={styles.card}>
+                    <Text style={styles.desc}>
+                        VITA is a context-aware campus wellness ecosystem designed to integrate seamlessly
+                        into your university life. Track nutrition, build activity streaks, and monitor
+                        mood stability to maintain a balanced lifestyle.
+                    </Text>
+                </GlassCard>
 
-                <Text style={styles.desc}>
-                    VITA is a context-aware campus wellness system designed to integrate seamlessly
-                    into your university life. Track nutrition, build activity streaks, and monitor
-                    mood stability to maintain a balanced lifestyle.
-                </Text>
+                <GlassCard style={styles.card}>
+                    <Text style={styles.sectionTitle}>Key Features</Text>
+                    <View style={styles.featureRow}>
+                        <Feather name="activity" size={18} color={COLORS.accent} />
+                        <Text style={styles.featureText}>Smart Activity Tracking</Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                        <Feather name="pie-chart" size={18} color={COLORS.accent} />
+                        <Text style={styles.featureText}>Nutrition Logging</Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                        <Feather name="smile" size={18} color={COLORS.accent} />
+                        <Text style={styles.featureText}>Daily Mood Analysis</Text>
+                    </View>
+                    <View style={styles.featureRow}>
+                        <Feather name="shield" size={18} color={COLORS.accent} />
+                        <Text style={styles.featureText}>Privacy First Architecture</Text>
+                    </View>
+                </GlassCard>
 
-                <Text style={styles.credits}>Built by Team TLE, Rishihood University</Text>
-            </View>
+                <View style={styles.footer}>
+                    <Text style={styles.credits}>Engineering & Design by{'\n'}Team TLE, Rishihood University</Text>
+                </View>
+            </ScrollView>
         </LinearGradient>
     );
 }
@@ -40,9 +65,15 @@ const styles = StyleSheet.create({
     screen: { flex: 1 },
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: TOP_PADDING, paddingBottom: 20 },
     title: { color: COLORS.white, fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
-    body: { flex: 1, paddingHorizontal: 30, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
-    glow: { position: 'absolute', width: 280, height: 280, borderRadius: 140, backgroundColor: COLORS.accentGlowMed },
-    version: { color: COLORS.textSecondary, fontSize: 15, marginTop: 14, marginBottom: 40 },
-    desc: { color: COLORS.textSecondary, fontSize: 16, lineHeight: 26, textAlign: 'center', marginBottom: 40 },
-    credits: { color: COLORS.textMuted, fontSize: 13, fontStyle: 'italic' },
+    scroll: { paddingHorizontal: 20, paddingBottom: 60 },
+    logoContainer: { alignItems: 'center', marginTop: 30, marginBottom: 40 },
+    glow: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: COLORS.accentGlowMed, top: -20 },
+    versionBadge: { color: COLORS.textAccent, fontSize: 13, fontWeight: '700', marginTop: 12, backgroundColor: 'rgba(163, 230, 53, 0.1)', paddingVertical: 4, paddingHorizontal: 12, borderRadius: 12, overflow: 'hidden' },
+    card: { marginBottom: 20 },
+    desc: { color: COLORS.textSecondary, fontSize: 15, lineHeight: 24, textAlign: 'center' },
+    sectionTitle: { color: COLORS.white, fontSize: 16, fontWeight: '700', marginBottom: 16 },
+    featureRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
+    featureText: { color: COLORS.textPrimary, fontSize: 15 },
+    footer: { alignItems: 'center', marginTop: 20 },
+    credits: { color: COLORS.textMuted, fontSize: 13, fontStyle: 'italic', textAlign: 'center', lineHeight: 20 },
 });

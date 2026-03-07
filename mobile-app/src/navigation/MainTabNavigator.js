@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, PanResponder, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, PanResponder, Dimensions, Image } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,12 +52,12 @@ const FloatingChatButton = () => {
                 onPress={() => navigation.navigate('ChatScreen')}
                 activeOpacity={0.85}
             >
-                <LinearGradient
-                    colors={[COLORS.accent, COLORS.accentDark]}
-                    style={styles.fabGradient}
-                >
-                    <Feather name="message-circle" size={22} color="#FFF" />
-                </LinearGradient>
+                <Image
+                    source={require('../../assets/chatbot-icon.png')}
+                    style={{ width: FAB_SIZE + 20, height: FAB_SIZE + 20, resizeMode: 'contain',width: 60, height: 60, borderRadius: 30,
+        backgroundColor: COLORS.accentGlow, borderWidth: 1.5, borderColor: COLORS.accentGlowMed,
+        justifyContent: 'center', alignItems: 'center'}}
+                />
             </TouchableOpacity>
         </Animated.View>
     );
