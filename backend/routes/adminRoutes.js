@@ -14,83 +14,6 @@ router.use(requireRole('ADMIN'));
 // Dashboard
 router.get('/dashboard/stats', dashboardController.getDashboardStats);
 
-// Notifications — data-driven from system state
-router.get('/notifications', async (req, res) => {
-    try {
-        const notifications = [];
-        const now = new Date();
-
-        // Check burnout alerts from dashboard data
-        const thirtyDaysAgo = new Date(now);
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const totalStudents = await prisma.user.count({ where: { role: 'STUDENT' } });
-        const activeStudents = await prisma.activityLog.findMany({
-            where: { loggedAt: { gte: thirtyDaysAgo } },
-            select: { userId: true },
-            distinct: ['userId'],
-        });
-        const inactiveCount = totalStudents - activeStudents.length;
-        if (inactiveCount > 10) {
-            notifications.push({
-                id: 'burnout-1',
-                message: `${inactiveCount} students inactive for 30+ days — burnout risk`,
-                type: 'alert',
-                time: 'Just now',
-                read: false,
-            });
-        }
-
-        // Recent environment readings
-        const recentEnv = await prisma.environmentZone.count({
-            where: { createdAt: { gte: thirtyDaysAgo } },
-        });
-        if (recentEnv > 0) {
-            notifications.push({
-                id: 'env-1',
-                message: `${recentEnv} environment zone readings updated`,
-                type: 'success',
-                time: 'Recently',
-                read: true,
-            });
-        }
-
-        // Weekly wellness insight
-        notifications.push({
-            id: 'report-1',
-            message: 'Weekly wellness report ready for export',
-            type: 'info',
-            time: '1 hour ago',
-            read: false,
-        });
-
-        // New student registrations in last 7 days
-        const sevenDaysAgo = new Date(now);
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const newStudents = await prisma.user.count({
-            where: { role: 'STUDENT', createdAt: { gte: sevenDaysAgo } },
-        });
-        if (newStudents > 0) {
-            notifications.push({
-                id: 'users-1',
-                message: `${newStudents} new students registered this week`,
-                type: 'info',
-                time: 'This week',
-                read: true,
-            });
-        }
-
-        res.json(notifications);
-    } catch (error) {
-        console.error('Notifications error:', error);
-        res.json([
-            { id: '1', message: 'System notifications loading...', type: 'info', time: 'Now', read: false },
-        ]);
-    }
-});
-
-router.post('/notifications/read-all', (req, res) => {
-    res.json({ success: true });
-});
 
 // Users Stats — real aggregated data for the Users page
 router.get('/users/stats', async (req, res) => {
@@ -141,7 +64,7 @@ router.get('/users/stats', async (req, res) => {
                 ...(cohort.branch !== 'N/A' && { branch: cohort.branch }),
                 ...(cohort.year !== 'N/A' && { academicYear: cohort.year }),
             };
-            const users = await prisma.user.findMany({ where: whereClause, select: { id: true, dietaryPref: true } });
+            const users = await prisma.user.findMany({ where: whereClause, select: { id: true, dietaryPref: true, fitnessLevel: true } });
             const userIds = users.map(u => u.id);
 
             if (userIds.length > 0) {
@@ -175,6 +98,11 @@ router.get('/users/stats', async (req, res) => {
 
                 const vegCount = users.filter(u => u.dietaryPref === 'VEGETARIAN' || u.dietaryPref === 'VEGAN').length;
                 cohort.diet = `${Math.round((vegCount / users.length) * 100)}% Veg`;
+
+                // Actual fitness level counts per cohort
+                cohort.beginnerCount = users.filter(u => !u.fitnessLevel || u.fitnessLevel === 'BEGINNER').length;
+                cohort.intermediateCount = users.filter(u => u.fitnessLevel === 'INTERMEDIATE').length;
+                cohort.advancedCount = users.filter(u => u.fitnessLevel === 'ADVANCED').length;
             }
         }
 
@@ -188,6 +116,61 @@ router.get('/users/stats', async (req, res) => {
     } catch (error) {
         console.error('getUsersStats error:', error);
         res.status(500).json({ message: 'Failed to fetch user stats.' });
+    }
+});
+
+// POST /api/admin/users/create — Create a new student (Admin only)
+router.post('/users/create', async (req, res) => {
+    try {
+        const { firstName, lastName, email } = req.body;
+
+        if (!firstName || !lastName || !email) {
+            return res.status(400).json({ message: 'First name, last name, and email are required.' });
+        }
+
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'A user with this email already exists.' });
+        }
+
+        // Generate a random 8-character alphanumeric password
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let generatedPassword = '';
+        for (let i = 0; i < 8; i++) {
+            generatedPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // Hash password
+        const salt = await require('bcryptjs').genSalt(10);
+        const hashedPassword = await require('bcryptjs').hash(generatedPassword, salt);
+
+        // Create new user (defaulting to STUDENT)
+        const newUser = await prisma.user.create({
+            data: {
+                firstName,
+                lastName,
+                email,
+                passwordHash: hashedPassword,
+                role: 'STUDENT'
+            }
+        });
+
+        res.status(201).json({
+            message: 'User created successfully.',
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                role: newUser.role
+            },
+            generatedPassword // Returned specifically so admin can copy and share it
+        });
+
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({ message: 'An internal server error occurred while creating the user.' });
     }
 });
 
@@ -551,6 +534,10 @@ router.get('/notifications', async (req, res) => {
         console.error('getNotifications error:', error);
         res.status(500).json({ message: 'Failed to fetch notifications.' });
     }
+});
+
+router.post('/notifications/read-all', (req, res) => {
+    res.json({ success: true });
 });
 
 // Activities Stats

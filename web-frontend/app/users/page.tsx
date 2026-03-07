@@ -17,6 +17,9 @@ interface Cohort {
     diet: string;
     flags: number;
     trend: string;
+    beginnerCount: number;
+    intermediateCount: number;
+    advancedCount: number;
 }
 
 export default function UsersPage() {
@@ -32,23 +35,48 @@ export default function UsersPage() {
     const [advanced, setAdvanced] = useState(0);
     const [cohorts, setCohorts] = useState<Cohort[]>([]);
 
+    // Modal state for creating a new student
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [newStudent, setNewStudent] = useState({ firstName: "", lastName: "", email: "" });
+    const [generatedPassword, setGeneratedPassword] = useState("");
+    const [createError, setCreateError] = useState("");
+
+    const fetchUserStats = async () => {
+        try {
+            const res = await api.get('/api/admin/users/stats');
+            setTotalStudents(res.data.totalStudents);
+            setBeginners(res.data.beginners);
+            setIntermediate(res.data.intermediate);
+            setAdvanced(res.data.advanced);
+            setCohorts(res.data.cohorts);
+        } catch (error) {
+            console.error("Failed to fetch user stats:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUserStats = async () => {
-            try {
-                const res = await api.get('/api/admin/users/stats');
-                setTotalStudents(res.data.totalStudents);
-                setBeginners(res.data.beginners);
-                setIntermediate(res.data.intermediate);
-                setAdvanced(res.data.advanced);
-                setCohorts(res.data.cohorts);
-            } catch (error) {
-                console.error("Failed to fetch user stats:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchUserStats();
     }, []);
+
+    const handleCreateStudent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsCreating(true);
+        setCreateError("");
+        try {
+            const res = await api.post('/api/admin/users/create', newStudent);
+            setGeneratedPassword(res.data.generatedPassword);
+            // Re-fetch stats to include the new user
+            fetchUserStats();
+        } catch (error: any) {
+            setCreateError(error.response?.data?.message || "Failed to create student");
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
 
     // Derive unique filter options from actual data
     const hostelOptions = ["All", ...Array.from(new Set(cohorts.map(c => c.hostel))).sort()];
@@ -60,9 +88,9 @@ export default function UsersPage() {
         if (branch !== "All" && c.branch !== branch) return false;
         if (year !== "All" && c.year !== year) return false;
         if (fitness !== "All") {
-            if (fitness === "Beginner" && c.wellness >= 70) return false;
-            if (fitness === "Intermediate" && (c.wellness < 70 || c.wellness >= 85)) return false;
-            if (fitness === "Advanced" && c.wellness < 85) return false;
+            if (fitness === "Beginner" && (c.beginnerCount || 0) === 0) return false;
+            if (fitness === "Intermediate" && (c.intermediateCount || 0) === 0) return false;
+            if (fitness === "Advanced" && (c.advancedCount || 0) === 0) return false;
         }
         return true;
     });
@@ -71,17 +99,18 @@ export default function UsersPage() {
     const showSuppression = filteredTotal < 10;
     const finalCohorts = showSuppression ? [] : filteredCohorts;
 
-    // Reactive stat cards — recalculated from filtered data
     const isFiltered = hostel !== "All" || branch !== "All" || year !== "All" || fitness !== "All";
+
+    // When filtering, we sum the exact fitness level counts from the remaining cohorts
     const displayTotal = isFiltered ? filteredTotal : totalStudents;
     const displayBeginners = isFiltered
-        ? filteredCohorts.filter(c => c.wellness < 70).reduce((s, c) => s + c.students, 0)
+        ? filteredCohorts.reduce((s, c) => s + (c.beginnerCount || 0), 0)
         : beginners;
     const displayIntermediate = isFiltered
-        ? filteredCohorts.filter(c => c.wellness >= 70 && c.wellness < 85).reduce((s, c) => s + c.students, 0)
+        ? filteredCohorts.reduce((s, c) => s + (c.intermediateCount || 0), 0)
         : intermediate;
     const displayAdvanced = isFiltered
-        ? filteredCohorts.filter(c => c.wellness >= 85).reduce((s, c) => s + c.students, 0)
+        ? filteredCohorts.reduce((s, c) => s + (c.advancedCount || 0), 0)
         : advanced;
 
     // Dynamic flagged cohorts — those with low wellness
@@ -138,9 +167,22 @@ export default function UsersPage() {
                 🔒 Privacy Mode Active — All data represents groups of 10+ students. Individual records are never accessible through this panel.
             </div>
 
-            <div className="page-header animate-fade-in-up">
-                <h1 className="page-title">User Management</h1>
-                <p className="page-subtitle">Manage student profiles, fitness levels, and dietary preferences</p>
+            <div className="page-header animate-fade-in-up" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h1 className="page-title">User Management</h1>
+                    <p className="page-subtitle">Manage student profiles, fitness levels, and dietary preferences</p>
+                </div>
+                <button 
+                    className="btn-primary" 
+                    onClick={() => {
+                        setNewStudent({ firstName: "", lastName: "", email: "" });
+                        setGeneratedPassword("");
+                        setCreateError("");
+                        setShowAddModal(true);
+                    }}
+                >
+                    <Users size={16} /> Add Student
+                </button>
             </div>
 
             <div className="stats-grid">
@@ -197,6 +239,103 @@ export default function UsersPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Add Student Modal */}
+            {showAddModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content animate-scale-in" style={{ maxWidth: '450px' }}>
+                        <div className="modal-header">
+                            <h2>{generatedPassword ? "Student Created Successfully" : "Add New Student"}</h2>
+                            { !generatedPassword && <p>Create a student account. A secure password will be generated automatically.</p> }
+                        </div>
+
+                        {generatedPassword ? (
+                            <div style={{ padding: '24px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</div>
+                                <h3 style={{ marginBottom: '8px', color: 'var(--text-primary)' }}>Account Created</h3>
+                                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                                    Please share this temporary password with <strong>{newStudent.firstName}</strong> securely.
+                                </p>
+                                <div style={{ 
+                                    background: 'var(--bg-alt)', 
+                                    padding: '16px', 
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginBottom: '24px'
+                                }}>
+                                    <span style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '2px', color: 'var(--accent)' }}>
+                                        {generatedPassword}
+                                    </span>
+                                    <button 
+                                        className="btn-ghost" 
+                                        style={{ color: 'var(--text-primary)' }}
+                                        onClick={() => navigator.clipboard.writeText(generatedPassword)}
+                                        title="Copy to clipboard"
+                                    >
+                                        Copy
+                                    </button>
+                                </div>
+                                <button className="btn-primary" style={{ width: '100%' }} onClick={() => setShowAddModal(false)}>
+                                    Done
+                                </button>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleCreateStudent}>
+                                <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    {createError && (
+                                        <div style={{ padding: '12px', background: 'rgba(251, 113, 133, 0.1)', color: 'var(--red)', borderRadius: '8px', fontSize: '14px' }}>
+                                            {createError}
+                                        </div>
+                                    )}
+                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                        <div className="form-group" style={{ flex: 1 }}>
+                                            <label>First Name</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-input" 
+                                                required 
+                                                value={newStudent.firstName}
+                                                onChange={e => setNewStudent({...newStudent, firstName: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ flex: 1 }}>
+                                            <label>Last Name</label>
+                                            <input 
+                                                type="text" 
+                                                className="form-input" 
+                                                required 
+                                                value={newStudent.lastName}
+                                                onChange={e => setNewStudent({...newStudent, lastName: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>University Email</label>
+                                        <input 
+                                            type="email" 
+                                            className="form-input" 
+                                            required 
+                                            value={newStudent.email}
+                                            onChange={e => setNewStudent({...newStudent, email: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="modal-footer" style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                                    <button type="button" className="btn-ghost" onClick={() => setShowAddModal(false)} disabled={isCreating}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn-primary" disabled={isCreating}>
+                                        {isCreating ? "Generating..." : "Create & Generate Password"}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
             )}

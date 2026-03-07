@@ -131,6 +131,7 @@ export default function ProfileSetupScreen({ navigation, route }) {
             if (isEditMode) {
                 navigation.goBack();
             } else {
+                await AsyncStorage.setItem('profileSetupDone', 'true');
                 navigation.replace('MainApp');
             }
         } catch (error) {
@@ -233,7 +234,10 @@ export default function ProfileSetupScreen({ navigation, route }) {
                 </TouchableOpacity>
 
                 {!isEditMode && (
-                    <TouchableOpacity onPress={() => navigation.replace('MainApp')} style={styles.skipBtn}>
+                    <TouchableOpacity onPress={async () => {
+                        await AsyncStorage.setItem('profileSetupDone', 'true');
+                        navigation.replace('MainApp');
+                    }} style={styles.skipBtn}>
                         <Text style={styles.skipText}>Skip for now</Text>
                     </TouchableOpacity>
                 )}

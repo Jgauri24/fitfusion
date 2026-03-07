@@ -26,7 +26,10 @@ export default function LoginScreen({ navigation }) {
             await AsyncStorage.setItem('userToken', token);
             await AsyncStorage.setItem('userInfo', JSON.stringify(user));
 
-            if (user.age && user.weight && user.height) {
+            // Only show profile setup once — if user skipped or completed it before, go straight to app
+            const setupDone = await AsyncStorage.getItem('profileSetupDone');
+            if (setupDone || (user.age && user.weight && user.height)) {
+                await AsyncStorage.setItem('profileSetupDone', 'true');
                 navigation.replace('MainApp');
             } else {
                 navigation.replace('ProfileSetup');
@@ -102,12 +105,8 @@ export default function LoginScreen({ navigation }) {
                     </LinearGradient>
                 </TouchableOpacity>
 
-                <View style={styles.signupRow}>
-                    <Text style={styles.signupText}>Don't have an account? </Text>
-                    <TouchableOpacity>
-                        <Text style={styles.signupLink}>Sign Up</Text>
-                    </TouchableOpacity>
-                </View>
+
+
             </View>
         </LinearGradient>
     );
@@ -182,18 +181,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         letterSpacing: 0.3,
     },
-    signupRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 20,
-    },
-    signupText: {
-        color: COLORS.textSecondary,
-        fontSize: 14,
-    },
-    signupLink: {
-        color: COLORS.accent,
-        fontSize: 14,
-        fontWeight: '700',
-    },
+
+
 });
