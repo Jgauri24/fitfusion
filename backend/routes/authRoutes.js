@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login } = require('../controllers/authController');
+const { login, register } = require('../controllers/authController');
 const { verifyToken } = require('../middleware/auth');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
@@ -9,6 +9,9 @@ const prisma = new PrismaClient();
 
 // POST /api/auth/login
 router.post('/login', login);
+
+// POST /api/auth/register
+router.post('/register', register);
 
 // GET /api/auth/me — return logged-in user's profile
 router.get('/me', verifyToken, async (req, res) => {

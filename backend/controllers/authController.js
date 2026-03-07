@@ -5,6 +5,66 @@ const jwt = require('jsonwebtoken');
 const prisma = new PrismaClient();
 
 /**
+ * Register a new student user
+ */
+const register = async (req, res) => {
+    try {
+        const { firstName, lastName, email, password } = req.body;
+
+        if (!firstName || !lastName || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required.' });
+        }
+
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email is already registered.' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create new user (defaulting to STUDENT)
+        const newUser = await prisma.user.create({
+            data: {
+                firstName,
+                lastName,
+                email,
+                passwordHash: hashedPassword,
+                role: 'STUDENT'
+            }
+        });
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: newUser.id, role: newUser.role, email: newUser.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.status(201).json({
+            message: 'Registration successful.',
+            token,
+            user: {
+                id: newUser.id,
+                email: newUser.email,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                role: newUser.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'An internal server error occurred during registration.' });
+    }
+};
+
+/**
  * Perform login using email and password, returning a JWT token on success.
  */
 const login = async (req, res) => {
@@ -66,5 +126,6 @@ const login = async (req, res) => {
 };
 
 module.exports = {
-    login
+    login,
+    register
 };
