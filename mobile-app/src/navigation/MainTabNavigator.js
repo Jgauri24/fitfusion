@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, PanRespon
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -79,12 +79,11 @@ const ProfileAvatar = ({ focused }) => {
         })();
     }, []);
 
-    // Pick avatar emoji based on gender
-    const avatarEmoji = gender === 'female' ? '👩' : '👨';
+    // Generic avatar icon
 
     return (
         <View style={[styles.avatarWrap, focused && styles.avatarFocused]}>
-            <Text style={styles.avatarEmoji}>{avatarEmoji}</Text>
+            <Ionicons name="person" size={20} color={COLORS.white} />
         </View>
     );
 };

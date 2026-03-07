@@ -13,7 +13,7 @@ export default function AboutScreen({ navigation }) {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Feather name="arrow-left" size={22} color={COLORS.white} />
                 </TouchableOpacity>
-                <Text style={styles.title}>About VITA Intelligence</Text>
+                <Text style={styles.title}>About VITA</Text>
                 <View style={{ width: 22 }} />
             </View>
 
@@ -25,7 +25,7 @@ export default function AboutScreen({ navigation }) {
                 <Text style={styles.version}>Version 1.0.0</Text>
 
                 <Text style={styles.desc}>
-                    VITA Intelligence is a context-aware campus wellness system designed to integrate seamlessly
+                    VITA is a context-aware campus wellness system designed to integrate seamlessly
                     into your university life. Track nutrition, build activity streaks, and monitor
                     mood stability to maintain a balanced lifestyle.
                 </Text>

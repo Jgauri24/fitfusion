@@ -13,7 +13,7 @@ const slides = [
     {
         key: '1',
         title: 'Your Journey Starts Here',
-        subtitle: 'Premium campus wellness intelligence for university students.',
+        subtitle: 'Premium campus wellness platform for university students.',
         icon: 'compass',
         iconLib: 'feather',
     },

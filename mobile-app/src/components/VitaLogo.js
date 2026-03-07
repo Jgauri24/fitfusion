@@ -38,11 +38,6 @@ export default function VitaLogo({
                     <Text style={[styles.text, { fontSize }, isColumn && styles.textColumn]}>
                         VITA
                     </Text>
-                    {showSubtitle && (
-                        <Text style={[styles.subtitle, { fontSize: fontSize * 0.7 }]}>
-                            Intelligence
-                        </Text>
-                    )}
                 </View>
             )}
         </View>
