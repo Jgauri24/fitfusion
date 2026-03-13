@@ -72,6 +72,8 @@ The platform consists of three major components:
                        └─────────────────────────────┘
 ```
 
+> 📐 **For detailed HLD/LLD with UML class diagrams, sequence diagrams, ER diagrams, and component diagrams**, see **[DESIGN.md](DESIGN.md)**.
+
 ---
 
 ## Features
@@ -405,10 +407,13 @@ The application uses **Prisma ORM** with **SQLite** and defines the following mo
 
 ## Team
 
-| Name | Role |
-|---|---|
-| **Sachin Jaiswal** | Full-Stack Development |
-| **Gaurav** | Full-Stack Development |
+| Name |
+|---|
+**Sachin Jaiswal**
+**Gauri Jindal**
+**Yashvi Goyal**
+**Kushal Sarkar**
+**Meghna Nair**
 
 ---
 
