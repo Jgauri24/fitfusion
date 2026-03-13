@@ -60,7 +60,7 @@ export default function ReportsPage() {
                 ["Scope Options", "Enabled"],
                 ...Object.entries(scope).map(([k, v]) => [k, v ? "Yes" : "No"])
             ];
-            
+
             const csvContent = "data:text/csv;charset=utf-8," + csvData.map(e => e.join(",")).join("\n");
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -196,31 +196,108 @@ export default function ReportsPage() {
                 <div className="report-builder-right">
                     <ChartCard title="Report Preview" badge="Live Simulator" className="preview-card-h-full">
                         <div className="report-preview-container">
-                            <div className="report-preview-title">{reportType}</div>
-                            <div className="report-preview-tags">
-                                <span className="report-preview-tag">{timeRange}</span>
-                                <span className="report-preview-tag">{format}</span>
-                            </div>
-                            <div className="report-preview-items">
-                                <div className="report-preview-item">
-                                    <div className="report-preview-check">✓</div>
-                                    <div className="report-preview-text">Campus Avg PWS <strong>78/100</strong> up <span style={{ color: "var(--green)" }}>5.4%</span> vs last period</div>
+                            {/* Preview Header */}
+                            <div className="rp-header">
+                                <div className="rp-header-left">
+                                    <div className="rp-report-icon">📊</div>
+                                    <div>
+                                        <div className="rp-title">{reportType}</div>
+                                        <div className="rp-subtitle">Auto-generated preview based on current selections</div>
+                                    </div>
                                 </div>
-                                <div className="report-preview-item">
-                                    <div className="report-preview-check">✓</div>
-                                    <div className="report-preview-text">Participation Rate <strong>68%</strong> across 6 hostels</div>
-                                </div>
-                                <div className="report-preview-item">
-                                    <div className="report-preview-check">✓</div>
-                                    <div className="report-preview-text">Active Burnout Alerts <strong>24</strong> with 3 cohorts flagged for review</div>
-                                </div>
-                                <div className="report-preview-item">
-                                    <div className="report-preview-check">✓</div>
-                                    <div className="report-preview-text">Highest wellness <strong>Govind Bhawan (85)</strong> lowest <strong>Kasturba Bhawan (68)</strong></div>
+                                <div className="rp-tags">
+                                    <span className="rp-tag rp-tag-time">{timeRange}</span>
+                                    <span className="rp-tag rp-tag-format">{format}</span>
                                 </div>
                             </div>
-                            <div className="report-preview-warning">
-                                <span style={{ fontSize: "16px" }}>⚠</span> 2 cohort segments suppressed in this report (group size below 10)
+
+                            {/* Metrics Grid */}
+                            <div className="rp-metrics-grid">
+                                {/* PWS Score Card */}
+                                <div className="rp-metric-card">
+                                    <div className="rp-metric-header">
+                                        <span className="rp-metric-icon rp-icon-blue">💠</span>
+                                        <span className="rp-metric-label">Campus Avg PWS</span>
+                                    </div>
+                                    <div className="rp-metric-body" style={{ alignItems: 'center' }}>
+                                        <div className="rp-score-ring" style={{ width: 64, height: 64, minWidth: 64, position: 'relative' }}>
+                                            <svg width="64" height="64" viewBox="0 0 80 80" className="rp-ring-svg" style={{ display: 'block' }}>
+                                                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border)" strokeWidth="6" />
+                                                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--accent)" strokeWidth="6"
+                                                    strokeDasharray={`${78 / 100 * 213.6} 213.6`}
+                                                    strokeLinecap="round"
+                                                    transform="rotate(-90 40 40)" />
+                                            </svg>
+                                            <div className="rp-ring-value">78</div>
+                                        </div>
+                                        <div className="rp-metric-detail">
+                                            <span className="rp-trend rp-trend-up">↑ 5.4%</span>
+                                            <span className="rp-trend-label">vs last period</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Participation Rate */}
+                                <div className="rp-metric-card">
+                                    <div className="rp-metric-header">
+                                        <span className="rp-metric-icon rp-icon-green">👥</span>
+                                        <span className="rp-metric-label">Participation Rate</span>
+                                    </div>
+                                    <div className="rp-metric-body rp-metric-body-col">
+                                        <div className="rp-big-value">68<span className="rp-big-unit">%</span></div>
+                                        <div className="rp-progress-track">
+                                            <div className="rp-progress-fill" style={{ width: "68%" }} />
+                                        </div>
+                                        <span className="rp-metric-note">Across 6 hostels</span>
+                                    </div>
+                                </div>
+
+                                {/* Burnout Alerts */}
+                                <div className="rp-metric-card">
+                                    <div className="rp-metric-header">
+                                        <span className="rp-metric-icon rp-icon-red">🔥</span>
+                                        <span className="rp-metric-label">Burnout Alerts</span>
+                                    </div>
+                                    <div className="rp-metric-body rp-metric-body-col">
+                                        <div className="rp-big-value">24</div>
+                                        <div className="rp-alert-badges">
+                                            <span className="rp-alert-badge rp-badge-warn">3 cohorts flagged</span>
+                                            <span className="rp-alert-badge rp-badge-info">Needs review</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Hostel Comparison */}
+                                <div className="rp-metric-card">
+                                    <div className="rp-metric-header">
+                                        <span className="rp-metric-icon rp-icon-purple">🏠</span>
+                                        <span className="rp-metric-label">Hostel Comparison</span>
+                                    </div>
+                                    <div className="rp-metric-body rp-metric-body-col">
+                                        <div className="rp-hostel-row">
+                                            <span className="rp-hostel-name">Govind Bhawan</span>
+                                            <div className="rp-hostel-bar-track">
+                                                <div className="rp-hostel-bar rp-bar-high" style={{ width: "85%" }} />
+                                            </div>
+                                            <span className="rp-hostel-score rp-score-high">85</span>
+                                        </div>
+                                        <div className="rp-hostel-row">
+                                            <span className="rp-hostel-name">Kasturba Bhawan</span>
+                                            <div className="rp-hostel-bar-track">
+                                                <div className="rp-hostel-bar rp-bar-low" style={{ width: "68%" }} />
+                                            </div>
+                                            <span className="rp-hostel-score rp-score-low">68</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Privacy Suppression Notice */}
+                            <div className="rp-privacy-notice">
+                                <div className="rp-privacy-icon">🔒</div>
+                                <div className="rp-privacy-text">
+                                    <strong>2 cohort segments suppressed</strong> in this report — group size below minimum threshold of 10
+                                </div>
                             </div>
                         </div>
                     </ChartCard>

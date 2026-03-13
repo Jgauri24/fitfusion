@@ -1700,10 +1700,360 @@ tbody tr:hover {
 }
 
 .report-preview-container {
-  padding: 32px;
+  padding: 24px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+}
+
+/* ---- Report Preview Header ---- */
+.rp-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.rp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rp-report-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--accent-glow);
+  border: 1px solid var(--border-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.rp-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 3px;
+}
+
+.rp-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.rp-tags {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.rp-tag {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.rp-tag-time {
+  background: var(--accent-glow);
+  color: var(--accent-light);
+  border: 1px solid rgba(0, 112, 243, 0.25);
+}
+
+.rp-tag-format {
+  background: rgba(121, 40, 202, 0.1);
+  color: var(--purple);
+  border: 1px solid rgba(121, 40, 202, 0.25);
+}
+
+/* ---- Metrics Grid ---- */
+.rp-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.rp-metric-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rp-metric-card:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.rp-metric-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.rp-metric-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.rp-icon-blue {
+  background: var(--accent-glow);
+}
+
+.rp-icon-green {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.rp-icon-red {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.rp-icon-purple {
+  background: rgba(121, 40, 202, 0.12);
+}
+
+.rp-metric-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rp-metric-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rp-metric-body-col {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* ---- Score Ring ---- */
+.rp-score-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.rp-ring-svg {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(1);
+}
+
+.rp-ring-svg circle:last-child {
+  transition: stroke-dasharray 0.8s ease;
+}
+
+.rp-ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.rp-metric-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rp-trend {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rp-trend-up {
+  color: #10B981;
+}
+
+.rp-trend-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---- Big Value ---- */
+.rp-big-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.rp-big-unit {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 1px;
+}
+
+/* ---- Progress Bar ---- */
+.rp-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.rp-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: var(--radius-full);
+  transition: width 0.8s ease;
+}
+
+.rp-metric-note {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---- Alert Badges ---- */
+.rp-alert-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rp-alert-badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.rp-badge-warn {
+  background: rgba(245, 166, 35, 0.12);
+  color: var(--orange);
+  border: 1px solid rgba(245, 166, 35, 0.2);
+}
+
+.rp-badge-info {
+  background: var(--accent-glow);
+  color: var(--accent-light);
+  border: 1px solid rgba(0, 112, 243, 0.2);
+}
+
+/* ---- Hostel Comparison Bars ---- */
+.rp-hostel-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 32px;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.rp-hostel-row + .rp-hostel-row {
+  margin-top: 10px;
+}
+
+.rp-hostel-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rp-hostel-bar-track {
+  height: 8px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.rp-hostel-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.8s ease;
+}
+
+.rp-bar-high {
+  background: linear-gradient(90deg, #10B981, #34D399);
+}
+
+.rp-bar-low {
+  background: linear-gradient(90deg, var(--orange), #FBBF24);
+}
+
+.rp-hostel-score {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.rp-score-high {
+  color: #10B981;
+}
+
+.rp-score-low {
+  color: var(--orange);
+}
+
+/* ---- Privacy Notice ---- */
+.rp-privacy-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(245, 166, 35, 0.05);
+  border: 1px solid rgba(245, 166, 35, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+.rp-privacy-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.rp-privacy-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.rp-privacy-text strong {
+  color: var(--orange);
+}
+
+/* Responsive: stack metric grid on smaller screens */
+@media (max-width: 1200px) {
+  .rp-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .rp-header {
+    flex-direction: column;
+  }
 }
 
 .flagged-card {
